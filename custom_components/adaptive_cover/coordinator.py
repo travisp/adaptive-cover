@@ -158,23 +158,28 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
     async def async_timed_refresh(self, event) -> None:
         """Control state at end time."""
 
+        now = dt.datetime.now()
         if self.end_time is not None:
             time = self.end_time
         if self.end_time_entity is not None:
             time = get_safe_state(self.hass, self.end_time_entity)
-        time_check = dt.datetime.now() - get_datetime_from_str(time)
+
+        _LOGGER.debug("Checking timed refresh. End time: %s, now: %s", time, now)
+
+        time_check = now - get_datetime_from_str(time)
         if time is not None and (time_check <= dt.timedelta(seconds=1)):
             self.timed_refresh = True
             _LOGGER.debug("Timed refresh triggered")
             await self.async_refresh()
         else:
-            _LOGGER.debug("Time not equal to end time")
+            _LOGGER.debug("Timed refresh, but: not equal to end time")
 
     async def async_check_entity_state_change(
         self, event: Event[EventStateChangedData]
     ) -> None:
         """Fetch and process state change event."""
         _LOGGER.debug("Entity state change")
+        _LOGGER.debug(f"Entity state change event: {event}")
         self.state_change = True
         await self.async_refresh()
 
@@ -214,7 +219,9 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
             if position == self.target_call.get(entity_id):
                 self.wait_for_target[entity_id] = False
                 _LOGGER.debug("Position %s reached for %s", position, entity_id)
-        _LOGGER.debug("Wait for target: %s", self.wait_for_target)
+            _LOGGER.debug("Wait for target: %s", self.wait_for_target)
+        else:
+            _LOGGER.debug("No wait for target call for %s", entity_id)
 
     async def _async_update_data(self) -> AdaptiveCoverData:
         options = self.config_entry.options
@@ -230,10 +237,14 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         if self._climate_mode:
             self.climate_mode_data(options, cover_data)
 
+        _LOGGER.debug("Control method is %s", self.control_method)
+
         # calculate the state of the cover
         self.normal_cover_state = NormalCoverState(cover_data)
+        _LOGGER.debug("Determined normal cover state to be %s", self.normal_cover_state)
 
         self.default_state = round(self.normal_cover_state.get_state())
+        _LOGGER.debug("Determined default state to be %s", self.default_state)
         state = self.state
 
         await self.manager.reset_if_needed()
@@ -615,10 +626,14 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
     def state(self) -> int:
         """Handle the output of the state based on mode."""
         state = self.default_state
+        _LOGGER.debug("Starting with default mode position: %s", state)
+
         if self._switch_mode:
             state = self.climate_state
+            _LOGGER.debug("Using climate mode position: %s", self.state)
 
         if self._use_interpolation:
+            _LOGGER.debug("Interpolating position: %s", state)
             state = self.interpolate_states(state)
 
         if self._inverse_state and self._use_interpolation:
@@ -628,8 +643,9 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
 
         if self._inverse_state and not self._use_interpolation:
             state = inverse_state(state)
+            _LOGGER.debug("Inversed position: %s", state)
 
-        _LOGGER.debug("Calculated position: %s", state)
+        _LOGGER.debug("Final position to use: %s", state)
         return state
 
     def interpolate_states(self, state):
@@ -771,14 +787,14 @@ class AdaptiveCoverManager:
             last_updated = new_state.last_updated
             self.manual_control_time[entity_id] = last_updated
             _LOGGER.debug(
-                "Updating last updated to %s for %s. Allow reset:%s",
+                "Updating last updated for manual control to %s for %s. Allow reset:%s",
                 last_updated,
                 entity_id,
                 allow_reset,
             )
         elif not allow_reset:
             _LOGGER.debug(
-                "Already time specified for %s, reset is not allowed by user setting:%s",
+                "Already manual control time specified for %s, reset is not allowed by user setting:%s",
                 entity_id,
                 allow_reset,
             )

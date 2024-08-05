@@ -148,6 +148,8 @@ class AdaptiveCoverSwitch(
             name=self._device_name,
         )
 
+        _LOGGER.debug("setup switch")
+
     @property
     def name(self):
         """Name of the entity."""
@@ -155,6 +157,7 @@ class AdaptiveCoverSwitch(
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the switch on."""
+        _LOGGER.debug("Turning on")
         self._attr_is_on = True
         setattr(self.coordinator, self._key, True)
         if self._key == "control_toggle" and kwargs.get("added") is not True:
@@ -171,6 +174,7 @@ class AdaptiveCoverSwitch(
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn the device off."""
+        _LOGGER.debug("Turning off")
         self._attr_is_on = False
         setattr(self.coordinator, self._key, False)
         if self._key == "control_toggle" and kwargs.get("added") is not True:

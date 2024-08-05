@@ -13,6 +13,7 @@ from numpy import radians as rad
 
 from .helpers import get_domain, get_safe_state
 from .sun import SunData
+from .const import _LOGGER
 
 
 @dataclass
@@ -197,11 +198,17 @@ class NormalCoverState:
 
     def get_state(self) -> int:
         """Return state."""
-        state = np.where(
-            self.cover.direct_sun_valid,
-            self.cover.calculate_percentage(),
-            self.cover.default,
-        )
+        _LOGGER.debug("Calculating state")
+        _LOGGER.debug("Direct sun valid: %s", self.cover.direct_sun_valid)
+        if self.cover.direct_sun_valid:
+            state = self.cover.calculate_percentage()
+        else:
+            state = self.cover.default
+        if self.cover.direct_sun_valid:
+            _LOGGER.debug("Calculated the percentage")
+        else:
+            _LOGGER.debug("Using default value")
+
         result = np.clip(state, 0, 100)
         if self.cover.apply_max_position and result > self.cover.max_pos:
             return self.cover.max_pos
@@ -451,7 +458,11 @@ class AdaptiveVerticalCover(AdaptiveGeneralCover):
 
     def calculate_percentage(self) -> float:
         """Convert blind height to percentage or default value."""
-        result = self.calculate_position() / self.h_win * 100
+        position = self.calculate_position()
+        _LOGGER.debug(
+            "Converting height to percentage: %s / %s * 100", position, self.h_win
+        )
+        result = position / self.h_win * 100
         return round(result)
 
 

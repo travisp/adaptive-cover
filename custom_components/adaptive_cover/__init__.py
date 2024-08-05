@@ -79,6 +79,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
 
     if _track_end_time and end_time is not None:
+        _LOGGER.debug("Setting track end time to %s", end_time)
         entry.async_on_unload(
             async_track_point_in_time(hass, coordinator.async_timed_refresh, end_time)
         )
