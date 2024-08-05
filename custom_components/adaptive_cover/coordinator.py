@@ -179,7 +179,6 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
     ) -> None:
         """Fetch and process state change event."""
         _LOGGER.debug("Entity state change")
-        _LOGGER.debug(f"Entity state change event: {event}")
         self.state_change = True
         await self.async_refresh()
 

@@ -204,12 +204,13 @@ class NormalCoverState:
     def get_state(self) -> int:
         """Return state."""
         _LOGGER.debug("Calculating state")
-        _LOGGER.debug("Direct sun valid: %s", self.cover.direct_sun_valid)
-        if self.cover.direct_sun_valid:
+        dsv = self.cover.direct_sun_valid
+        _LOGGER.debug("Direct sun valid: %s", dsv)
+        if dsv:
             state = self.cover.calculate_percentage()
         else:
             state = self.cover.default
-        if self.cover.direct_sun_valid:
+        if dsv:
             _LOGGER.debug("Calculated the percentage")
         else:
             _LOGGER.debug("Using default value")
