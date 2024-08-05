@@ -1,11 +1,10 @@
 """Constants for integration_blueprint."""
 
 import logging
-from .config_context_adapter import ConfigContextAdapter
 
 DOMAIN = "adaptive_cover"
 LOGGER = logging.getLogger(__package__)
-_LOGGER = ConfigContextAdapter(logging.getLogger(__name__))
+_LOGGER = logging.getLogger(__name__)
 
 ATTR_POSITION = "position"
 ATTR_TILT_POSITION = "tilt_position"
