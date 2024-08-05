@@ -89,6 +89,7 @@ class AdaptiveGeneralCover(ABC):
             blindspot = (self.gamma <= left_edge) & (self.gamma >= right_edge)
             if self.blind_spot_elevation is not None:
                 blindspot = blindspot & (self.sol_elev <= self.blind_spot_elevation)
+            _LOGGER.debug("Is sun in blind spot? %s", blindspot)
             return blindspot
         return False
 
@@ -120,7 +121,9 @@ class AdaptiveGeneralCover(ABC):
             return self.sol_elev <= self.max_elevation
         if self.max_elevation is None:
             return self.sol_elev >= self.min_elevation
-        return self.min_elevation <= self.sol_elev <= self.max_elevation
+        within_range = self.min_elevation <= self.sol_elev <= self.max_elevation
+        _LOGGER.debug("elevation within range? %s", within_range)
+        return within_range
 
     @property
     def valid(self) -> bool:
@@ -133,6 +136,7 @@ class AdaptiveGeneralCover(ABC):
         valid = (
             (self.gamma < azi_min) & (self.gamma > -azi_max) & (self.valid_elevation)
         )
+        _LOGGER.debug("sun in front of window? %s", valid)
         return valid
 
     @property
@@ -144,6 +148,7 @@ class AdaptiveGeneralCover(ABC):
         before_sunrise = datetime.utcnow() < (
             sunrise + timedelta(minutes=self.sunrise_off)
         )
+        _LOGGER.debug("after sunset plus offset? %s", (after_sunset or before_sunrise))
         return after_sunset or before_sunrise
 
     @property
