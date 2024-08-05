@@ -4,6 +4,9 @@ set -e
 
 cd "$(dirname "$0")/.."
 
+# Install system dependencies
+sudo apt-get update && sudo apt-get install -y libhdf5-dev
+
 # Install development requirements
 python3 -m pip install --requirement requirements-dev.txt
 
