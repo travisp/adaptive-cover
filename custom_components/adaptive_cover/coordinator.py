@@ -630,7 +630,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
 
         if self._switch_mode:
             state = self.climate_state
-            _LOGGER.debug("Using climate mode position: %s", self.state)
+            _LOGGER.debug("Using climate mode position: %s", state)
 
         if self._use_interpolation:
             _LOGGER.debug("Interpolating position: %s", state)
