@@ -182,7 +182,7 @@ class AdaptiveCoverSwitch(
     async def async_added_to_hass(self) -> None:
         """Call when entity about to be added to hass."""
         last_state = await self.async_get_last_state()
-        _LOGGER.debug("%s: last state is %s", self._name, last_state)
+        _LOGGER.debug("last state is %s", last_state)
         if (last_state is None and self._initial_state) or (
             last_state is not None and last_state.state == STATE_ON
         ):
