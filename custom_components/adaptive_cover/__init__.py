@@ -60,7 +60,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if _end_time_entity is not None:
         end_time = get_datetime_from_str(get_safe_state(hass, _end_time_entity))
 
-    _LOGGER.set_config_name(entry.data.get("name"))
+    _LOGGER.debug("Setting up entry %s", entry.data.get("name"))
 
     entry.async_on_unload(
         async_track_state_change_event(
