@@ -26,6 +26,8 @@ from homeassistant.helpers.event import async_track_point_in_time
 from homeassistant.helpers.template import state_attr
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
+from .config_context_adapter import ConfigContextAdapter
+
 from .calculation import (
     AdaptiveHorizontalCover,
     AdaptiveTiltCover,
@@ -110,6 +112,8 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
     def __init__(self, hass: HomeAssistant) -> None:  # noqa: D107
         super().__init__(hass, LOGGER, name=DOMAIN)
 
+        self.logger = ConfigContextAdapter(_LOGGER)
+        self.logger.set_config_name(self.config_entry.data.get("name"))
         self._cover_type = self.config_entry.data.get("sensor_type")
         self._inverse_state = self.config_entry.options.get(CONF_INVERSE_STATE, False)
         self._use_interpolation = self.config_entry.options.get(CONF_INTERP, False)
@@ -133,7 +137,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         self.timed_refresh = False
         self.control_method = "intermediate"
         self.state_change_data: StateChangedData | None = None
-        self.manager = AdaptiveCoverManager(self.manual_duration)
+        self.manager = AdaptiveCoverManager(self.manual_duration, self.logger)
         self.wait_for_target = {}
         self.target_call = {}
         self.ignore_intermediate_states = self.config_entry.options.get(
@@ -445,6 +449,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         if self._cover_type == "cover_blind":
             cover_data = AdaptiveVerticalCover(
                 self.hass,
+                self.logger,
                 *self.pos_sun,
                 *self.common_data(options),
                 *self.vertical_data(options),
@@ -452,6 +457,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         if self._cover_type == "cover_awning":
             cover_data = AdaptiveHorizontalCover(
                 self.hass,
+                self.logger,
                 *self.pos_sun,
                 *self.common_data(options),
                 *self.vertical_data(options),
@@ -460,6 +466,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         if self._cover_type == "cover_tilt":
             cover_data = AdaptiveTiltCover(
                 self.hass,
+                self.logger,
                 *self.pos_sun,
                 *self.common_data(options),
                 *self.tilt_data(options),
@@ -609,7 +616,6 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
             options.get(CONF_MAX_ELEVATION, None),
         ]
 
-
     def vertical_data(self, options):
         """Update data for vertical blinds."""
         return [
@@ -697,13 +703,14 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
 class AdaptiveCoverManager:
     """Track position changes."""
 
-    def __init__(self, reset_duration: dict[str:int]) -> None:
+    def __init__(self, reset_duration: dict[str:int], logger) -> None:
         """Initialize the AdaptiveCoverManager."""
         self.covers: set[str] = set()
 
         self.manual_control: dict[str, bool] = {}
         self.manual_control_time: dict[str, dt.datetime] = {}
         self.reset_duration = dt.timedelta(**reset_duration)
+        self.logger = logger
 
     def add_covers(self, entity):
         """Update set with entities."""

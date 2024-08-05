@@ -11,6 +11,7 @@ from numpy import cos, sin, tan
 from numpy import radians as rad
 
 from .sun import SunData
+from .config_context_adapter import ConfigContextAdapter
 
 
 @dataclass
@@ -18,6 +19,7 @@ class AdaptiveGeneralCover(ABC):
     """Collect common data."""
 
     hass: HomeAssistant
+    logger: ConfigContextAdapter
     sol_azi: float
     sol_elev: float
     sunset_pos: int
@@ -206,9 +208,6 @@ class NormalCoverState:
         if self.cover.apply_min_position and result < self.cover.min_pos:
             return self.cover.min_pos
         return result
-
-
-
 
 @dataclass
 class AdaptiveVerticalCover(AdaptiveGeneralCover):
