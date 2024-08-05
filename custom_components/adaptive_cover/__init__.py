@@ -19,6 +19,7 @@ from .const import (
     CONF_TEMP_ENTITY,
     CONF_WEATHER_ENTITY,
     DOMAIN,
+    _LOGGER,
 )
 from .coordinator import AdaptiveDataUpdateCoordinator
 from .helpers import get_datetime_from_str, get_safe_state
@@ -58,6 +59,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         end_time = get_datetime_from_str(_end_time)
     if _end_time_entity is not None:
         end_time = get_datetime_from_str(get_safe_state(hass, _end_time_entity))
+
+    _LOGGER.set_config_name(entry.data.get("name"))
 
     entry.async_on_unload(
         async_track_state_change_event(
