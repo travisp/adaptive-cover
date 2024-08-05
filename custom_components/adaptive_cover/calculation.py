@@ -13,6 +13,7 @@ from numpy import radians as rad
 
 from .helpers import get_domain, get_safe_state
 from .sun import SunData
+from .const import _LOGGER
 from .config_context_adapter import ConfigContextAdapter
 
 
@@ -90,6 +91,7 @@ class AdaptiveGeneralCover(ABC):
             blindspot = (self.gamma <= left_edge) & (self.gamma >= right_edge)
             if self.blind_spot_elevation is not None:
                 blindspot = blindspot & (self.sol_elev <= self.blind_spot_elevation)
+            _LOGGER.debug("Is sun in blind spot? %s", blindspot)
             return blindspot
         return False
 
@@ -121,7 +123,9 @@ class AdaptiveGeneralCover(ABC):
             return self.sol_elev <= self.max_elevation
         if self.max_elevation is None:
             return self.sol_elev >= self.min_elevation
-        return self.min_elevation <= self.sol_elev <= self.max_elevation
+        within_range = self.min_elevation <= self.sol_elev <= self.max_elevation
+        _LOGGER.debug("elevation within range? %s", within_range)
+        return within_range
 
     @property
     def valid(self) -> bool:
@@ -134,6 +138,7 @@ class AdaptiveGeneralCover(ABC):
         valid = (
             (self.gamma < azi_min) & (self.gamma > -azi_max) & (self.valid_elevation)
         )
+        _LOGGER.debug("sun in front of window? %s", valid)
         return valid
 
     @property
@@ -145,6 +150,7 @@ class AdaptiveGeneralCover(ABC):
         before_sunrise = datetime.utcnow() < (
             sunrise + timedelta(minutes=self.sunrise_off)
         )
+        _LOGGER.debug("after sunset plus offset? %s", (after_sunset or before_sunrise))
         return after_sunset or before_sunrise
 
     @property
@@ -199,11 +205,18 @@ class NormalCoverState:
 
     def get_state(self) -> int:
         """Return state."""
-        state = np.where(
-            self.cover.direct_sun_valid,
-            self.cover.calculate_percentage(),
-            self.cover.default,
-        )
+        _LOGGER.debug("Calculating state")
+        dsv = self.cover.direct_sun_valid
+        _LOGGER.debug("Direct sun valid: %s", dsv)
+        if dsv:
+            state = self.cover.calculate_percentage()
+        else:
+            state = self.cover.default
+        if dsv:
+            _LOGGER.debug("Calculated the percentage")
+        else:
+            _LOGGER.debug("Using default value")
+
         result = np.clip(state, 0, 100)
         if self.cover.apply_max_position and result > self.cover.max_pos:
             return self.cover.max_pos
@@ -308,6 +321,12 @@ class ClimateCoverData:
     @property
     def is_summer(self) -> bool:
         """Check if temperature is over threshold."""
+        _LOGGER.debug(
+            "is summer calc? temp_high, current_temp, outside_high: %s, %s, %s",
+            self.temp_high,
+            self.get_current_temperature,
+            self.outside_high,
+        )
         if self.temp_high is not None and self.get_current_temperature is not None:
             return self.get_current_temperature > self.temp_high and self.outside_high
         return False
@@ -360,6 +379,13 @@ class ClimateCoverState(NormalCoverState):
     def normal_with_presence(self) -> int:
         """Determine state for horizontal and vertical covers with occupants."""
 
+        _LOGGER.debug(
+            "is summer? %s; is winter? %s; is_sunny? %s",
+            self.climate_data.is_summer,
+            self.climate_data.is_winter,
+            self.climate_data.is_sunny,
+        )
+
         # Check if it's not summer and either lux, irradiance or sunny weather is present
         if not self.climate_data.is_summer and (
             self.climate_data.lux
@@ -368,8 +394,10 @@ class ClimateCoverState(NormalCoverState):
         ):
             # If it's winter and the cover is valid, return 100
             if self.climate_data.is_winter and self.cover.valid:
+                _LOGGER.debug("Winter and sun is in front of window")
                 return 100
             # Otherwise, return the default cover state
+            _LOGGER.debug("it's not summer and sunny weather is not present")
             return self.cover.default
 
         # If it's summer and there's a transparent blind, return 0
@@ -377,6 +405,7 @@ class ClimateCoverState(NormalCoverState):
             return 0
 
         # If none of the above conditions are met, get the state from the parent class
+        _LOGGER.debug("None of the climate conditions are met")
         return super().get_state()
 
     def normal_without_presence(self) -> int:
@@ -454,7 +483,11 @@ class AdaptiveVerticalCover(AdaptiveGeneralCover):
 
     def calculate_percentage(self) -> float:
         """Convert blind height to percentage or default value."""
-        result = self.calculate_position() / self.h_win * 100
+        position = self.calculate_position()
+        _LOGGER.debug(
+            "Converting height to percentage: %s / %s * 100", position, self.h_win
+        )
+        result = position / self.h_win * 100
         return round(result)
 
 
