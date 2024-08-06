@@ -411,6 +411,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         if self._cover_type == "cover_blind":
             cover_data = AdaptiveVerticalCover(
                 self.hass,
+                self.logger,
                 *self.pos_sun,
                 *self.common_data(options),
                 *self.vertical_data(options),
@@ -418,6 +419,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         if self._cover_type == "cover_awning":
             cover_data = AdaptiveHorizontalCover(
                 self.hass,
+                self.logger,
                 *self.pos_sun,
                 *self.common_data(options),
                 *self.vertical_data(options),
@@ -426,7 +428,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         if self._cover_type == "cover_tilt":
             cover_data = AdaptiveTiltCover(
                 self.hass,
-                *self.pos_sun,
+                self.logger * self.pos_sun,
                 *self.common_data(options),
                 *self.tilt_data(options),
             )
@@ -576,6 +578,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         """Update climate data."""
         return [
             self.hass,
+            self.logger,
             options.get(CONF_TEMP_ENTITY),
             options.get(CONF_TEMP_LOW),
             options.get(CONF_TEMP_HIGH),
