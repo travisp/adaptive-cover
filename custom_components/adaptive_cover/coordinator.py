@@ -604,6 +604,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
             self.control_method = "summer"
         if climate_data.is_winter and self.switch_mode:
             self.control_method = "winter"
+        self.logger.debug("Climate mode control method is %s", self.control_method)
 
     def vertical_data(self, options):
         """Update data for vertical blinds."""

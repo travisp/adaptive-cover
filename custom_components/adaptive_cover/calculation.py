@@ -378,8 +378,10 @@ class ClimateCoverState(NormalCoverState):
         ):
             # If it's winter and the cover is valid, return 100
             if self.climate_data.is_winter and self.cover.valid:
+                _LOGGER.debug("Winter and cover is valid")
                 return 100
             # Otherwise, return the default cover state
+            _LOGGER.debug("it's not summer and sunny weather is present")
             return self.cover.default
 
         # If it's summer and there's a transparent blind, return 0
@@ -387,6 +389,7 @@ class ClimateCoverState(NormalCoverState):
             return 0
 
         # If none of the above conditions are met, get the state from the parent class
+        _LOGGER.debug("None of the climate conditions are met")
         return super().get_state()
 
     def normal_without_presence(self) -> int:
