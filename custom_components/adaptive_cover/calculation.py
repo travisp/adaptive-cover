@@ -318,6 +318,12 @@ class ClimateCoverData:
     @property
     def is_summer(self) -> bool:
         """Check if temperature is over threshold."""
+        _LOGGER.debug(
+            "is summer calc? temp_high, current_temp, outside_high: %s, %s, %s",
+            self.temp_high,
+            self.get_current_temperature,
+            self.outside_high,
+        )
         if self.temp_high is not None and self.get_current_temperature is not None:
             return self.get_current_temperature > self.temp_high and self.outside_high
         return False
@@ -370,6 +376,13 @@ class ClimateCoverState(NormalCoverState):
     def normal_with_presence(self) -> int:
         """Determine state for horizontal and vertical covers with occupants."""
 
+        _LOGGER.debug(
+            "is summer? %s; is winter? %s; is_sunny? %s",
+            self.climate_data.is_summer,
+            self.climate_data.is_winter,
+            self.climate_data.is_sunny,
+        )
+
         # Check if it's not summer and either lux, irradiance or sunny weather is present
         if not self.climate_data.is_summer and (
             self.climate_data.lux
@@ -378,10 +391,10 @@ class ClimateCoverState(NormalCoverState):
         ):
             # If it's winter and the cover is valid, return 100
             if self.climate_data.is_winter and self.cover.valid:
-                _LOGGER.debug("Winter and cover is valid")
+                _LOGGER.debug("Winter and sun is in front of window")
                 return 100
             # Otherwise, return the default cover state
-            _LOGGER.debug("it's not summer and sunny weather is present")
+            _LOGGER.debug("it's not summer and sunny weather is not present")
             return self.cover.default
 
         # If it's summer and there's a transparent blind, return 0

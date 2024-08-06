@@ -146,7 +146,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         self.climate_state = None
         self.control_method = "intermediate"
         self.state_change_data: StateChangedData | None = None
-        self.manager = AdaptiveCoverManager(self.manual_duration)
+        self.manager = AdaptiveCoverManager(self.manual_duration, self.logger)
         self.wait_for_target = {}
         self.target_call = {}
         self.ignore_intermediate_states = self.config_entry.options.get(
@@ -729,13 +729,14 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
 class AdaptiveCoverManager:
     """Track position changes."""
 
-    def __init__(self, reset_duration: dict[str:int]) -> None:
+    def __init__(self, reset_duration: dict[str:int], logger) -> None:
         """Initialize the AdaptiveCoverManager."""
         self.covers: set[str] = set()
 
         self.manual_control: dict[str, bool] = {}
         self.manual_control_time: dict[str, dt.datetime] = {}
         self.reset_duration = dt.timedelta(**reset_duration)
+        self.logger = logger
 
     def add_covers(self, entity):
         """Update set with entities."""
