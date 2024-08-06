@@ -380,7 +380,7 @@ class ClimateCoverState(NormalCoverState):
     def normal_with_presence(self) -> int:
         """Determine state for horizontal and vertical covers with occupants."""
 
-        self.logger.debug(
+        self.cover.logger.debug(
             "is summer? %s; is winter? %s; is_sunny? %s",
             self.climate_data.is_summer,
             self.climate_data.is_winter,
@@ -395,10 +395,10 @@ class ClimateCoverState(NormalCoverState):
         ):
             # If it's winter and the cover is valid, return 100
             if self.climate_data.is_winter and self.cover.valid:
-                self.logger.debug("Winter and sun is in front of window")
+                self.cover.logger.debug("Winter and sun is in front of window")
                 return 100
             # Otherwise, return the default cover state
-            self.logger.debug("it's not summer and sunny weather is not present")
+            self.cover.logger.debug("it's not summer and sunny weather is not present")
             return self.cover.default
 
         # If it's summer and there's a transparent blind, return 0
@@ -406,7 +406,7 @@ class ClimateCoverState(NormalCoverState):
             return 0
 
         # If none of the above conditions are met, get the state from the parent class
-        self.logger.debug("None of the climate conditions are met")
+        self.cover.logger.debug("None of the climate conditions are met")
         return super().get_state()
 
     def normal_without_presence(self) -> int:
