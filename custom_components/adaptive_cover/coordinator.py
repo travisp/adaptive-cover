@@ -330,6 +330,10 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
 
     async def async_handle_timed_refresh(self, options):
         """Handle timed refresh."""
+        self.logger.debug(
+            "This is a timed refresh, using sunset position: %s",
+            options.get(CONF_SUNSET_POS),
+        )
         if self.control_toggle:
             for cover in self.entities:
                 await self.async_set_manual_position(
