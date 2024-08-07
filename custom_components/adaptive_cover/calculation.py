@@ -206,19 +206,19 @@ class NormalCoverState:
 
     def get_state(self) -> int:
         """Return state."""
-        self.cover.logger.debug("Calculating normal position")
+        self.cover.logger.debug("Determining normal position")
         dsv = self.cover.direct_sun_valid
         self.cover.logger.debug(
             "Sun directly in front of window & before sunset + offset? %s", dsv
         )
         if dsv:
             state = self.cover.calculate_percentage()
+            self.cover.logger.debug(
+                "Yes sun in window: using calculated percentage (%s)", state
+            )
         else:
             state = self.cover.default
-        if dsv:
-            self.cover.logger.debug("Using calculated the percentage")
-        else:
-            self.cover.logger.debug("Using default value")
+            self.cover.logger.debug("No sun in window: using default value (%s)", state)
 
         result = np.clip(state, 0, 100)
         if self.cover.apply_max_position and result > self.cover.max_pos:
