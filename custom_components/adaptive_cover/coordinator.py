@@ -239,8 +239,8 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         # Access climate data if climate mode is enabled
         if self._climate_mode:
             self.climate_mode_data(options, cover_data)
-
-        self.logger.debug("Control method is %s", self.control_method)
+        else:
+            self.logger.debug("Control method is %s", self.control_method)
 
         # calculate the state of the cover
         self.normal_cover_state = NormalCoverState(cover_data)
@@ -607,7 +607,9 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
             self.control_method = "summer"
         if climate_data.is_winter and self.switch_mode:
             self.control_method = "winter"
-        self.logger.debug("Climate mode control method is %s", self.control_method)
+        self.logger.debug(
+            "Climate mode control method was set to %s", self.control_method
+        )
 
     def vertical_data(self, options):
         """Update data for vertical blinds."""
@@ -634,12 +636,16 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
     @property
     def state(self) -> int:
         """Handle the output of the state based on mode."""
-        state = self.default_state
-        self.logger.debug("Starting with default mode position: %s", state)
-
+        self.logger.debug(
+            "Basic position: %s; Climate position: %s; Using climate position? %s",
+            self.default_state,
+            self.climate_state,
+            self._switch_mode,
+        )
         if self._switch_mode:
             state = self.climate_state
-            self.logger.debug("Using climate mode position: %s", state)
+        else:
+            state = self.default_state
 
         if self._use_interpolation:
             self.logger.debug("Interpolating position: %s", state)
