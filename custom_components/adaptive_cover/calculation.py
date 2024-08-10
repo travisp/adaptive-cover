@@ -347,6 +347,7 @@ class ClimateCoverData:
             self.logger.debug(
                 "Weather: %s; Is that sunny? %s", self.weather_condition, matches
             )
+            return matches
 
     @property
     def lux(self) -> bool:
