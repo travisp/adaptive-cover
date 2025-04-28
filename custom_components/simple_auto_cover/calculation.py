@@ -88,6 +88,7 @@ class AdaptiveGeneralCover(ABC):
             blindspot = (self.gamma <= left_edge) & (self.gamma >= right_edge)
             if self.blind_spot_elevation is not None:
                 blindspot = blindspot & (self.sol_elev <= self.blind_spot_elevation)
+            self.logger.debug("Is sun in blind spot? %s", blindspot)
             return blindspot
         return False
 
@@ -119,7 +120,9 @@ class AdaptiveGeneralCover(ABC):
             return self.sol_elev <= self.max_elevation
         if self.max_elevation is None:
             return self.sol_elev >= self.min_elevation
-        return self.min_elevation <= self.sol_elev <= self.max_elevation
+        within_range = self.min_elevation <= self.sol_elev <= self.max_elevation
+        self.logger.debug("elevation within range? %s", within_range)
+        return within_range
 
     @property
     def valid(self) -> bool:
@@ -132,6 +135,7 @@ class AdaptiveGeneralCover(ABC):
         valid = (
             (self.gamma < azi_min) & (self.gamma > -azi_max) & (self.valid_elevation)
         )
+        self.logger.debug("sun in front of window? %s", valid)
         return valid
 
     @property
@@ -142,6 +146,9 @@ class AdaptiveGeneralCover(ABC):
         after_sunset = datetime.utcnow() > (sunset + timedelta(minutes=self.sunset_off))
         before_sunrise = datetime.utcnow() < (
             sunrise + timedelta(minutes=self.sunrise_off)
+        )
+        self.logger.debug(
+            "after sunset plus offset? %s", (after_sunset or before_sunrise)
         )
         return after_sunset or before_sunrise
 
@@ -197,11 +204,18 @@ class NormalCoverState:
 
     def get_state(self) -> int:
         """Return state."""
-        state = np.where(
-            self.cover.direct_sun_valid,
-            self.cover.calculate_percentage(),
-            self.cover.default,
-        )
+        self.cover.logger.debug("Calculating state")
+        dsv = self.cover.direct_sun_valid
+        self.cover.logger.debug("Direct sun valid: %s", dsv)
+        if dsv:
+            state = self.cover.calculate_percentage()
+        else:
+            state = self.cover.default
+        if dsv:
+            self.cover.logger.debug("Calculated the percentage")
+        else:
+            self.cover.logger.debug("Using default value")
+
         result = np.clip(state, 0, 100)
         if self.cover.apply_max_position and result > self.cover.max_pos:
             return self.cover.max_pos
@@ -228,7 +242,11 @@ class AdaptiveVerticalCover(AdaptiveGeneralCover):
 
     def calculate_percentage(self) -> float:
         """Convert blind height to percentage or default value."""
-        result = self.calculate_position() / self.h_win * 100
+        position = self.calculate_position()
+        self.logger.debug(
+            "Converting height to percentage: %s / %s * 100", position, self.h_win
+        )
+        result = position / self.h_win * 100
         return round(result)
 
 

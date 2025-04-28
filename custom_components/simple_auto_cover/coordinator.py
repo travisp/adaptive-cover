@@ -157,11 +157,15 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
     async def async_timed_refresh(self, event) -> None:
         """Control state at end time."""
 
+        now = dt.datetime.now()
         if self.end_time is not None:
             time = self.end_time
         if self.end_time_entity is not None:
             time = get_safe_state(self.hass, self.end_time_entity)
-        time_check = dt.datetime.now() - get_datetime_from_str(time)
+
+        self.logger.debug("Checking timed refresh. End time: %s, now: %s", time, now)
+
+        time_check = now - get_datetime_from_str(time)
         if time is not None and (time_check <= dt.timedelta(seconds=1)):
             self.timed_refresh = True
             self.logger.debug("Timed refresh triggered")
@@ -221,7 +225,9 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
             if position == self.target_call.get(entity_id):
                 self.wait_for_target[entity_id] = False
                 self.logger.debug("Position %s reached for %s", position, entity_id)
-        self.logger.debug("Wait for target: %s", self.wait_for_target)
+            self.logger.debug("Wait for target: %s", self.wait_for_target)
+        else:
+            self.logger.debug("No wait for target call for %s", entity_id)
 
     @callback
     def _async_cancel_update_listener(self) -> None:
@@ -261,10 +267,16 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         self._update_manager_and_covers()
 
 
+        self.logger.debug("Control method is %s", self.control_method)
+
         # calculate the state of the cover
         self.normal_cover_state = NormalCoverState(cover_data)
+        self.logger.debug(
+            "Determined normal cover state to be %s", self.normal_cover_state
+        )
 
         self.default_state = round(self.normal_cover_state.get_state())
+        self.logger.debug("Determined default state to be %s", self.default_state)
         state = self.state
 
         await self.manager.reset_if_needed()
@@ -643,12 +655,16 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         """Return the calculated shade position."""
         if self.force_mode == "force open":
             state = 100
+            self.logger.debug("Force open position: %s", state)
         elif self.force_mode == "force close":
             state = 0
+            self.logger.debug("Force close position: %s", state)
         else:
             state = self.default_state
+            self.logger.debug("Starting with default mode position: %s", state)
 
         if self._use_interpolation:
+            self.logger.debug("Interpolating position: %s", state)
             state = self.interpolate_states(state)
 
         if self._inverse_state:
@@ -658,6 +674,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
                 )
             else:
                 state = inverse_state(state)
+                self.logger.debug("Inversed position: %s", state)
 
         self.logger.debug("Final position to use: %s", state)
         return state
