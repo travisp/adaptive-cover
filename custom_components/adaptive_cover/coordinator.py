@@ -232,6 +232,9 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         ]:
             self.logger.debug("Ignoring intermediate state change for %s", entity_id)
             return
+        if event.new_state.state == "unavailable":
+            self.logger.debug("New state is unavailable, not processing")
+            return
         if self.wait_for_target.get(entity_id):
             position = event.new_state.attributes.get(
                 "current_position"
