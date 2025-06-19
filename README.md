@@ -1,13 +1,22 @@
-![Version](https://img.shields.io/github/v/release/basbruss/adaptive-cover?style=for-the-badge)
+![Version](https://img.shields.io/github/v/release/travisp/adaptive-cover?style=for-the-badge)
 
-![logo](https://github.com/basbruss/adaptive-cover/blob/main/images/logo.png#gh-light-mode-only)
-![logo](https://github.com/basbruss/adaptive-cover/blob/main/images/dark_logo.png#gh-dark-mode-only)
+![logo](https://github.com/travisp/adaptive-cover/blob/main/images/logo.png#gh-light-mode-only)
+![logo](https://github.com/travisp/adaptive-cover/blob/main/images/dark_logo.png#gh-dark-mode-only)
 
 # Simple Auto Cover
 
 Simple Auto Cover exposes sensors that calculate the optimal blind position to reduce glare based on the sun's position.
 
-This integration builds upon the template sensor from this forum post [Automatic Blinds](https://community.home-assistant.io/t/automatic-blinds-sunscreen-control-based-on-sun-platform/)
+This project began as a fork of [Adaptive
+Cover](https://github.com/basbruss/adaptive-cover) by [Bas
+Brussee](https://github.com/basbruss). This fork is intended to be a simpler
+implementation of the same idea, but with climate and other functionality pushed
+out of the project and into user's custom automations. The original project is
+still maintained at the time of this writing and recommended for those who want
+a more complete all-in-one solution.
+
+That integration originally built upon the template sensor from this forum post [Automatic
+Blinds](https://community.home-assistant.io/t/automatic-blinds-sunscreen-control-based-on-sun-platform/)
 
 - [Simple Auto Cover](#simple-auto-cover)
   - [Features](#features)
@@ -43,7 +52,7 @@ This integration builds upon the template sensor from this forum post [Automatic
 
 ### HACS (Recommended)
 
-Add <https://github.com/basbruss/adaptive-cover> as custom repository to HACS.
+Add <https://github.com/travisp/adaptive-cover> as custom repository to HACS.
 Search and download Simple Auto Cover within HACS.
 
 Restart Home-Assistant and add the integration.
@@ -94,7 +103,6 @@ This component provides a simple `basic` strategy for positioning shades based s
 ### Basic mode
 
 This mode uses the calculated position when the sun is within the specified azimuth range of the window. Else it defaults to the default value or after sunset value depending on the time of day.
-
 
 ## Variables
 
@@ -180,7 +188,6 @@ These entities are always available:
 | `switch.{type}_toggle_control_{name}` | `on` | Activates the adaptive control feature. When enabled, blinds adjust based on calculated position, unless manually overridden. |
 | `switch.{type}_manual_override_{name}` | `on` | Enables detection of manual overrides. A cover is marked if its position differs from the calculated one, resetting to adaptive control after a set duration. |
 | `button.{type}_reset_manual_override_{name}` | `on` | Resets manual override tags for all covers; if `switch.{type}_toggle_control_{name}` is on, it also restores blinds to their correct positions. |
-
 
 ## Features Planned
 
