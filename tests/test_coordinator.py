@@ -6,6 +6,7 @@ import math
 import datetime as dt
 from pathlib import Path
 from importlib import util
+import dataclasses
 
 
 # Stub numpy functions used by the module
@@ -29,7 +30,7 @@ sys.modules.setdefault("pandas", pandas_stub)
 
 # Minimal pytz stub
 pytz_stub = types.ModuleType("pytz")
-pytz_stub.UTC = dt.timezone.utc
+pytz_stub.UTC = dt.UTC
 sys.modules.setdefault("pytz", pytz_stub)
 
 # Minimal dateutil parser stub
@@ -41,9 +42,13 @@ sys.modules.setdefault("dateutil", dateutil)
 sys.modules.setdefault("dateutil.parser", parser_stub)
 
 # Simplify dataclass decorator
-import dataclasses
+
+
 def simple_dataclass(cls=None, **kwargs):
+    """Return class unchanged for dataclass stub."""
+
     return cls if cls is not None else (lambda c: c)
+
 dataclasses.dataclass = simple_dataclass
 
 # Home Assistant stubs -------------------------------------------------------
