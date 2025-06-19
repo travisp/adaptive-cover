@@ -67,28 +67,10 @@
           "group": "Selecteer entiteiten om te besturen via integratie",
           "sunset_position": "Positie om naar over te schakelen na zonsondergang",
           "sunset_offset": "Verschil (±) vanaf zonsondergang in minuten",
-          "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten",
+          "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten"
         },
         "description": "Voeg configuratie variabelen toe",
         "title": "Verticaal scherm"
-      },
-        "data_description": {
-          "temp_low": "Minimale comfortabele temperatuur",
-          "temp_high": "Maximale comfortabele temperatuur",
-          "lux_threshold": "Drempelwaarde voor lux-sensor, boven deze waarde moet schittering worden verminderd",
-          "irradiance_threshold": "Drempelwaarde voor stralingsintensiteitssensor, boven deze waarde moet schittering worden verminderd"
-        },
-        "description": "Voeg additionele klimaat configuratie variabelen toe. Weer and Aanwezigheid entiteiten zijn optioneel",
-        "title": "Klimaat instellingen"
-      },
-      "weather": {
-        "data": {
-          "weather_state": "Weer Condities"
-        },
-        "data_description": {
-          "weather_state": "Kies de weersomstandigheden die automatische raambediening mogelijk maken."
-        },
-        "title": "Weer Condities"
       },
       "horizontal": {
         "data": {
@@ -127,7 +109,7 @@
           "group": "Selecteer entiteiten om te besturen via integratie",
           "sunset_position": "Positie om naar over te schakelen na zonsondergang",
           "sunset_offset": "Verschil (±) vanaf zonsondergang in minuten",
-          "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten",
+          "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten"
         },
         "description": "Voeg configuratie variabelen toe",
         "title": "Horizontaal scherm"
@@ -271,26 +253,10 @@
           "group": "Selecteer entiteiten om te besturen via integratie",
           "sunset_position": "Positie om naar over te schakelen na zonsondergang",
           "sunset_offset": "Verschil (±) vanaf zonsondergang in minuten",
-          "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten",
+          "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten"
         },
         "description": "Voeg configuratie variabelen toe",
         "title": "Verticaal scherm"
-      },
-        "data_description": {
-          "temp_low": "Minimale comfortabele temperatuur",
-          "temp_high": "Maximale comfortabele temperatuur"
-        },
-        "description": "Voeg additionele klimaat configuratie variabelen toe. Weer and Aanwezigheid entiteiten zijn optioneel",
-        "title": "Klimaat instellingen"
-      },
-      "weather": {
-        "data": {
-          "weather_state": "Weer Condities"
-        },
-        "data_description": {
-          "weather_state": "Kies de weersomstandigheden die automatische raambediening mogelijk maken."
-        },
-        "title": "Weer Condities"
       },
       "horizontal": {
         "data": {
@@ -329,7 +295,7 @@
           "group": "Selecteer entiteiten om te besturen via integratie",
           "sunset_position": "Positie om naar over te schakelen na zonsondergang",
           "sunset_offset": "Verschil (±) vanaf zonsondergang in minuten",
-          "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten",
+          "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten"
         },
         "description": "Voeg configuratie variabelen toe",
         "title": "Horizontaal scherm"
