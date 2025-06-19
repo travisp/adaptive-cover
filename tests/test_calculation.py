@@ -6,6 +6,7 @@ import sys
 import types
 import math
 from pathlib import Path
+from importlib import util
 import pytest
 
 np_stub = types.ModuleType("numpy")
@@ -18,7 +19,7 @@ np_stub.rad2deg = math.degrees
 np_stub.arctan = math.atan
 np_stub.sqrt = math.sqrt
 np_stub.where = lambda cond, a, b: a if cond else b
-np_stub.isscalar = lambda obj: isinstance(obj, (int, float, complex))
+np_stub.isscalar = lambda obj: isinstance(obj, int | float | complex)
 sys.modules.setdefault("numpy", np_stub)
 
 pandas_stub = types.ModuleType("pandas")
@@ -58,13 +59,12 @@ class SunData:  # pragma: no cover - minimal stub
     """Stub for SunData class."""
 
     def __init__(self, *args, **kwargs) -> None:
+        """Initialize SunData stub."""
         pass
 
 
 sun_stub.SunData = SunData
 sys.modules.setdefault("custom_components.simple_auto_cover.sun", sun_stub)
-
-from importlib import util
 
 spec = util.spec_from_file_location(
     "custom_components.simple_auto_cover.calculation",
