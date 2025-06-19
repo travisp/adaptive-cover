@@ -58,6 +58,7 @@ from .const import (
     CONF_TILT_MODE,
     CONF_WEATHER_STATE,
     CONF_OUTSIDE_THRESHOLD,
+    CONF_TRANSPARENT_BLIND,
     DOMAIN,
     SensorType,
     CONF_MIN_POSITION,
