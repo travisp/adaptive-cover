@@ -630,42 +630,24 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
 
     @property
     def state(self) -> int:
-        """Handle the output of the state based on mode."""
-        if self.force_mode in ("force_open", "force open"):
+        """Return the calculated shade position."""
+        if self.force_mode == "force open":
             state = 100
-            if self._inverse_state and self._use_interpolation:
-                _LOGGER.info(
-                    "Inverse state is not supported with interpolation, you can inverse the state by arranging the list from high to low"
-                )
-            if self._inverse_state and not self._use_interpolation:
-                state = inverse_state(state)
-            if self._use_interpolation:
-                state = self.interpolate_states(state)
-            return state
-        if self.force_mode in ("force_close", "force close"):
+        elif self.force_mode == "force close":
             state = 0
-            if self._inverse_state and self._use_interpolation:
-                _LOGGER.info(
-                    "Inverse state is not supported with interpolation, you can inverse the state by arranging the list from high to low"
-                )
-            if self._inverse_state and not self._use_interpolation:
-                state = inverse_state(state)
-            if self._use_interpolation:
-                state = self.interpolate_states(state)
-            return state
-
-        state = self.default_state
+        else:
+            state = self.default_state
 
         if self._use_interpolation:
             state = self.interpolate_states(state)
 
-        if self._inverse_state and self._use_interpolation:
-            _LOGGER.info(
-                "Inverse state is not supported with interpolation, you can inverse the state by arranging the list from high to low"
-            )
-
-        if self._inverse_state and not self._use_interpolation:
-            state = inverse_state(state)
+        if self._inverse_state:
+            if self._use_interpolation:
+                _LOGGER.info(
+                    "Inverse state is not supported with interpolation, you can inverse the state by arranging the list from high to low"
+                )
+            else:
+                state = inverse_state(state)
 
         _LOGGER.debug("Calculated position: %s", state)
         return state
