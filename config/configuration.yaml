@@ -12,7 +12,7 @@ frontend:
 logger:
   default: "info"
   logs:
-    custom_components.adaptive_cover: debug
+    custom_components.simple_auto_cover: debug
 
 cover:
   - platform: template

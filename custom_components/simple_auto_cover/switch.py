@@ -1,4 +1,4 @@
-"""Switch platform for the Adaptive Cover integration."""
+"""Switch platform for the Simple Auto Cover integration."""
 
 from __future__ import annotations
 
@@ -15,13 +15,8 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
     _LOGGER,
-    CONF_CLIMATE_MODE,
     CONF_ENTITIES,
-    CONF_IRRADIANCE_ENTITY,
-    CONF_LUX_ENTITY,
-    CONF_OUTSIDETEMP_ENTITY,
     CONF_SENSOR_TYPE,
-    CONF_WEATHER_ENTITY,
     DOMAIN,
 )
 from .coordinator import AdaptiveDataUpdateCoordinator
@@ -53,57 +48,10 @@ async def async_setup_entry(
         "control_toggle",
         coordinator,
     )
-    climate_switch = AdaptiveCoverSwitch(
-        config_entry,
-        config_entry.entry_id,
-        "Climate Mode",
-        True,
-        "switch_mode",
-        coordinator,
-    )
-    temp_switch = AdaptiveCoverSwitch(
-        config_entry,
-        config_entry.entry_id,
-        "Outside Temperature",
-        False,
-        "temp_toggle",
-        coordinator,
-    )
-    lux_switch = AdaptiveCoverSwitch(
-        config_entry,
-        config_entry.entry_id,
-        "Lux",
-        True,
-        "lux_toggle",
-        coordinator,
-    )
-    irradiance_switch = AdaptiveCoverSwitch(
-        config_entry,
-        config_entry.entry_id,
-        "Irradiance",
-        True,
-        "irradiance_toggle",
-        coordinator,
-    )
-
-    climate_mode = config_entry.options.get(CONF_CLIMATE_MODE)
-    weather_entity = config_entry.options.get(CONF_WEATHER_ENTITY)
-    sensor_entity = config_entry.options.get(CONF_OUTSIDETEMP_ENTITY)
-    lux_entity = config_entry.options.get(CONF_LUX_ENTITY)
-    irradiance_entity = config_entry.options.get(CONF_IRRADIANCE_ENTITY)
     switches = []
 
     if len(config_entry.options.get(CONF_ENTITIES)) >= 1:
         switches = [control_switch, manual_switch]
-
-    if climate_mode:
-        switches.append(climate_switch)
-        if weather_entity or sensor_entity:
-            switches.append(temp_switch)
-        if lux_entity:
-            switches.append(lux_switch)
-        if irradiance_entity:
-            switches.append(irradiance_switch)
 
     async_add_entities(switches)
 
@@ -111,7 +59,7 @@ async def async_setup_entry(
 class AdaptiveCoverSwitch(
     CoordinatorEntity[AdaptiveDataUpdateCoordinator], SwitchEntity, RestoreEntity
 ):
-    """Representation of a adaptive cover switch."""
+    """Representation of a simple auto cover switch."""
 
     _attr_has_entity_name = True
     _attr_should_poll = False

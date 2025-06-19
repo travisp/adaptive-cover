@@ -1,4 +1,4 @@
-"""Config flow for Adaptive Cover integration."""
+"""Config flow for Simple Auto Cover integration."""
 
 from __future__ import annotations
 
@@ -20,7 +20,6 @@ from .const import (
     CONF_BLIND_SPOT_ELEVATION,
     CONF_BLIND_SPOT_LEFT,
     CONF_BLIND_SPOT_RIGHT,
-    CONF_CLIMATE_MODE,
     CONF_DEFAULT_HEIGHT,
     CONF_DELTA_POSITION,
     CONF_DELTA_TIME,
@@ -38,11 +37,7 @@ from .const import (
     CONF_INTERP_LIST_NEW,
     CONF_INTERP_START,
     CONF_INVERSE_STATE,
-    CONF_IRRADIANCE_ENTITY,
-    CONF_IRRADIANCE_THRESHOLD,
     CONF_LENGTH_AWNING,
-    CONF_LUX_ENTITY,
-    CONF_LUX_THRESHOLD,
     CONF_MANUAL_IGNORE_INTERMEDIATE,
     CONF_MANUAL_OVERRIDE_DURATION,
     CONF_MANUAL_OVERRIDE_RESET,
@@ -51,8 +46,6 @@ from .const import (
     CONF_MAX_POSITION,
     CONF_MIN_ELEVATION,
     CONF_MODE,
-    CONF_OUTSIDETEMP_ENTITY,
-    CONF_PRESENCE_ENTITY,
     CONF_RETURN_SUNSET,
     CONF_SENSOR_TYPE,
     CONF_START_ENTITY,
@@ -60,14 +53,9 @@ from .const import (
     CONF_SUNRISE_OFFSET,
     CONF_SUNSET_OFFSET,
     CONF_SUNSET_POS,
-    CONF_TEMP_ENTITY,
-    CONF_TEMP_HIGH,
-    CONF_TEMP_LOW,
     CONF_TILT_DEPTH,
     CONF_TILT_DISTANCE,
     CONF_TILT_MODE,
-    CONF_TRANSPARENT_BLIND,
-    CONF_WEATHER_ENTITY,
     CONF_WEATHER_STATE,
     CONF_OUTSIDE_THRESHOLD,
     DOMAIN,
@@ -77,7 +65,7 @@ from .const import (
     CONF_ENABLE_MIN_POSITION,
 )
 
-# DEFAULT_NAME = "Adaptive Cover"
+# DEFAULT_NAME = "Simple Auto Cover"
 
 SENSOR_TYPE_MENU = [SensorType.BLIND, SensorType.AWNING, SensorType.TILT]
 
@@ -93,11 +81,6 @@ CONFIG_SCHEMA = vol.Schema(
     }
 )
 
-CLIMATE_MODE = vol.Schema(
-    {
-        vol.Optional(CONF_CLIMATE_MODE, default=False): selector.BooleanSelector(),
-    }
-)
 
 OPTIONS = vol.Schema(
     {
@@ -221,93 +204,6 @@ TILT_OPTIONS = vol.Schema(
     }
 ).extend(OPTIONS.schema)
 
-CLIMATE_OPTIONS = vol.Schema(
-    {
-        vol.Required(CONF_TEMP_ENTITY): selector.EntitySelector(
-            selector.EntityFilterSelectorConfig(domain=["climate", "sensor"])
-        ),
-        vol.Required(CONF_TEMP_LOW, default=21): selector.NumberSelector(
-            selector.NumberSelectorConfig(
-                min=0, max=86, step=1, mode="slider", unit_of_measurement="°"
-            )
-        ),
-        vol.Required(CONF_TEMP_HIGH, default=25): selector.NumberSelector(
-            selector.NumberSelectorConfig(
-                min=0, max=90, step=1, mode="slider", unit_of_measurement="°"
-            )
-        ),
-        vol.Optional(
-            CONF_OUTSIDETEMP_ENTITY, default=vol.UNDEFINED
-        ): selector.EntitySelector(
-            selector.EntityFilterSelectorConfig(domain=["sensor"])
-        ),
-        vol.Optional(CONF_OUTSIDE_THRESHOLD, default=0): vol.All(
-            vol.Coerce(int), vol.Range(min=0, max=100)
-        ),
-        vol.Optional(
-            CONF_PRESENCE_ENTITY, default=vol.UNDEFINED
-        ): selector.EntitySelector(
-            selector.EntityFilterSelectorConfig(
-                domain=["device_tracker", "zone", "binary_sensor", "input_boolean"]
-            )
-        ),
-        vol.Optional(CONF_LUX_ENTITY, default=vol.UNDEFINED): selector.EntitySelector(
-            selector.EntityFilterSelectorConfig(
-                domain=["sensor"], device_class="illuminance"
-            )
-        ),
-        vol.Optional(CONF_LUX_THRESHOLD, default=1000): selector.NumberSelector(
-            selector.NumberSelectorConfig(mode="box", unit_of_measurement="lux")
-        ),
-        vol.Optional(
-            CONF_IRRADIANCE_ENTITY, default=vol.UNDEFINED
-        ): selector.EntitySelector(
-            selector.EntityFilterSelectorConfig(
-                domain=["sensor"], device_class="irradiance"
-            )
-        ),
-        vol.Optional(CONF_IRRADIANCE_THRESHOLD, default=300): selector.NumberSelector(
-            selector.NumberSelectorConfig(mode="box", unit_of_measurement="W/m²")
-        ),
-        vol.Optional(CONF_TRANSPARENT_BLIND, default=False): selector.BooleanSelector(),
-        vol.Optional(
-            CONF_WEATHER_ENTITY, default=vol.UNDEFINED
-        ): selector.EntitySelector(
-            selector.EntityFilterSelectorConfig(domain="weather")
-        ),
-    }
-)
-
-WEATHER_OPTIONS = vol.Schema(
-    {
-        vol.Optional(
-            CONF_WEATHER_STATE, default=["sunny", "partlycloudy", "cloudy", "clear"]
-        ): selector.SelectSelector(
-            selector.SelectSelectorConfig(
-                multiple=True,
-                sort=False,
-                options=[
-                    "clear-night",
-                    "clear",
-                    "cloudy",
-                    "fog",
-                    "hail",
-                    "lightning",
-                    "lightning-rainy",
-                    "partlycloudy",
-                    "pouring",
-                    "rainy",
-                    "snowy",
-                    "snowy-rainy",
-                    "sunny",
-                    "windy",
-                    "windy-variant",
-                    "exceptional",
-                ],
-            )
-        )
-    }
-)
 
 
 AUTOMATION_CONFIG = vol.Schema(
@@ -408,7 +304,7 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
                 if user_input[CONF_MAX_ELEVATION] <= user_input[CONF_MIN_ELEVATION]:
                     return self.async_show_form(
                         step_id="vertical",
-                        data_schema=CLIMATE_MODE.extend(VERTICAL_OPTIONS.schema),
+                        data_schema=VERTICAL_OPTIONS.schema,
                         errors={
                             CONF_MAX_ELEVATION: "Must be greater than 'Minimal Elevation'"
                         },
@@ -421,7 +317,7 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
             return await self.async_step_automation()
         return self.async_show_form(
             step_id="vertical",
-            data_schema=CLIMATE_MODE.extend(VERTICAL_OPTIONS.schema),
+            data_schema=VERTICAL_OPTIONS.schema,
         )
 
     async def async_step_horizontal(self, user_input: dict[str, Any] | None = None):
@@ -435,7 +331,7 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
                 if user_input[CONF_MAX_ELEVATION] <= user_input[CONF_MIN_ELEVATION]:
                     return self.async_show_form(
                         step_id="horizontal",
-                        data_schema=CLIMATE_MODE.extend(HORIZONTAL_OPTIONS.schema),
+                        data_schema=HORIZONTAL_OPTIONS.schema,
                         errors={
                             CONF_MAX_ELEVATION: "Must be greater than 'Minimal Elevation'"
                         },
@@ -448,7 +344,7 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
             return await self.async_step_automation()
         return self.async_show_form(
             step_id="horizontal",
-            data_schema=CLIMATE_MODE.extend(HORIZONTAL_OPTIONS.schema),
+            data_schema=HORIZONTAL_OPTIONS.schema,
         )
 
     async def async_step_tilt(self, user_input: dict[str, Any] | None = None):
@@ -462,7 +358,7 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
                 if user_input[CONF_MAX_ELEVATION] <= user_input[CONF_MIN_ELEVATION]:
                     return self.async_show_form(
                         step_id="tilt",
-                        data_schema=CLIMATE_MODE.extend(TILT_OPTIONS.schema),
+                        data_schema=TILT_OPTIONS.schema,
                         errors={
                             CONF_MAX_ELEVATION: "Must be greater than 'Minimal Elevation'"
                         },
@@ -474,7 +370,7 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
                 return await self.async_step_blind_spot()
             return await self.async_step_automation()
         return self.async_show_form(
-            step_id="tilt", data_schema=CLIMATE_MODE.extend(TILT_OPTIONS.schema)
+            step_id="tilt", data_schema=TILT_OPTIONS.schema
         )
 
     async def async_step_interp(self, user_input: dict[str, Any] | None = None):
@@ -534,26 +430,9 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
         """Manage automation options."""
         if user_input is not None:
             self.config.update(user_input)
-            if self.config[CONF_CLIMATE_MODE] is True:
-                return await self.async_step_climate()
             return await self.async_step_update()
         return self.async_show_form(step_id="automation", data_schema=AUTOMATION_CONFIG)
 
-    async def async_step_climate(self, user_input: dict[str, Any] | None = None):
-        """Manage climate options."""
-        if user_input is not None:
-            self.config.update(user_input)
-            if self.config.get(CONF_WEATHER_ENTITY):
-                return await self.async_step_weather()
-            return await self.async_step_update()
-        return self.async_show_form(step_id="climate", data_schema=CLIMATE_OPTIONS)
-
-    async def async_step_weather(self, user_input: dict[str, Any] | None = None):
-        """Manage weather conditions."""
-        if user_input is not None:
-            self.config.update(user_input)
-            return await self.async_step_update()
-        return self.async_show_form(step_id="weather", data_schema=WEATHER_OPTIONS)
 
     async def async_step_update(self, user_input: dict[str, Any] | None = None):
         """Create entry."""
@@ -588,13 +467,6 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
                 CONF_TILT_DISTANCE: self.config.get(CONF_TILT_DISTANCE),
                 CONF_TILT_DEPTH: self.config.get(CONF_TILT_DEPTH),
                 CONF_TILT_MODE: self.config.get(CONF_TILT_MODE),
-                CONF_TEMP_ENTITY: self.config.get(CONF_TEMP_ENTITY),
-                CONF_PRESENCE_ENTITY: self.config.get(CONF_PRESENCE_ENTITY),
-                CONF_WEATHER_ENTITY: self.config.get(CONF_WEATHER_ENTITY),
-                CONF_TEMP_LOW: self.config.get(CONF_TEMP_LOW),
-                CONF_TEMP_HIGH: self.config.get(CONF_TEMP_HIGH),
-                CONF_OUTSIDETEMP_ENTITY: self.config.get(CONF_OUTSIDETEMP_ENTITY),
-                CONF_CLIMATE_MODE: self.config.get(CONF_CLIMATE_MODE),
                 CONF_WEATHER_STATE: self.config.get(CONF_WEATHER_STATE),
                 CONF_DELTA_POSITION: self.config.get(CONF_DELTA_POSITION),
                 CONF_DELTA_TIME: self.config.get(CONF_DELTA_TIME),
@@ -622,10 +494,6 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
                 CONF_INTERP_END: self.config.get(CONF_INTERP_END, None),
                 CONF_INTERP_LIST: self.config.get(CONF_INTERP_LIST, []),
                 CONF_INTERP_LIST_NEW: self.config.get(CONF_INTERP_LIST_NEW, []),
-                CONF_LUX_ENTITY: self.config.get(CONF_LUX_ENTITY),
-                CONF_LUX_THRESHOLD: self.config.get(CONF_LUX_THRESHOLD),
-                CONF_IRRADIANCE_ENTITY: self.config.get(CONF_IRRADIANCE_ENTITY),
-                CONF_IRRADIANCE_THRESHOLD: self.config.get(CONF_IRRADIANCE_THRESHOLD),
                 CONF_OUTSIDE_THRESHOLD: self.config.get(CONF_OUTSIDE_THRESHOLD),
             },
         )
@@ -649,10 +517,6 @@ class OptionsFlowHandler(OptionsFlow):
     ) -> FlowResult:
         """Manage the options."""
         options = ["automation", "blind"]
-        if self.options[CONF_CLIMATE_MODE]:
-            options.append("climate")
-        if self.options.get(CONF_WEATHER_ENTITY):
-            options.append("weather")
         if self.options.get(CONF_ENABLE_BLIND_SPOT):
             options.append("blind_spot")
         if self.options.get(CONF_INTERP):
@@ -685,9 +549,7 @@ class OptionsFlowHandler(OptionsFlow):
     async def async_step_vertical(self, user_input: dict[str, Any] | None = None):
         """Show basic config for vertical blinds."""
         self.type_blind = SensorType.BLIND
-        schema = CLIMATE_MODE.extend(VERTICAL_OPTIONS.schema)
-        if self.options[CONF_CLIMATE_MODE]:
-            schema = VERTICAL_OPTIONS
+        schema = VERTICAL_OPTIONS
         if user_input is not None:
             keys = [
                 CONF_MIN_ELEVATION,
@@ -701,7 +563,7 @@ class OptionsFlowHandler(OptionsFlow):
                 if user_input[CONF_MAX_ELEVATION] <= user_input[CONF_MIN_ELEVATION]:
                     return self.async_show_form(
                         step_id="vertical",
-                        data_schema=CLIMATE_MODE.extend(VERTICAL_OPTIONS.schema),
+                        data_schema=VERTICAL_OPTIONS.schema,
                         errors={
                             CONF_MAX_ELEVATION: "Must be greater than 'Minimal Elevation'"
                         },
@@ -711,8 +573,6 @@ class OptionsFlowHandler(OptionsFlow):
                 return await self.async_step_interp()
             if self.options[CONF_ENABLE_BLIND_SPOT]:
                 return await self.async_step_blind_spot()
-            if self.options[CONF_CLIMATE_MODE]:
-                return await self.async_step_climate()
             return await self._update_options()
         return self.async_show_form(
             step_id="vertical",
@@ -724,9 +584,7 @@ class OptionsFlowHandler(OptionsFlow):
     async def async_step_horizontal(self, user_input: dict[str, Any] | None = None):
         """Show basic config for horizontal blinds."""
         self.type_blind = SensorType.AWNING
-        schema = CLIMATE_MODE.extend(HORIZONTAL_OPTIONS.schema)
-        if self.options[CONF_CLIMATE_MODE]:
-            schema = HORIZONTAL_OPTIONS
+        schema = HORIZONTAL_OPTIONS
         if user_input is not None:
             keys = [
                 CONF_MIN_ELEVATION,
@@ -740,14 +598,12 @@ class OptionsFlowHandler(OptionsFlow):
                 if user_input[CONF_MAX_ELEVATION] <= user_input[CONF_MIN_ELEVATION]:
                     return self.async_show_form(
                         step_id="horizontal",
-                        data_schema=CLIMATE_MODE.extend(HORIZONTAL_OPTIONS.schema),
+                        data_schema=HORIZONTAL_OPTIONS.schema,
                         errors={
                             CONF_MAX_ELEVATION: "Must be greater than 'Minimal Elevation'"
                         },
                     )
             self.options.update(user_input)
-            if self.options[CONF_CLIMATE_MODE]:
-                return await self.async_step_climate()
             return await self._update_options()
         return self.async_show_form(
             step_id="horizontal",
@@ -759,9 +615,7 @@ class OptionsFlowHandler(OptionsFlow):
     async def async_step_tilt(self, user_input: dict[str, Any] | None = None):
         """Show basic config for tilted blinds."""
         self.type_blind = SensorType.TILT
-        schema = CLIMATE_MODE.extend(TILT_OPTIONS.schema)
-        if self.options[CONF_CLIMATE_MODE]:
-            schema = TILT_OPTIONS
+        schema = TILT_OPTIONS
         if user_input is not None:
             keys = [
                 CONF_MIN_ELEVATION,
@@ -775,14 +629,12 @@ class OptionsFlowHandler(OptionsFlow):
                 if user_input[CONF_MAX_ELEVATION] <= user_input[CONF_MIN_ELEVATION]:
                     return self.async_show_form(
                         step_id="tilt",
-                        data_schema=CLIMATE_MODE.extend(TILT_OPTIONS.schema),
+                        data_schema=TILT_OPTIONS.schema,
                         errors={
                             CONF_MAX_ELEVATION: "Must be greater than 'Minimal Elevation'"
                         },
                     )
             self.options.update(user_input)
-            if self.options[CONF_CLIMATE_MODE]:
-                return await self.async_step_climate()
             return await self._update_options()
         return self.async_show_form(
             step_id="tilt",
@@ -851,39 +703,6 @@ class OptionsFlowHandler(OptionsFlow):
             ),
         )
 
-    async def async_step_climate(self, user_input: dict[str, Any] | None = None):
-        """Manage climate options."""
-        if user_input is not None:
-            entities = [
-                CONF_OUTSIDETEMP_ENTITY,
-                CONF_WEATHER_ENTITY,
-                CONF_PRESENCE_ENTITY,
-                CONF_LUX_ENTITY,
-                CONF_IRRADIANCE_ENTITY,
-            ]
-            self.optional_entities(entities, user_input)
-            self.options.update(user_input)
-            if self.options.get(CONF_WEATHER_ENTITY):
-                return await self.async_step_weather()
-            return await self._update_options()
-        return self.async_show_form(
-            step_id="climate",
-            data_schema=self.add_suggested_values_to_schema(
-                CLIMATE_OPTIONS, user_input or self.options
-            ),
-        )
-
-    async def async_step_weather(self, user_input: dict[str, Any] | None = None):
-        """Manage weather conditions."""
-        if user_input is not None:
-            self.options.update(user_input)
-            return await self._update_options()
-        return self.async_show_form(
-            step_id="weather",
-            data_schema=self.add_suggested_values_to_schema(
-                WEATHER_OPTIONS, user_input or self.options
-            ),
-        )
 
     async def _update_options(self) -> FlowResult:
         """Update config entry options."""

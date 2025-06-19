@@ -1,4 +1,4 @@
-"""The Coordinator for Adaptive Cover."""
+"""The Coordinator for Simple Auto Cover."""
 
 from __future__ import annotations
 
@@ -30,8 +30,6 @@ from .calculation import (
     AdaptiveHorizontalCover,
     AdaptiveTiltCover,
     AdaptiveVerticalCover,
-    ClimateCoverData,
-    ClimateCoverState,
     NormalCoverState,
 )
 from .const import (
@@ -63,11 +61,7 @@ from .const import (
     CONF_INTERP_LIST_NEW,
     CONF_INTERP_START,
     CONF_INVERSE_STATE,
-    CONF_IRRADIANCE_ENTITY,
-    CONF_IRRADIANCE_THRESHOLD,
     CONF_LENGTH_AWNING,
-    CONF_LUX_ENTITY,
-    CONF_LUX_THRESHOLD,
     CONF_MANUAL_IGNORE_INTERMEDIATE,
     CONF_MANUAL_OVERRIDE_DURATION,
     CONF_MANUAL_OVERRIDE_RESET,
@@ -76,24 +70,15 @@ from .const import (
     CONF_MAX_POSITION,
     CONF_MIN_ELEVATION,
     CONF_MIN_POSITION,
-    CONF_OUTSIDE_THRESHOLD,
-    CONF_OUTSIDETEMP_ENTITY,
-    CONF_PRESENCE_ENTITY,
     CONF_RETURN_SUNSET,
     CONF_START_ENTITY,
     CONF_START_TIME,
     CONF_SUNRISE_OFFSET,
     CONF_SUNSET_OFFSET,
     CONF_SUNSET_POS,
-    CONF_TEMP_ENTITY,
-    CONF_TEMP_HIGH,
-    CONF_TEMP_LOW,
     CONF_TILT_DEPTH,
     CONF_TILT_DISTANCE,
     CONF_TILT_MODE,
-    CONF_TRANSPARENT_BLIND,
-    CONF_WEATHER_ENTITY,
-    CONF_WEATHER_STATE,
     DOMAIN,
     LOGGER,
 )
@@ -127,20 +112,16 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         super().__init__(hass, LOGGER, name=DOMAIN)
 
         self._cover_type = self.config_entry.data.get("sensor_type")
-        self._climate_mode = self.config_entry.options.get(CONF_CLIMATE_MODE, False)
-        self._switch_mode = True if self._climate_mode else False
         self._inverse_state = self.config_entry.options.get(CONF_INVERSE_STATE, False)
         self._use_interpolation = self.config_entry.options.get(CONF_INTERP, False)
         self._track_end_time = self.config_entry.options.get(CONF_RETURN_SUNSET)
-        self._temp_toggle = None
         self._control_toggle = None
         self._manual_toggle = None
-        self._lux_toggle = None
-        self._irradiance_toggle = None
         self._start_time = None
         self._sun_end_time = None
         self._sun_start_time = None
         # self._end_time = None
+        self.force_mode = "auto"
         self.manual_reset = self.config_entry.options.get(
             CONF_MANUAL_OVERRIDE_RESET, False
         )
@@ -151,7 +132,6 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         self.cover_state_change = False
         self.first_refresh = False
         self.timed_refresh = False
-        self.climate_state = None
         self.control_method = "intermediate"
         self.state_change_data: StateChangedData | None = None
         self.manager = AdaptiveCoverManager(self.manual_duration)
@@ -272,9 +252,6 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         # Update manager with covers
         self._update_manager_and_covers()
 
-        # Access climate data if climate mode is enabled
-        if self._climate_mode:
-            self.climate_mode_data(options, cover_data)
 
         # calculate the state of the cover
         self.normal_cover_state = NormalCoverState(cover_data)
@@ -317,12 +294,13 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         else:
             start, end = self._sun_start_time, self._sun_end_time
         return AdaptiveCoverData(
-            climate_mode_toggle=self.switch_mode,
+            climate_mode_toggle=False,
             states={
                 "state": state,
                 "start": start,
                 "end": end,
                 "control": self.control_method,
+                "force": self.force_mode,
                 "sun_motion": normal_cover.valid,
                 "manual_override": self.manager.binary_cover_manual,
                 "manual_list": self.manager.manual_controlled,
@@ -627,38 +605,6 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
             options.get(CONF_MAX_ELEVATION, None),
         ]
 
-    def get_climate_data(self, options):
-        """Update climate data."""
-        return [
-            self.hass,
-            options.get(CONF_TEMP_ENTITY),
-            options.get(CONF_TEMP_LOW),
-            options.get(CONF_TEMP_HIGH),
-            options.get(CONF_PRESENCE_ENTITY),
-            options.get(CONF_WEATHER_ENTITY),
-            options.get(CONF_WEATHER_STATE),
-            options.get(CONF_OUTSIDETEMP_ENTITY),
-            self._temp_toggle,
-            self._cover_type,
-            options.get(CONF_TRANSPARENT_BLIND),
-            options.get(CONF_LUX_ENTITY),
-            options.get(CONF_IRRADIANCE_ENTITY),
-            options.get(CONF_LUX_THRESHOLD),
-            options.get(CONF_IRRADIANCE_THRESHOLD),
-            options.get(CONF_OUTSIDE_THRESHOLD),
-            self._lux_toggle,
-            self._irradiance_toggle,
-        ]
-
-    def climate_mode_data(self, options, cover_data):
-        """Update climate mode data and control method."""
-        climate = ClimateCoverData(*self.get_climate_data(options))
-        self.climate_state = round(ClimateCoverState(cover_data, climate).get_state())
-        climate_data = ClimateCoverState(cover_data, climate).climate_data
-        if climate_data.is_summer and self.switch_mode:
-            self.control_method = "summer"
-        if climate_data.is_winter and self.switch_mode:
-            self.control_method = "winter"
 
     def vertical_data(self, options):
         """Update data for vertical blinds."""
@@ -685,9 +631,30 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
     @property
     def state(self) -> int:
         """Handle the output of the state based on mode."""
+        if self.force_mode in ("force_open", "force open"):
+            state = 100
+            if self._inverse_state and self._use_interpolation:
+                _LOGGER.info(
+                    "Inverse state is not supported with interpolation, you can inverse the state by arranging the list from high to low"
+                )
+            if self._inverse_state and not self._use_interpolation:
+                state = inverse_state(state)
+            if self._use_interpolation:
+                state = self.interpolate_states(state)
+            return state
+        if self.force_mode in ("force_close", "force close"):
+            state = 0
+            if self._inverse_state and self._use_interpolation:
+                _LOGGER.info(
+                    "Inverse state is not supported with interpolation, you can inverse the state by arranging the list from high to low"
+                )
+            if self._inverse_state and not self._use_interpolation:
+                state = inverse_state(state)
+            if self._use_interpolation:
+                state = self.interpolate_states(state)
+            return state
+
         state = self.default_state
-        if self._switch_mode:
-            state = self.climate_state
 
         if self._use_interpolation:
             state = self.interpolate_states(state)
@@ -720,23 +687,6 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
                 state = 100
         return state
 
-    @property
-    def switch_mode(self):
-        """Let switch toggle climate mode."""
-        return self._switch_mode
-
-    @switch_mode.setter
-    def switch_mode(self, value):
-        self._switch_mode = value
-
-    @property
-    def temp_toggle(self):
-        """Let switch toggle between inside or outside temperature."""
-        return self._temp_toggle
-
-    @temp_toggle.setter
-    def temp_toggle(self, value):
-        self._temp_toggle = value
 
     @property
     def control_toggle(self):
@@ -756,23 +706,6 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
     def manual_toggle(self, value):
         self._manual_toggle = value
 
-    @property
-    def lux_toggle(self):
-        """Toggle automation."""
-        return self._lux_toggle
-
-    @lux_toggle.setter
-    def lux_toggle(self, value):
-        self._lux_toggle = value
-
-    @property
-    def irradiance_toggle(self):
-        """Toggle automation."""
-        return self._irradiance_toggle
-
-    @irradiance_toggle.setter
-    def irradiance_toggle(self, value):
-        self._irradiance_toggle = value
 
 
 class AdaptiveCoverManager:
