@@ -206,8 +206,3 @@ These entities are always available:
 ### Simulation
 
 ![combined_simulation](custom_components/adaptive_cover/simulation/sim_plot.png)
-
-### Blueprint (deprecated since v1.0.0)
-
-This integration provides the option to download a blueprint to control the covers automatically by the provide sensor.
-By selecting the option the blueprints will be added to your local blueprints folder.
