@@ -1,15 +1,10 @@
 {
-  "domain": "adaptive_cover",
-  "name": "Adaptive Cover",
+  "domain": "simple_auto_cover",
+  "name": "Simple Auto Cover",
   "codeowners": ["@basbruss"],
   "config_flow": true,
   "dependencies": [
-    "sun",
-    "device_tracker",
-    "zone",
-    "climate",
-    "sensor",
-    "weather"
+    "sun"
   ],
   "documentation": "https://github.com/basbruss/adaptive-cover",
   "iot_class": "calculated",

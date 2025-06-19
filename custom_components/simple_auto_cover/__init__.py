@@ -1,4 +1,4 @@
-"""The Adaptive Cover integration."""
+"""The Simple Auto Cover integration."""
 
 from __future__ import annotations
 
@@ -12,14 +12,17 @@ from homeassistant.helpers.event import (
 from .const import (
     CONF_END_ENTITY,
     CONF_ENTITIES,
-    CONF_PRESENCE_ENTITY,
-    CONF_TEMP_ENTITY,
-    CONF_WEATHER_ENTITY,
     DOMAIN,
 )
 from .coordinator import AdaptiveDataUpdateCoordinator
 
-PLATFORMS = [Platform.SENSOR, Platform.SWITCH, Platform.BINARY_SENSOR, Platform.BUTTON]
+PLATFORMS = [
+    Platform.SENSOR,
+    Platform.SWITCH,
+    Platform.BINARY_SENSOR,
+    Platform.BUTTON,
+    Platform.SELECT,
+]
 CONF_SUN = ["sun.sun"]
 
 
@@ -33,20 +36,16 @@ async def async_initialize_integration(
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up Adaptive Cover from a config entry."""
+    """Set up Simple Auto Cover from a config entry."""
 
     hass.data.setdefault(DOMAIN, {})
 
     coordinator = AdaptiveDataUpdateCoordinator(hass)
-    _temp_entity = entry.options.get(CONF_TEMP_ENTITY)
-    _presence_entity = entry.options.get(CONF_PRESENCE_ENTITY)
-    _weather_entity = entry.options.get(CONF_WEATHER_ENTITY)
     _cover_entities = entry.options.get(CONF_ENTITIES, [])
     _end_time_entity = entry.options.get(CONF_END_ENTITY)
     _entities = ["sun.sun"]
-    for entity in [_temp_entity, _presence_entity, _weather_entity, _end_time_entity]:
-        if entity is not None:
-            _entities.append(entity)
+    if _end_time_entity is not None:
+        _entities.append(_end_time_entity)
 
     entry.async_on_unload(
         async_track_state_change_event(

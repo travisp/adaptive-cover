@@ -1,5 +1,5 @@
 {
-  "title": "Adaptive Cover",
+  "title": "Simple Auto Cover",
   "config": {
     "step": {
       "user": {
@@ -51,7 +51,6 @@
           "sunset_position": "Sunset Position",
           "sunset_offset": "Sunset Offset",
           "sunrise_offset": "Sunrise Offset",
-          "climate_mode": "Climate Mode",
           "blind_spot": "Setup Blindspot",
           "min_elevation": "Minimum Elevation of the sun",
           "max_elevation": "Maximum Elevation of the sun",
@@ -70,48 +69,6 @@
           "sunset_position": "Position to switch to after sunset",
           "sunset_offset": "Offset (±) from sunset time in minutes",
           "sunrise_offset": "Offset (±) from sunrise time in minutes",
-          "climate_mode": "Configure variables for climate mode"
-        },
-        "description": "Add configuration variables to the sensor",
-        "title": "Vertical cover"
-      },
-      "climate": {
-        "data": {
-          "temp_entity": "Inside temperature entity",
-          "presence_entity": "Presence entity (optional)",
-          "weather_entity": "Weather entity (optional)",
-          "outside_temp": "Outside temperature sensor (optional)",
-          "temp_low": "Low temperature threshold",
-          "temp_high": "High temperature threshold",
-          "transparent_blind": "Transparent blind",
-          "lux_entity": "Lux sensor (optional)",
-          "lux_threshold": "Lux threshold",
-          "irradiance_entity": "Irradiance sensor (optional)",
-          "irradiance_threshold": "Irradiance threshold",
-          "outside_threshold": "Minimum outside temperature for summer mode"
-        },
-        "data_description": {
-          "presence_entity": "Entity representing room or home presence status",
-          "weather_entity": "Monitors weather conditions, and outside temperature",
-          "outside_temp": "Overrides outside temperature from weather entity if both are set",
-          "temp_low": "Minimum comfortable temperature",
-          "temp_high": "Maximum comfortable temperature",
-          "transparent_blind": "The blind is transparent and should always close fully when summer mode is active",
-          "lux_entity": "Use lux sensor to determine if cover should reduce glare in presence mode",
-          "lux_threshold": "Threshold for lux sensor, above this value glare should be reduced",
-          "irradiance_entity": "Use irradiance sensor to determine if cover should reduce glare in presence mode",
-          "irradiance_threshold": "Threshold for irradiance sensor, above this value glare should be reduced"
-        },
-        "description": "Add additional climate configuration variables.",
-        "title": "Climate settings"
-      },
-      "weather": {
-        "data": { "weather_state": "Weather Conditions" },
-        "data_description": {
-          "weather_state": "Choose the weather conditions that enable automatic window control."
-        },
-        "title": "Weather Conditions"
-      },
       "horizontal": {
         "data": {
           "set_azimuth": "Window Azimuth",
@@ -131,7 +88,6 @@
           "sunset_position": "Sunset Position",
           "sunset_offset": "Sunset Offset",
           "sunrise_offset": "Sunrise Offset",
-          "climate_mode": "Climate Mode",
           "blind_spot": "Setup Blindspot",
           "min_elevation": "Minimum Elevation of the sun",
           "max_elevation": "Maximum Elevation of the sun",
@@ -152,7 +108,6 @@
           "sunset_position": "Position to switch to after sunset",
           "sunset_offset": "Offset (±) from sunset time in minutes",
           "sunrise_offset": "Offset (±) from sunrise time in minutes",
-          "climate_mode": "Configure variables for climate mode"
         },
         "description": "Add configuration variables to the sensor",
         "title": "Horizontal cover"
@@ -174,7 +129,6 @@
           "sunset_position": "Sunset Position",
           "sunset_offset": "Sunset Offset",
           "sunrise_offset": "Sunrise Offset",
-          "climate_mode": "Climate Mode",
           "tilt_mode": "Type of movement",
           "blind_spot": "Setup Blindspot",
           "min_elevation": "Minimum Elevation of the sun",
@@ -194,7 +148,6 @@
           "sunset_position": "Position to transition to after sunset",
           "sunset_offset": "Offset (±) from sunset time in minutes",
           "sunrise_offset": "Offset (±) from sunrise time in minutes",
-          "climate_mode": "Configure variables for climate mode",
           "tilt_mode": "Choose the type of movement"
         },
         "description": "Add configuration variables to the sensor",
@@ -236,7 +189,6 @@
         "menu_options": {
           "automation": "Modify Automation Configuration",
           "blind": "Fine-tune Blind Settings",
-          "climate": "Edit Climate Configuration",
           "weather": "Edit Weather Configuration",
           "blind_spot": "Setup Blindspot",
           "interp": "Range Adjustment"
@@ -284,7 +236,6 @@
           "sunset_position": "Sunset Position",
           "sunset_offset": "Sunset Offset",
           "sunrise_offset": "Sunrise Offset",
-          "climate_mode": "Climate Mode",
           "blind_spot": "Setup Blindspot",
           "min_elevation": "Minimum Elevation of the sun",
           "max_elevation": "Maximum Elevation of the sun",
@@ -303,39 +254,20 @@
           "sunset_position": "Position to switch to after sunset",
           "sunset_offset": "Offset (±) from sunset time in minutes",
           "sunrise_offset": "Offset (±) from sunrise time in minutes",
-          "climate_mode": "Configure variables for climate mode"
         },
         "description": "Add configuration variables to the sensor",
         "title": "Vertical cover"
       },
-      "climate": {
-        "data": {
-          "temp_entity": "Inside temperature entity",
-          "presence_entity": "Presence entity (optional)",
-          "weather_entity": "Weather entity (optional)",
-          "outside_temp": "Outside temperature sensor (optional)",
-          "temp_low": "Low temperature threshold",
-          "temp_high": "High temperature threshold",
-          "transparent_blind": "Transparent blind",
-          "lux_entity": "Lux sensor (optional)",
           "lux_threshold": "Lux threshold",
-          "irradiance_entity": "Irradiance sensor (optional)",
           "irradiance_threshold": "Irradiance threshold",
-          "outside_threshold": "Minimum outside temperature for summer mode"
         },
         "data_description": {
-          "presence_entity": "Entity representing room or home presence status",
-          "weather_entity": "Monitors weather conditions, and outside temperature",
-          "outside_temp": "Overrides outside temperature from weather entity if both are set",
           "temp_low": "Minimum comfortable temperature",
           "temp_high": "Maximum comfortable temperature",
           "transparent_blind": "The blind is transparent and should always close fully when summer mode is active",
-          "lux_entity": "Use lux sensor to determine if cover should reduce glare in presence mode",
           "lux_threshold": "Threshold for lux sensor, above this value glare should be reduced",
-          "irradiance_entity": "Use irradiance sensor to determine if cover should reduce glare in presence mode",
           "irradiance_threshold": "Threshold for irradiance sensor, above this value glare should be reduced"
         },
-        "description": "Add additional climate configuration variables.",
         "title": "Climate settings"
       },
       "weather": {
@@ -364,7 +296,6 @@
           "sunset_position": "Sunset Position",
           "sunset_offset": "Sunset Offset",
           "sunrise_offset": "Sunrise Offset",
-          "climate_mode": "Climate Mode",
           "blind_spot": "Setup Blindspot",
           "min_elevation": "Minimum Elevation of the sun",
           "max_elevation": "Maximum Elevation of the sun",
@@ -385,7 +316,6 @@
           "sunset_position": "Position to switch to after sunset",
           "sunset_offset": "Offset (±) from sunset time in minutes",
           "sunrise_offset": "Offset (±) from sunrise time in minutes",
-          "climate_mode": "Configure variables for climate mode"
         },
         "description": "Add configuration variables to the sensor",
         "title": "Horizontal cover"
@@ -407,7 +337,6 @@
           "sunset_position": "Sunset Position",
           "sunset_offset": "Sunset Offset",
           "sunrise_offset": "Sunrise Offset",
-          "climate_mode": "Climate Mode",
           "tilt_mode": "Type of movement",
           "blind_spot": "Setup Blindspot",
           "min_elevation": "Minimum Elevation of the sun",
@@ -427,7 +356,6 @@
           "sunset_position": "Position to transition to after sunset",
           "sunset_offset": "Offset (±) from sunset time in minutes",
           "sunrise_offset": "Offset (±) from sunrise time in minutes",
-          "climate_mode": "Configure variables for climate mode",
           "tilt_mode": "Choose the type of movement"
         },
         "description": "Add configuration variables to the sensor",
@@ -475,6 +403,14 @@
       "options": {
         "mode1": "single direction (0% = closed / 100% = open)",
         "mode2": "bi-directional (0% = closed / 50% = open / 100% = closed)"
+      }
+    },
+    "force_mode": {
+      "name": "Force mode",
+      "options": {
+        "auto": "Auto",
+        "force open": "Force open",
+        "force close": "Force close"
       }
     }
   }

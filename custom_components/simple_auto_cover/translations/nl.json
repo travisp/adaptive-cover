@@ -1,5 +1,5 @@
 {
-  "title": "Adaptive Cover",
+  "title": "Simple Auto Cover",
   "config": {
     "step": {
       "user": {
@@ -50,7 +50,6 @@
           "inverse_state": "Draai de status om (nodig voor sommige covers die omgekeerde percentages hanteren)",
           "sunset_position": "Zonsondergang Posistie",
           "sunset_offset": "Afwijking Zonsondergang",
-          "climate_mode": "Klimaatmodus",
           "blind_spot": "Configureer schaduwzone",
           "min_elevation": "Minimale zonhoogte",
           "max_elevation": "Maximale zonhoogte",
@@ -69,34 +68,14 @@
           "sunset_position": "Positie om naar over te schakelen na zonsondergang",
           "sunset_offset": "Verschil (±) vanaf zonsondergang in minuten",
           "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten",
-          "climate_mode": "Configureer variabelen voor klimaatmodus"
         },
         "description": "Voeg configuratie variabelen toe",
         "title": "Verticaal scherm"
       },
-      "climate": {
-        "data": {
-          "temp_entity": "Binnen temperatuur entiteit",
-          "presence_entity": "Aanwezigheid entiteit (optioneel)",
-          "weather_entity": "Weer entiteit (optioneel)",
-          "outside_temp": "Buitentemperatuur sensor (optioneel)",
-          "temp_low": "Minimale comfort temperatuur",
-          "temp_high": "Maximale comfort temperatuur",
-          "lux_entity": "Lux sensor (optioneel)",
-          "lux_threshold": "Lux drempelwaarde",
-          "irradiance_entity": "Stralingsintensiteit sensor (optioneel)",
-          "irradiance_threshold": "Stralingsintensiteit drempelwaarde",
-          "outside_threshold": "Minimale buitentemperatuur voor zomermodus"
-        },
         "data_description": {
-          "presence_entity": "Entiteit die de aanwezigheidsstatus van de ruimte of het huis vertegenwoordigt",
-          "weather_entity": "Controleert weersomstandigheden, en buitentemperatuur",
-          "outside_temp": "Overschrijft de buitentemperatuur van de weerentiteit als beide zijn ingesteld",
           "temp_low": "Minimale comfortabele temperatuur",
           "temp_high": "Maximale comfortabele temperatuur",
-          "lux_entity": "Gebruik lux-sensor om te bepalen of de cover schittering moet verminderen in aanwezigheidsmodus",
           "lux_threshold": "Drempelwaarde voor lux-sensor, boven deze waarde moet schittering worden verminderd",
-          "irradiance_entity": "Gebruik stralingsintensiteitssensor om te bepalen of de cover schittering moet verminderen in aanwezigheidsmodus",
           "irradiance_threshold": "Drempelwaarde voor stralingsintensiteitssensor, boven deze waarde moet schittering worden verminderd"
         },
         "description": "Voeg additionele klimaat configuratie variabelen toe. Weer and Aanwezigheid entiteiten zijn optioneel",
@@ -129,7 +108,6 @@
           "inverse_state": "Draai de status om (nodig voor sommige covers die omgekeerde percentages hanteren)",
           "sunset_position": "Zonsondergang Posistie",
           "sunset_offset": "Afwijking Zonsondergang",
-          "climate_mode": "Klimaat Modus",
           "blind_spot": "Configureer schaduwzone",
           "min_elevation": "Minimale zonhoogte",
           "max_elevation": "Maximale zonhoogte",
@@ -150,7 +128,6 @@
           "sunset_position": "Positie om naar over te schakelen na zonsondergang",
           "sunset_offset": "Verschil (±) vanaf zonsondergang in minuten",
           "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten",
-          "climate_mode": "Configureer variabelen voor klimaatmodus"
         },
         "description": "Voeg configuratie variabelen toe",
         "title": "Horizontaal scherm"
@@ -171,7 +148,6 @@
           "inverse_state": "Draai de status om (nodig voor sommige covers die omgekeerde percentages hanteren)",
           "sunset_position": "Zonsondergang Posistie",
           "sunset_offset": "Afwijking Zonsondergang",
-          "climate_mode": "Klimaat Modus",
           "tilt_mode": "Type beweging",
           "blind_spot": "Configureer schaduwzone",
           "min_elevation": "Minimale zonhoogte",
@@ -191,7 +167,6 @@
           "sunset_position": "Positie om naar over te schakelen na zonsondergang",
           "sunset_offset": "Verschil (±) vanaf zonsondergang in minuten",
           "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten",
-          "climate_mode": "Configureer variabelen voor klimaatmodus",
           "tilt_mode": "Kies het type beweging"
         },
         "description": "Voeg configuratie variabelen toe",
@@ -233,7 +208,6 @@
         "menu_options": {
           "automation": "Wijzig Automatiseringsinstellingen",
           "blind": "Pas parameters van de zonwering aan",
-          "climate": "Bewerk Klimaatconfiguratie",
           "weather": "Bewerk Weercondities",
           "interp": "Pas bereik aan"
         }
@@ -280,7 +254,6 @@
           "inverse_state": "Draai de status om (nodig voor sommige covers die omgekeerde percentages hanteren)",
           "sunset_position": "Zonsondergang Posistie",
           "sunset_offset": "Afwijking Zonsondergang",
-          "climate_mode": "Klimaatmodus",
           "blind_spot": "Configureer schaduwzone",
           "min_elevation": "Minimale zonhoogte",
           "max_elevation": "Maximale zonhoogte",
@@ -299,25 +272,11 @@
           "sunset_position": "Positie om naar over te schakelen na zonsondergang",
           "sunset_offset": "Verschil (±) vanaf zonsondergang in minuten",
           "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten",
-          "climate_mode": "Configureer variabelen voor klimaatmodus"
         },
         "description": "Voeg configuratie variabelen toe",
         "title": "Verticaal scherm"
       },
-      "climate": {
-        "data": {
-          "temp_entity": "Binnen temperatuur entiteit",
-          "presence_entity": "Aanwezigheid entiteit (optioneel)",
-          "weather_entity": "Weer entiteit (optioneel)",
-          "outside_temp": "Buitentemperatuur sensor (optioneel)",
-          "temp_low": "Minimale comfort temperatuur",
-          "temp_high": "Maximale comfort temperatuur",
-          "outside_threshold": "Minimale buitentemperatuur voor zomermodus"
-        },
         "data_description": {
-          "presence_entity": "Entiteit die de aanwezigheidsstatus van de ruimte of het huis vertegenwoordigt",
-          "weather_entity": "Controleert weersomstandigheden, en buitentemperatuur",
-          "outside_temp": "Overschrijft de buitentemperatuur van de weerentiteit als beide zijn ingesteld",
           "temp_low": "Minimale comfortabele temperatuur",
           "temp_high": "Maximale comfortabele temperatuur"
         },
@@ -351,7 +310,6 @@
           "inverse_state": "Draai de status om (nodig voor sommige covers die omgekeerde percentages hanteren)",
           "sunset_position": "Zonsondergang Posistie",
           "sunset_offset": "Afwijking Zonsondergang",
-          "climate_mode": "Klimaat Modus",
           "blind_spot": "Configureer schaduwzone",
           "min_elevation": "Minimale zonhoogte",
           "max_elevation": "Maximale zonhoogte",
@@ -372,7 +330,6 @@
           "sunset_position": "Positie om naar over te schakelen na zonsondergang",
           "sunset_offset": "Verschil (±) vanaf zonsondergang in minuten",
           "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten",
-          "climate_mode": "Configureer variabelen voor klimaatmodus"
         },
         "description": "Voeg configuratie variabelen toe",
         "title": "Horizontaal scherm"
@@ -393,7 +350,6 @@
           "inverse_state": "Draai de status om (nodig voor sommige covers die omgekeerde percentages hanteren)",
           "sunset_position": "Zonsondergang Posistie",
           "sunset_offset": "Afwijking Zonsondergang",
-          "climate_mode": "Klimaat Modus",
           "tilt_mode": "Type beweging",
           "blind_spot": "Configureer schaduwzone",
           "min_elevation": "Minimale zonhoogte",
@@ -413,7 +369,6 @@
           "sunset_position": "Positie om naar over te schakelen na zonsondergang",
           "sunset_offset": "Verschil (±) vanaf zonsondergang in minuten",
           "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten",
-          "climate_mode": "Configureer variabelen voor klimaatmodus",
           "tilt_mode": "Kies het type beweging"
         },
         "description": "Voeg configuratie variabelen toe",
@@ -461,6 +416,14 @@
       "options": {
         "mode1": "eenrichting (0% = dicht / 100% = open)",
         "mode2": "twee-richtings (0% = dicht / 50% = open / 100% = dicht)"
+      }
+    },
+    "force_mode": {
+      "name": "Forceermodus",
+      "options": {
+        "auto": "Auto",
+        "force open": "Openen afdwingen",
+        "force close": "Sluiten afdwingen"
       }
     }
   }

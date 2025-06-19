@@ -1,4 +1,4 @@
-"""Adaptive Cover integration diagnostics."""
+"""Simple Auto Cover integration diagnostics."""
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -9,7 +9,7 @@ async def async_get_config_entry_diagnostics(
 ):
     """Return config entry diagnostics."""
     return {
-        "title": "Adaptive Cover Configuration",
+        "title": "Simple Auto Cover Configuration",
         "type": "config_entry",
         "identifier": config_entry.entry_id,
         "config_data": config_entry.data,
