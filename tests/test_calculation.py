@@ -28,6 +28,11 @@ sys.modules.setdefault("pandas", pandas_stub)
 homeassistant = types.ModuleType("homeassistant")
 core = types.ModuleType("homeassistant.core")
 
+util_module = types.ModuleType("homeassistant.util")
+logging_module = types.ModuleType("homeassistant.util.logging")
+logging_module.log_exception = lambda *a, **k: None
+util_module.logging = logging_module
+
 
 class HomeAssistant:  # pragma: no cover - minimal stub
     """Stub for Home Assistant object used in tests."""
@@ -37,8 +42,11 @@ class HomeAssistant:  # pragma: no cover - minimal stub
 
 core.HomeAssistant = HomeAssistant
 homeassistant.core = core
+homeassistant.util = util_module
 sys.modules.setdefault("homeassistant", homeassistant)
 sys.modules.setdefault("homeassistant.core", core)
+sys.modules.setdefault("homeassistant.util", util_module)
+sys.modules.setdefault("homeassistant.util.logging", logging_module)
 
 custom_components = types.ModuleType("custom_components")
 simple_auto_cover = types.ModuleType("custom_components.simple_auto_cover")
