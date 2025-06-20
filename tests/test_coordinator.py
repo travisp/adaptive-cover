@@ -120,6 +120,11 @@ const.ATTR_ENTITY_ID = "entity_id"
 const.SERVICE_SET_COVER_POSITION = "set_cover_position"
 const.SERVICE_SET_COVER_TILT_POSITION = "set_cover_tilt_position"
 
+util_module = types.ModuleType("homeassistant.util")
+logging_module = types.ModuleType("homeassistant.util.logging")
+logging_module.log_exception = lambda *a, **k: None
+util_module.logging = logging_module
+
 helpers_update_coordinator = types.ModuleType("homeassistant.helpers.update_coordinator")
 
 class DataUpdateCoordinator:  # pragma: no cover - minimal stub
@@ -167,6 +172,7 @@ components_cover.DOMAIN = "cover"
 homeassistant = types.ModuleType("homeassistant")
 homeassistant.__path__ = []
 homeassistant.core = core
+homeassistant.util = util_module
 homeassistant.config_entries = config_entries
 homeassistant.const = const
 homeassistant.helpers = types.ModuleType("homeassistant.helpers")
@@ -178,6 +184,8 @@ homeassistant.components.cover = components_cover
 
 sys.modules["homeassistant"] = homeassistant
 sys.modules["homeassistant.core"] = core
+sys.modules["homeassistant.util"] = util_module
+sys.modules["homeassistant.util.logging"] = logging_module
 sys.modules["homeassistant.config_entries"] = config_entries
 sys.modules["homeassistant.const"] = const
 sys.modules["homeassistant.helpers.update_coordinator"] = helpers_update_coordinator
