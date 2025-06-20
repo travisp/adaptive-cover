@@ -190,7 +190,6 @@
         "menu_options": {
           "automation": "Wijzig Automatiseringsinstellingen",
           "blind": "Pas parameters van de zonwering aan",
-          "weather": "Bewerk Weercondities",
           "interp": "Pas bereik aan"
         }
       },

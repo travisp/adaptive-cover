@@ -29,8 +29,8 @@ pre-commit = "4.0.1"
 pre-commit-hooks = "5.0.0"
 pylint = "3.3.1"
 ruff = "0.6.9"
-pytest = "8.2.0"
-pytest-homeassistant-custom-component = "0.13.89"
+pytest = "8.0.2"
+pytest-homeassistant-custom-component = "0.13.109"
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/travisp/adaptive-cover/issues"
