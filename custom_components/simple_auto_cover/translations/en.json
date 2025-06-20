@@ -191,7 +191,6 @@
         "menu_options": {
           "automation": "Modify Automation Configuration",
           "blind": "Fine-tune Blind Settings",
-          "weather": "Edit Weather Configuration",
           "blind_spot": "Setup Blindspot",
           "interp": "Range Adjustment"
         }
