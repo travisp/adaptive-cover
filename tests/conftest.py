@@ -27,6 +27,7 @@ numpy_stub.isscalar = lambda obj: isinstance(obj, (int, float, complex))
 sys.modules.setdefault("numpy", numpy_stub)
 
 pandas_stub = types.ModuleType("pandas")
+pandas_stub.DatetimeIndex = list
 sys.modules.setdefault("pandas", pandas_stub)
 
 pytz_stub = types.ModuleType("pytz")
@@ -45,9 +46,16 @@ sys.modules.setdefault("dateutil.parser", parser_stub)
 # ---------------------------------------------------------------------------
 
 def import_module(path: str, name: str):
-    spec = util.spec_from_file_location(name, Path(__file__).resolve().parents[1] / path)
+    root = Path(__file__).resolve().parents[1]
+    if str(root) not in sys.path:
+        sys.path.insert(0, str(root))
+    package = name.rpartition(".")[0]
+    if package and package not in sys.modules:
+        __import__(package)
+    spec = util.spec_from_file_location(name, root / path)
     module = util.module_from_spec(spec)
     assert spec.loader is not None
+    sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
 
