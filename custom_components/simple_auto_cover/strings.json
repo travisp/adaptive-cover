@@ -75,8 +75,6 @@
         "data": {
           "temp_entity": "Inside temperature entity",
           "presence_entity": "Presence entity (optional)",
-          "weather_entity": "Weather entity (optional)",
-          "outside_temp": "Outside temperature sensor (optional)",
           "temp_low": "Low temperature threshold",
           "temp_high": "High temperature threshold",
           "lux_entity": "Lux sensor (optional)",
@@ -86,8 +84,6 @@
         },
         "data_description": {
           "presence_entity": "Entity representing room or home presence status",
-          "weather_entity": "Monitors weather conditions, and outside temperature",
-          "outside_temp": "Overrides outside temperature from weather entity if both are set",
           "temp_low": "Minimum comfortable temperature",
           "temp_high": "Maximum comfortable temperature",
           "lux_entity": "Use lux sensor to determine if cover should reduce glare in presence mode",
@@ -285,8 +281,6 @@
         "data": {
           "temp_entity": "Inside temperature entity",
           "presence_entity": "Presence entity (optional)",
-          "weather_entity": "Weather entity (optional)",
-          "outside_temp": "Outside temperature sensor (optional)",
           "temp_low": "Low temperature threshold",
           "temp_high": "High temperature threshold",
             "lux_entity": "Lux sensor (optional)",
@@ -296,8 +290,6 @@
         },
         "data_description": {
           "presence_entity": "Entity representing room or home presence status",
-          "weather_entity": "Monitors weather conditions, and outside temperature",
-          "outside_temp": "Overrides outside temperature from weather entity if both are set",
           "temp_low": "Minimum comfortable temperature",
           "temp_high": "Maximum comfortable temperature",
             "lux_entity": "Use lux sensor to determine if cover should reduce glare in presence mode",
