@@ -2,15 +2,21 @@
 
 from __future__ import annotations
 
+import importlib
+import sys
 import pytest
 
+# Ensure the real Home Assistant package is used for this integration test.
 pytest.importorskip("homeassistant")
+for name in [m for m in list(sys.modules) if m.startswith("homeassistant")]:
+    sys.modules.pop(name)
+importlib.invalidate_caches()
 
-try:  # pragma: no cover - skip if Home Assistant is missing
+try:  # pragma: no cover - fail if Home Assistant is missing
     from homeassistant.config_entries import ConfigEntryState
     from pytest_homeassistant_custom_component.common import MockConfigEntry
-except Exception:  # pragma: no cover - not installed
-    pytest.skip("homeassistant not available", allow_module_level=True)
+except Exception as exc:  # pragma: no cover - not installed
+    pytest.fail(f"Home Assistant not available: {exc}")
 
 from custom_components.simple_auto_cover import DOMAIN
 from custom_components.simple_auto_cover.const import (
