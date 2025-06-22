@@ -12,6 +12,8 @@ from custom_components.simple_auto_cover.const import SensorType
 
 @pytest.fixture
 def manager_module():
+    """Import and return the cover_manager module under test."""
+
     from tests.conftest import import_module
 
     return import_module(
@@ -22,15 +24,21 @@ def manager_module():
 
 @pytest.fixture
 def state_data_class(coordinator):
+    """Return the data class used for state change events."""
+
     return coordinator.StateChangedData
 
 
 def make_manager(manager_module, seconds=30):
+    """Create an AdaptiveCoverManager instance for testing."""
+
     logger = types.SimpleNamespace(debug=lambda *a, **k: None)
     return manager_module.AdaptiveCoverManager({"seconds": seconds}, logger)
 
 
 def make_state(entity_id: str, position: int, cover_type: str | SensorType = "cover"):
+    """Return a `State` object with the desired position."""
+
     from homeassistant.core import State
 
     attr = {
@@ -42,6 +50,7 @@ def make_state(entity_id: str, position: int, cover_type: str | SensorType = "co
 
 
 def test_add_and_basic_properties(manager_module):
+    """Verify that covers are added and tracked correctly."""
     manager = make_manager(manager_module)
     manager.add_covers({"cover.one", "cover.two"})
     assert manager.covers == {"cover.one", "cover.two"}
@@ -52,6 +61,7 @@ def test_add_and_basic_properties(manager_module):
 
 
 def test_handle_state_change_marks_manual(manager_module, state_data_class):
+    """Ensure state changes mark covers as manual when appropriate."""
     manager = make_manager(manager_module)
     manager.add_covers({"cover.test"})
     our_state = 10
@@ -62,6 +72,7 @@ def test_handle_state_change_marks_manual(manager_module, state_data_class):
 
 
 def test_handle_state_change_threshold(manager_module, state_data_class):
+    """Check manual control is not set when below threshold."""
     manager = make_manager(manager_module)
     manager.add_covers({"cover.test"})
     our_state = 10
@@ -71,6 +82,7 @@ def test_handle_state_change_threshold(manager_module, state_data_class):
 
 
 def test_reset_if_needed(manager_module, state_data_class):
+    """Validate that manual control flags reset after the cooldown."""
     manager = make_manager(manager_module, seconds=0)
     manager.add_covers({"cover.test"})
     past_state = make_state("cover.test", 50)

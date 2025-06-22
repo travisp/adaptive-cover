@@ -1,3 +1,5 @@
+"""Tests for the config flow helpers."""
+
 import importlib
 import sys
 from pathlib import Path
@@ -16,6 +18,8 @@ except Exception as exc:
 
 @pytest.mark.asyncio
 async def test_vertical_schema_callable():
+    """Ensure the vertical step returns a callable schema."""
+
     handler = cf.ConfigFlowHandler()
     result = await handler.async_step_vertical(None)
     schema = result["data_schema"]
