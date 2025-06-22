@@ -301,7 +301,7 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
                 if user_input[CONF_MAX_ELEVATION] <= user_input[CONF_MIN_ELEVATION]:
                     return self.async_show_form(
                         step_id="vertical",
-                        data_schema=VERTICAL_OPTIONS.schema,
+                        data_schema=VERTICAL_OPTIONS,
                         errors={
                             CONF_MAX_ELEVATION: "Must be greater than 'Minimal Elevation'"
                         },
@@ -314,7 +314,7 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
             return await self.async_step_automation()
         return self.async_show_form(
             step_id="vertical",
-            data_schema=VERTICAL_OPTIONS.schema,
+            data_schema=VERTICAL_OPTIONS,
         )
 
     async def async_step_horizontal(self, user_input: dict[str, Any] | None = None):
@@ -328,7 +328,7 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
                 if user_input[CONF_MAX_ELEVATION] <= user_input[CONF_MIN_ELEVATION]:
                     return self.async_show_form(
                         step_id="horizontal",
-                        data_schema=HORIZONTAL_OPTIONS.schema,
+                        data_schema=HORIZONTAL_OPTIONS,
                         errors={
                             CONF_MAX_ELEVATION: "Must be greater than 'Minimal Elevation'"
                         },
@@ -341,7 +341,7 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
             return await self.async_step_automation()
         return self.async_show_form(
             step_id="horizontal",
-            data_schema=HORIZONTAL_OPTIONS.schema,
+            data_schema=HORIZONTAL_OPTIONS,
         )
 
     async def async_step_tilt(self, user_input: dict[str, Any] | None = None):
@@ -355,7 +355,7 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
                 if user_input[CONF_MAX_ELEVATION] <= user_input[CONF_MIN_ELEVATION]:
                     return self.async_show_form(
                         step_id="tilt",
-                        data_schema=TILT_OPTIONS.schema,
+                        data_schema=TILT_OPTIONS,
                         errors={
                             CONF_MAX_ELEVATION: "Must be greater than 'Minimal Elevation'"
                         },
@@ -366,7 +366,7 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
             if self.config[CONF_ENABLE_BLIND_SPOT]:
                 return await self.async_step_blind_spot()
             return await self.async_step_automation()
-        return self.async_show_form(step_id="tilt", data_schema=TILT_OPTIONS.schema)
+        return self.async_show_form(step_id="tilt", data_schema=TILT_OPTIONS)
 
     async def async_step_interp(self, user_input: dict[str, Any] | None = None):
         """Show interpolation options."""
