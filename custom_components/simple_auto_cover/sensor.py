@@ -21,6 +21,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import (
     CONF_SENSOR_TYPE,
     DOMAIN,
+    COVER_TYPE_DISPLAY,
 )
 from .coordinator import AdaptiveDataUpdateCoordinator
 
@@ -87,11 +88,7 @@ class AdaptiveCoverSensorEntity(
     ) -> None:
         """Initialize simple_auto_cover Sensor."""
         super().__init__(coordinator=coordinator)
-        self.type = {
-            "cover_blind": "Vertical",
-            "cover_awning": "Horizontal",
-            "cover_tilt": "Tilt",
-        }
+        self.type = COVER_TYPE_DISPLAY
         self.coordinator = coordinator
         self.data = self.coordinator.data
         self._sensor_name = "Cover Position"
@@ -154,11 +151,7 @@ class AdaptiveCoverTimeSensorEntity(
     ) -> None:
         """Initialize simple_auto_cover Sensor."""
         super().__init__(coordinator=coordinator)
-        self.type = {
-            "cover_blind": "Vertical",
-            "cover_awning": "Horizontal",
-            "cover_tilt": "Tilt",
-        }
+        self.type = COVER_TYPE_DISPLAY
         self._attr_icon = icon
         self.key = key
         self.coordinator = coordinator
@@ -217,11 +210,7 @@ class AdaptiveCoverControlSensorEntity(
     ) -> None:
         """Initialize simple_auto_cover Sensor."""
         super().__init__(coordinator=coordinator)
-        self.type = {
-            "cover_blind": "Vertical",
-            "cover_awning": "Horizontal",
-            "cover_tilt": "Tilt",
-        }
+        self.type = COVER_TYPE_DISPLAY
         self.coordinator = coordinator
         self.data = self.coordinator.data
         self._sensor_name = "Control Method"

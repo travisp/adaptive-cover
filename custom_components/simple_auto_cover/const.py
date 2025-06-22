@@ -72,3 +72,10 @@ class SensorType:
     BLIND = "cover_blind"
     AWNING = "cover_awning"
     TILT = "cover_tilt"
+
+# Human readable names for the available cover types
+COVER_TYPE_DISPLAY = {
+    SensorType.BLIND: "Vertical",
+    SensorType.AWNING: "Horizontal",
+    SensorType.TILT: "Tilt",
+}

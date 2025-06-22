@@ -17,6 +17,7 @@ from .const import (
     CONF_ENTITIES,
     CONF_SENSOR_TYPE,
     DOMAIN,
+    COVER_TYPE_DISPLAY,
 )
 from .coordinator import AdaptiveDataUpdateCoordinator
 
@@ -75,11 +76,7 @@ class AdaptiveCoverSwitch(
     ) -> None:
         """Initialize the switch."""
         super().__init__(coordinator=coordinator)
-        self.type = {
-            "cover_blind": "Vertical",
-            "cover_awning": "Horizontal",
-            "cover_tilt": "Tilt",
-        }
+        self.type = COVER_TYPE_DISPLAY
         self._name = config_entry.data["name"]
         self._state: bool | None = None
         self._key = key
