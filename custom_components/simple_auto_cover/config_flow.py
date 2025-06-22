@@ -430,13 +430,13 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
 
     async def async_step_update(self, user_input: dict[str, Any] | None = None):
         """Create entry."""
-        type = {
+        cover_label_map = {
             "cover_blind": "Vertical",
             "cover_awning": "Horizontal",
             "cover_tilt": "Tilt",
         }
         return self.async_create_entry(
-            title=f"{type[self.type_blind]} {self.config['name']}",
+            title=f"{cover_label_map[self.type_blind]} {self.config['name']}",
             data={
                 "name": self.config["name"],
                 CONF_SENSOR_TYPE: self.type_blind,
