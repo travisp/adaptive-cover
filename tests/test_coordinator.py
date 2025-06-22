@@ -33,6 +33,7 @@ def make_coordinator(module, cover_type="cover_blind"):
     coord.min_change = 10
     coord.time_threshold = 2
     coord.logger = types.SimpleNamespace(debug=lambda *a, **k: None)
+
     return coord, hass
 
 
@@ -84,3 +85,14 @@ def test_check_time_delta(module):
 
 def test_inverse_state(module):
     assert module.inverse_state(20) == 80
+
+
+def test_async_timed_refresh_without_end_time(module):
+    coord, hass = make_coordinator(module)
+    coord.end_time = None
+    coord.end_time_entity = None
+    coord.timed_refresh = False
+    import asyncio
+
+    asyncio.run(coord.async_timed_refresh(None))
+    assert coord.timed_refresh is False

@@ -45,6 +45,7 @@ class TestVerticalCover:
             "max_elevation": None,
             "distance": 1,
             "h_win": 2,
+            "logger": types.SimpleNamespace(debug=lambda *a, **k: None),
         }
         if hasattr(
             calculation_module.AdaptiveVerticalCover,
