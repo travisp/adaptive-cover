@@ -2,6 +2,7 @@
 
 from enum import StrEnum
 import logging
+from enum import StrEnum
 
 DOMAIN = "simple_auto_cover"
 LOGGER = logging.getLogger(__package__)
