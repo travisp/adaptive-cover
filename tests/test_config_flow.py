@@ -48,18 +48,22 @@ class DummyFlow(cf.ConfigFlowHandler):
     """Expose next step calls for testing."""
 
     def __init__(self):
+        """Initialize with a record of called steps."""
         super().__init__()
         self.called: list[str] = []
 
     async def async_step_interp(self):
+        """Handle the interpolation step."""
         self.called.append("interp")
         return self.async_show_form(step_id="interp", data_schema=cf.INTERPOLATION_OPTIONS)
 
     async def async_step_blind_spot(self):
+        """Handle the blind spot step."""
         self.called.append("blind_spot")
         return self.async_show_form(step_id="blind_spot", data_schema=cf.AUTOMATION_CONFIG)
 
     async def async_step_automation(self):
+        """Handle the automation step."""
         self.called.append("automation")
         return self.async_show_form(step_id="automation", data_schema=cf.AUTOMATION_CONFIG)
 
