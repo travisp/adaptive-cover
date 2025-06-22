@@ -1,5 +1,9 @@
 """Helper functions."""
 
+from __future__ import annotations
+
+import datetime as dt
+
 from dateutil import parser
 from homeassistant.core import HomeAssistant
 
@@ -12,14 +16,16 @@ def get_safe_state(hass: HomeAssistant, entity_id: str):
     return state.state
 
 
-def get_datetime_from_str(string: str):
+def get_datetime_from_str(string: str | None) -> dt.datetime | None:
     """Convert datetime string to datetime."""
     if string is not None:
         return parser.parse(string, ignoretz=True)
+    return None
 
 
-def get_last_updated(entity_id: str, hass: HomeAssistant):
+def get_last_updated(entity_id: str | None, hass: HomeAssistant) -> dt.datetime | None:
     """Get last updated attribute from entity."""
     if entity_id is not None:
         if hass.states.get(entity_id):
             return hass.states.get(entity_id).last_updated
+    return None
