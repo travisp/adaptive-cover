@@ -2,19 +2,22 @@
 
 from __future__ import annotations
 
-import datetime as dt
 import types
 import pytest
 
 
 @pytest.fixture
 def module(calculation):
+    """Return the calculation module under test."""
     return calculation
 
 
 class TestVerticalCover:
+    """Helper class for AdaptiveVerticalCover test instances."""
+
     @staticmethod
     def make_cover(calculation_module, **kwargs):
+        """Create a dummy ``AdaptiveVerticalCover`` instance."""
         class DummyCover(calculation_module.AdaptiveVerticalCover):
             __test__ = False
 
@@ -59,12 +62,14 @@ class TestVerticalCover:
 
 
 def test_vertical_cover_calculation(module):
+    """Test calculation of the adaptive vertical cover."""
     cover = TestVerticalCover.make_cover(module)
     assert cover.calculate_position() == pytest.approx(1)
     assert cover.calculate_percentage() == 50
 
 
 def test_normal_cover_state_default(module):
+    """Test the default state when no max position is applied."""
     class DummyCover:
         def __init__(self):
             self.direct_sun_valid = False
@@ -83,6 +88,7 @@ def test_normal_cover_state_default(module):
 
 
 def test_normal_cover_state_apply_max(module):
+    """Test the state when the max position should be applied."""
     class DummyCover:
         def __init__(self):
             self.direct_sun_valid = True
