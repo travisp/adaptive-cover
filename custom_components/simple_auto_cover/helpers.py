@@ -26,7 +26,6 @@ def get_datetime_from_str(string: str | None) -> dt.datetime | None:
 def get_last_updated(entity_id: str | None, hass: HomeAssistant) -> dt.datetime | None:
     """Get last updated attribute from entity."""
     if entity_id is not None:
-        state = hass.states.get(entity_id)
-        if state:
-            return state.last_updated
+        if hass.states.get(entity_id):
+            return hass.states.get(entity_id).last_updated
     return None

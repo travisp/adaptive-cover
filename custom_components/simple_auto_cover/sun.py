@@ -32,16 +32,14 @@ class SunData:
     def solar_azimuth(self) -> list:
         """Create list with solar azimuth data per 5 minutes."""
         return [
-            self.location.solar_azimuth(time, self.elevation)
-            for time in self.times
+            self.location.solar_azimuth(time, self.elevation) for time in self.times
         ]
 
     @property
     def solar_elevation(self) -> list:
         """Create list with solar elevation data per 5 minutes."""
         return [
-            self.location.solar_elevation(time, self.elevation)
-            for time in self.times
+            self.location.solar_elevation(time, self.elevation) for time in self.times
         ]
 
     def sunset(self) -> datetime:
