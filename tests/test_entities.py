@@ -1,3 +1,5 @@
+"""Unit tests for entity helpers."""
+
 import types
 import pytest
 
@@ -7,6 +9,7 @@ from custom_components.simple_auto_cover import const
 
 @pytest.fixture
 def entity_module():
+    """Return the entity module for import testing."""
     return import_module(
         "custom_components/simple_auto_cover/entity.py",
         "custom_components.simple_auto_cover.entity",
@@ -15,6 +18,7 @@ def entity_module():
 
 @pytest.fixture
 def button_module():
+    """Return the button module for import testing."""
     return import_module(
         "custom_components/simple_auto_cover/button.py",
         "custom_components.simple_auto_cover.button",
@@ -23,6 +27,7 @@ def button_module():
 
 @pytest.fixture
 def binary_sensor_module():
+    """Return the binary sensor module for import testing."""
     return import_module(
         "custom_components/simple_auto_cover/binary_sensor.py",
         "custom_components.simple_auto_cover.binary_sensor",
@@ -31,6 +36,7 @@ def binary_sensor_module():
 
 @pytest.fixture
 def sensor_module():
+    """Return the sensor module for import testing."""
     return import_module(
         "custom_components/simple_auto_cover/sensor.py",
         "custom_components.simple_auto_cover.sensor",
@@ -39,6 +45,7 @@ def sensor_module():
 
 @pytest.fixture
 def switch_module():
+    """Return the switch module for import testing."""
     return import_module(
         "custom_components/simple_auto_cover/switch.py",
         "custom_components.simple_auto_cover.switch",
@@ -49,21 +56,26 @@ class DummyCoordinator:
     """Simplified coordinator for entity tests."""
 
     def __init__(self, states=None, attrs=None):
+        """Initialize the dummy coordinator."""
         self.data = types.SimpleNamespace(states=states or {}, attributes=attrs or {})
         self.last_update_success = True
         self.logger = types.SimpleNamespace(debug=lambda *a, **k: None)
 
     async def async_request_refresh(self):
+        """Stub refresh request."""
         pass
 
     async def async_refresh(self):
+        """Stub refresh call."""
         pass
 
     def async_add_listener(self, *_):
+        """Return a dummy remove listener callback."""
         return lambda: None
 
 
 def make_entry(*, name="Test", sensor_type=None):
+    """Create a dummy config entry for tests."""
     return types.SimpleNamespace(
         data={"name": name, const.CONF_SENSOR_TYPE: sensor_type or const.SensorType.BLIND},
         options={const.CONF_ENTITIES: ["cover.one"]},
@@ -71,6 +83,7 @@ def make_entry(*, name="Test", sensor_type=None):
     )
 
 def test_base_entity_initialization(entity_module):
+    """Ensure the base entity initializes as expected."""
     entry = make_entry()
     coord = DummyCoordinator()
     entity = entity_module.AdaptiveCoverEntity(entry, "uid", coord)
@@ -82,6 +95,7 @@ def test_base_entity_initialization(entity_module):
 
 
 def test_button_inherits_base(entity_module, button_module):
+    """Validate button entity inherits from the base entity."""
     entry = make_entry()
     coord = DummyCoordinator()
     button = button_module.AdaptiveCoverButton(entry, "uid", "Reset", coord)
@@ -93,6 +107,7 @@ def test_button_inherits_base(entity_module, button_module):
 
 
 def test_binary_sensor_is_on(entity_module, binary_sensor_module):
+    """Verify binary sensor state calculation."""
     entry = make_entry()
     coord = DummyCoordinator(states={"sun": True, "manual_list": []})
     sensor = binary_sensor_module.AdaptiveCoverBinarySensor(
@@ -112,6 +127,7 @@ def test_binary_sensor_is_on(entity_module, binary_sensor_module):
 
 
 def test_sensor_native_value(entity_module, sensor_module):
+    """Test the generic sensor entities."""
     entry = make_entry()
     states = {"state": 55, "start": "2025-01-01", "end": "2025-01-02", "control": "auto"}
     coord = DummyCoordinator(states=states, attrs={"foo": "bar"})
@@ -137,6 +153,7 @@ def test_sensor_native_value(entity_module, sensor_module):
 
 
 def test_switch_initial_state(entity_module, switch_module):
+    """Check that switches initialize correctly."""
     entry = make_entry()
     coord = DummyCoordinator()
     switch = switch_module.AdaptiveCoverSwitch(entry, "uid", "Manual", True, "manual_toggle", coord)
