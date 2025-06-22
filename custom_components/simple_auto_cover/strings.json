@@ -283,7 +283,7 @@
           "presence_entity": "Presence entity (optional)",
           "temp_low": "Low temperature threshold",
           "temp_high": "High temperature threshold",
-            "lux_entity": "Lux sensor (optional)",
+          "lux_entity": "Lux sensor (optional)",
           "lux_threshold": "Lux threshold",
           "irradiance_entity": "Irradiance sensor (optional)",
           "irradiance_threshold": "Irradiance threshold"
@@ -292,7 +292,7 @@
           "presence_entity": "Entity representing room or home presence status",
           "temp_low": "Minimum comfortable temperature",
           "temp_high": "Maximum comfortable temperature",
-            "lux_entity": "Use lux sensor to determine if cover should reduce glare in presence mode",
+          "lux_entity": "Use lux sensor to determine if cover should reduce glare in presence mode",
           "lux_threshold": "Threshold for lux sensor, above this value glare should be reduced",
           "irradiance_entity": "Use irradiance sensor to determine if cover should reduce glare in presence mode",
           "irradiance_threshold": "Threshold for irradiance sensor, above this value glare should be reduced"

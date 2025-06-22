@@ -270,7 +270,6 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         # Update manager with covers
         self._update_manager_and_covers()
 
-
         self.logger.debug("Control method is %s", self.control_method)
 
         # calculate the state of the cover
@@ -704,7 +703,6 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
                 state = 100
         return state
 
-
     @property
     def control_toggle(self):
         """Toggle automation."""
@@ -722,7 +720,6 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
     @manual_toggle.setter
     def manual_toggle(self, value):
         self._manual_toggle = value
-
 
 
 class AdaptiveCoverManager:

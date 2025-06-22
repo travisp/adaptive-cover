@@ -14,7 +14,9 @@ import pytest
 
 numpy_stub = types.ModuleType("numpy")
 numpy_stub.interp = (
-    lambda x, xp, fp: fp[0] + (fp[1] - fp[0]) * (x - xp[0]) / (xp[1] - xp[0]) if xp[1] - xp[0] else fp[0]
+    lambda x, xp, fp: fp[0] + (fp[1] - fp[0]) * (x - xp[0]) / (xp[1] - xp[0])
+    if xp[1] - xp[0]
+    else fp[0]
 )
 numpy_stub.cos = math.cos
 numpy_stub.sin = math.sin
@@ -46,6 +48,7 @@ sys.modules.setdefault("dateutil.parser", parser_stub)
 # ---------------------------------------------------------------------------
 # Helper to load integration modules from file paths
 # ---------------------------------------------------------------------------
+
 
 def import_module(path: str, name: str):
     """Load ``name`` from the specified ``path``."""

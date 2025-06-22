@@ -18,6 +18,7 @@ class TestVerticalCover:
     @staticmethod
     def make_cover(calculation_module, **kwargs):
         """Create a dummy ``AdaptiveVerticalCover`` instance."""
+
         class DummyCover(calculation_module.AdaptiveVerticalCover):
             __test__ = False
 
@@ -50,11 +51,17 @@ class TestVerticalCover:
             "h_win": 2,
             "logger": types.SimpleNamespace(debug=lambda *a, **k: None),
         }
-        if hasattr(
-            calculation_module.AdaptiveVerticalCover,
-            "__dataclass_fields__",
-        ) and "logger" in calculation_module.AdaptiveVerticalCover.__dataclass_fields__:
-            defaults.setdefault("logger", types.SimpleNamespace(debug=lambda *a, **k: None))
+        if (
+            hasattr(
+                calculation_module.AdaptiveVerticalCover,
+                "__dataclass_fields__",
+            )
+            and "logger"
+            in calculation_module.AdaptiveVerticalCover.__dataclass_fields__
+        ):
+            defaults.setdefault(
+                "logger", types.SimpleNamespace(debug=lambda *a, **k: None)
+            )
         defaults.update(kwargs)
         cover = DummyCover(**defaults)
         cover.sun_data = None
@@ -70,6 +77,7 @@ def test_vertical_cover_calculation(module):
 
 def test_normal_cover_state_default(module):
     """Test the default state when no max position is applied."""
+
     class DummyCover:
         def __init__(self):
             self.direct_sun_valid = False
@@ -89,6 +97,7 @@ def test_normal_cover_state_default(module):
 
 def test_normal_cover_state_apply_max(module):
     """Test the state when the max position should be applied."""
+
     class DummyCover:
         def __init__(self):
             self.direct_sun_valid = True
