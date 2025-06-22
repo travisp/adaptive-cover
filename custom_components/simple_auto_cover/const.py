@@ -1,5 +1,6 @@
 """Constants for integration_blueprint."""
 
+from enum import StrEnum
 import logging
 from enum import StrEnum
 
@@ -61,7 +62,6 @@ FORCE_MODE = "force_mode"
 
 STRATEGY_MODE_BASIC = "basic"
 STRATEGY_MODES = [STRATEGY_MODE_BASIC]
-
 
 
 class SensorType(StrEnum):

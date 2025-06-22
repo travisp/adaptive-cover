@@ -48,7 +48,7 @@ class DummyFlow(cf.ConfigFlowHandler):
     """Expose next step calls for testing."""
 
     def __init__(self):
-        """Initialize DummyFlow and tracking list."""
+        """Initialize with a record of called steps."""
         super().__init__()
         self.called: list[str] = []
 

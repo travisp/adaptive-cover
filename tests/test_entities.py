@@ -1,4 +1,4 @@
-"""Unit tests for entity helpers."""
+"""Unit tests for the entity helpers."""
 
 import types
 import pytest
@@ -56,26 +56,26 @@ class DummyCoordinator:
     """Simplified coordinator for entity tests."""
 
     def __init__(self, states=None, attrs=None):
-        """Initialize the dummy coordinator."""
+        """Initialize with optional state and attribute dictionaries."""
         self.data = types.SimpleNamespace(states=states or {}, attributes=attrs or {})
         self.last_update_success = True
         self.logger = types.SimpleNamespace(debug=lambda *a, **k: None)
 
     async def async_request_refresh(self):
-        """Stub refresh request."""
+        """Mock request of a data refresh."""
         pass
 
     async def async_refresh(self):
-        """Stub refresh call."""
+        """Mock refresh callback."""
         pass
 
     def async_add_listener(self, *_):
-        """Return a dummy remove listener callback."""
+        """Return a dummy remove callback for listeners."""
         return lambda: None
 
 
 def make_entry(*, name="Test", sensor_type=None):
-    """Create a dummy config entry for tests."""
+    """Create a simple config entry namespace for tests."""
     return types.SimpleNamespace(
         data={"name": name, const.CONF_SENSOR_TYPE: sensor_type or const.SensorType.BLIND},
         options={const.CONF_ENTITIES: ["cover.one"]},
@@ -83,7 +83,7 @@ def make_entry(*, name="Test", sensor_type=None):
     )
 
 def test_base_entity_initialization(entity_module):
-    """Ensure the base entity initializes as expected."""
+    """Ensure base entity is initialized with the correct attributes."""
     entry = make_entry()
     coord = DummyCoordinator()
     entity = entity_module.AdaptiveCoverEntity(entry, "uid", coord)
@@ -95,7 +95,7 @@ def test_base_entity_initialization(entity_module):
 
 
 def test_button_inherits_base(entity_module, button_module):
-    """Validate button entity inherits from the base entity."""
+    """Verify button inherits from the base entity class."""
     entry = make_entry()
     coord = DummyCoordinator()
     button = button_module.AdaptiveCoverButton(entry, "uid", "Reset", coord)
@@ -107,7 +107,7 @@ def test_button_inherits_base(entity_module, button_module):
 
 
 def test_binary_sensor_is_on(entity_module, binary_sensor_module):
-    """Verify binary sensor state calculation."""
+    """Confirm binary sensor reports its state correctly."""
     entry = make_entry()
     coord = DummyCoordinator(states={"sun": True, "manual_list": []})
     sensor = binary_sensor_module.AdaptiveCoverBinarySensor(
@@ -127,7 +127,7 @@ def test_binary_sensor_is_on(entity_module, binary_sensor_module):
 
 
 def test_sensor_native_value(entity_module, sensor_module):
-    """Test the generic sensor entities."""
+    """Validate sensor entities expose the expected values."""
     entry = make_entry()
     states = {"state": 55, "start": "2025-01-01", "end": "2025-01-02", "control": "auto"}
     coord = DummyCoordinator(states=states, attrs={"foo": "bar"})
@@ -153,7 +153,7 @@ def test_sensor_native_value(entity_module, sensor_module):
 
 
 def test_switch_initial_state(entity_module, switch_module):
-    """Check that switches initialize correctly."""
+    """Check initial attributes of the manual override switch."""
     entry = make_entry()
     coord = DummyCoordinator()
     switch = switch_module.AdaptiveCoverSwitch(entry, "uid", "Manual", True, "manual_toggle", coord)
