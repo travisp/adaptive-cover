@@ -124,3 +124,43 @@ def test_async_timed_refresh_without_end_time(module):
 
     asyncio.run(coord.async_timed_refresh(None))
     assert coord.timed_refresh is False
+
+
+def test_interpolate_states_default(module):
+    """Ensure no adjustment occurs with no custom range."""
+    coord, _ = make_coordinator(module)
+    coord.start_value = None
+    coord.end_value = None
+    coord.normal_list = []
+    coord.new_list = []
+    assert coord.interpolate_states(50) == 50
+
+
+def test_interpolate_states_start_only(module):
+    """Interpolate when only the starting value is provided."""
+    coord, _ = make_coordinator(module)
+    coord.start_value = 20
+    coord.end_value = None
+    coord.normal_list = []
+    coord.new_list = []
+    assert coord.interpolate_states(50) == 60
+
+
+def test_interpolate_states_end_only(module):
+    """Interpolate when only the ending value is provided."""
+    coord, _ = make_coordinator(module)
+    coord.start_value = None
+    coord.end_value = 80
+    coord.normal_list = []
+    coord.new_list = []
+    assert coord.interpolate_states(50) == 40
+
+
+def test_interpolate_states_full_range(module):
+    """Interpolate when both start and end values are provided."""
+    coord, _ = make_coordinator(module)
+    coord.start_value = 10
+    coord.end_value = 90
+    coord.normal_list = []
+    coord.new_list = []
+    assert coord.interpolate_states(50) == 50
