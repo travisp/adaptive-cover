@@ -24,7 +24,9 @@ class HomeAssistant:
         self.config = types.SimpleNamespace(time_zone="UTC")
 
 
-def make_coordinator(module, cover_type="cover_blind"):
+def make_coordinator(module, cover_type=None):
+    if cover_type is None:
+        cover_type = module.SensorType.BLIND
     hass = HomeAssistant()
     coord = module.AdaptiveDataUpdateCoordinator.__new__(module.AdaptiveDataUpdateCoordinator)
     coord.hass = hass
@@ -38,11 +40,11 @@ def make_coordinator(module, cover_type="cover_blind"):
 
 
 def test_get_current_position(module):
-    coord, hass = make_coordinator(module, "cover_blind")
+    coord, hass = make_coordinator(module, module.SensorType.BLIND)
     hass.states["cover.test"] = module.State("cover.test", "open", {"current_position": 40})
     assert coord._get_current_position("cover.test") == 40
 
-    coord._cover_type = "cover_tilt"
+    coord._cover_type = module.SensorType.TILT
     hass.states["cover.test"] = module.State("cover.test", "open", {"current_tilt_position": 30})
     assert coord._get_current_position("cover.test") == 30
 
