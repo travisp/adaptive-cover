@@ -7,18 +7,15 @@ import asyncio
 from homeassistant.components.button import ButtonEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
     _LOGGER,
     CONF_ENTITIES,
-    CONF_SENSOR_TYPE,
     DOMAIN,
-    COVER_TYPE_DISPLAY,
 )
 from .coordinator import AdaptiveDataUpdateCoordinator
+from .entity import AdaptiveCoverEntity
 
 
 async def async_setup_entry(
@@ -44,9 +41,7 @@ async def async_setup_entry(
     async_add_entities(buttons)
 
 
-class AdaptiveCoverButton(
-    CoordinatorEntity[AdaptiveDataUpdateCoordinator], ButtonEntity
-):
+class AdaptiveCoverButton(AdaptiveCoverEntity, ButtonEntity):
     """Representation of a simple auto cover button."""
 
     _attr_has_entity_name = True
@@ -61,18 +56,10 @@ class AdaptiveCoverButton(
         coordinator: AdaptiveDataUpdateCoordinator,
     ) -> None:
         """Initialize the button."""
-        super().__init__(coordinator=coordinator)
-        self.type = COVER_TYPE_DISPLAY
-        self._name = config_entry.data["name"]
-        self._device_name = self.type[config_entry.data[CONF_SENSOR_TYPE]]
+        super().__init__(config_entry, unique_id, coordinator)
         self._attr_unique_id = f"{unique_id}_{button_name}"
-        self._device_id = unique_id
         self._button_name = button_name
         self._entities = config_entry.options.get(CONF_ENTITIES, [])
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, self._device_id)},
-            name=self._device_name,
-        )
 
     @property
     def name(self):
