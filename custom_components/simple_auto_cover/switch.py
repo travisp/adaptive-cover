@@ -8,18 +8,15 @@ from homeassistant.components.switch import SwitchDeviceClass, SwitchEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import STATE_ON
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
     CONF_ENTITIES,
-    CONF_SENSOR_TYPE,
     DOMAIN,
-    COVER_TYPE_DISPLAY,
 )
 from .coordinator import AdaptiveDataUpdateCoordinator
+from .entity import AdaptiveCoverEntity
 
 
 async def async_setup_entry(
@@ -56,9 +53,7 @@ async def async_setup_entry(
     async_add_entities(switches)
 
 
-class AdaptiveCoverSwitch(
-    CoordinatorEntity[AdaptiveDataUpdateCoordinator], SwitchEntity, RestoreEntity
-):
+class AdaptiveCoverSwitch(AdaptiveCoverEntity, SwitchEntity, RestoreEntity):
     """Representation of a simple auto cover switch."""
 
     _attr_has_entity_name = True
@@ -75,22 +70,14 @@ class AdaptiveCoverSwitch(
         device_class: SwitchDeviceClass | None = None,
     ) -> None:
         """Initialize the switch."""
-        super().__init__(coordinator=coordinator)
-        self.type = COVER_TYPE_DISPLAY
-        self._name = config_entry.data["name"]
+        super().__init__(config_entry, unique_id, coordinator)
         self._state: bool | None = None
         self._key = key
         self._attr_translation_key = key
-        self._device_name = self.type[config_entry.data[CONF_SENSOR_TYPE]]
         self._switch_name = switch_name
         self._attr_device_class = device_class
         self._initial_state = initial_state
         self._attr_unique_id = f"{unique_id}_{switch_name}"
-        self._device_id = unique_id
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, self._device_id)},
-            name=self._device_name,
-        )
 
         self.coordinator.logger.debug("Setup switch")
 

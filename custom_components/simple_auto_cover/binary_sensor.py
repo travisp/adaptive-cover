@@ -11,12 +11,11 @@ from homeassistant.components.binary_sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import CONF_SENSOR_TYPE, DOMAIN, COVER_TYPE_DISPLAY
+from .const import DOMAIN
 from .coordinator import AdaptiveDataUpdateCoordinator
+from .entity import AdaptiveCoverEntity
 
 
 async def async_setup_entry(
@@ -50,9 +49,7 @@ async def async_setup_entry(
     async_add_entities([binary_sensor, manual_override])
 
 
-class AdaptiveCoverBinarySensor(
-    CoordinatorEntity[AdaptiveDataUpdateCoordinator], BinarySensorEntity
-):
+class AdaptiveCoverBinarySensor(AdaptiveCoverEntity, BinarySensorEntity):
     """Representation of a simple auto cover binary sensor."""
 
     _attr_has_entity_name = True
@@ -69,21 +66,13 @@ class AdaptiveCoverBinarySensor(
         coordinator: AdaptiveDataUpdateCoordinator,
     ) -> None:
         """Initialize the binary sensor."""
-        super().__init__(coordinator=coordinator)
-        self.type = COVER_TYPE_DISPLAY
+        super().__init__(config_entry, unique_id, coordinator)
         self._key = key
         self._attr_translation_key = key
-        self._name = config_entry.data["name"]
-        self._device_name = self.type[config_entry.data[CONF_SENSOR_TYPE]]
         self._binary_name = binary_name
         self._attr_unique_id = f"{unique_id}_{binary_name}"
-        self._device_id = unique_id
         self._state = state
         self._attr_device_class = device_class
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, self._device_id)},
-            name=self._device_name,
-        )
 
     @property
     def name(self):
