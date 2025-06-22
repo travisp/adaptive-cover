@@ -93,19 +93,23 @@ This component provides a simple `basic` strategy for positioning shades based s
       BM --> |auto| BA("Sun within field of view")
 
       BA --> |No| BC{{Default}}
-      BC --> BE("Time between sunset and sunrise?")
-      BE --> |Yes| BF["Return default"]
-      BE --> |No| BG["Return Sunset default"]
+      BC --> BD("Within sunrise+offset and sunset+offset?")
+      BD --> |Yes| BE["Return default"]
+      BD --> |No| BF["Return Sunset default"]
 
-      BA --> |Yes| BD("Elevation above 0?")
-      BD --> |Yes| BH{{"Calculated Position"}}
-      BD --> |No| BC
+      BA --> |Yes| BG("Elevation above 0?")
+      BG --> |No| BC
+      BG --> |Yes| BH("Within sunrise+offset and sunset+offset?")
+      BH --> |No| BC
+      BH --> |Yes| BI("Within start and end times?")
+      BI --> |No| BC
+      BI --> |Yes| BJ{{"Calculated Position"}}
   end
 ```
 
 ### Basic mode
 
-This mode uses the calculated position when the sun is within the specified azimuth range of the window. Else it defaults to the default value or after sunset value depending on the time of day.
+This mode uses the calculated position only when the sun is in front of the window, above the horizon, the current time lies between sunrise plus offset and sunset plus offset, and it is within the configured start and end times. Otherwise the integration falls back to the default position (or the sunset default outside the daylight period).
 
 ## Variables
 
