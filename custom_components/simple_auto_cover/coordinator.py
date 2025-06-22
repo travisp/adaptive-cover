@@ -309,7 +309,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
             or dt.datetime.now(pytz.UTC).date() != self._sun_start_time.date()
         ):
             self.logger.debug("Calculating solar times")
-            loop = asyncio.get_event_loop()
+            loop = asyncio.get_running_loop()
             start, end = await loop.run_in_executor(None, normal_cover.solar_times)
             self._sun_start_time = start
             self._sun_end_time = end
