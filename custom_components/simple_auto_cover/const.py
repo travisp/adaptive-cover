@@ -62,7 +62,10 @@ STRATEGY_MODE_BASIC = "basic"
 STRATEGY_MODES = [STRATEGY_MODE_BASIC]
 
 
-class SensorType:
+from enum import Enum
+
+
+class SensorType(str, Enum):
     """Possible modes for a number selector."""
 
     BLIND = "cover_blind"
