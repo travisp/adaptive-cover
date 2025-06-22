@@ -47,6 +47,11 @@ class TestVerticalCover:
             "h_win": 2,
             "logger": types.SimpleNamespace(debug=lambda *a, **kw: None),
         }
+        if hasattr(
+            calculation_module.AdaptiveVerticalCover,
+            "__dataclass_fields__",
+        ) and "logger" in calculation_module.AdaptiveVerticalCover.__dataclass_fields__:
+            defaults.setdefault("logger", types.SimpleNamespace(debug=lambda *a, **k: None))
         defaults.update(kwargs)
         cover = DummyCover(**defaults)
         cover.sun_data = None
@@ -68,7 +73,7 @@ def test_normal_cover_state_default(module):
             self.apply_min_position = False
             self.max_pos = 100
             self.min_pos = 0
-            self.logger = types.SimpleNamespace(debug=lambda *a, **kw: None)
+            self.logger = types.SimpleNamespace(debug=lambda *a, **k: None)
 
         def calculate_percentage(self):
             return 80
@@ -86,7 +91,7 @@ def test_normal_cover_state_apply_max(module):
             self.max_pos = 50
             self.apply_min_position = False
             self.min_pos = 0
-            self.logger = types.SimpleNamespace(debug=lambda *a, **kw: None)
+            self.logger = types.SimpleNamespace(debug=lambda *a, **k: None)
 
         def calculate_percentage(self):
             return 80
