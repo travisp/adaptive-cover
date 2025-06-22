@@ -1,3 +1,5 @@
+"""Tests for sunset and final cover position logic."""
+
 import datetime as dt
 import types
 import pytest
@@ -5,26 +7,34 @@ import pytest
 
 @pytest.fixture
 def module(calculation):
+    """Return the calculation module under test."""
     return calculation
 
 
 def make_sundata(sunset, sunrise):
+    """Create a simple sun data namespace with ``sunset`` and ``sunrise``."""
     return types.SimpleNamespace(sunset=lambda: sunset, sunrise=lambda: sunrise)
 
 
 def patch_time(monkeypatch, module, new_time):
+    """Patch ``datetime.utcnow`` for the calculation module."""
     class FixedDateTime(dt.datetime):
         @classmethod
         def utcnow(cls):
             return new_time
+
     monkeypatch.setattr(module, "datetime", FixedDateTime)
 
 
 class TestVerticalCover:
+    """Utility factory for ``AdaptiveVerticalCover`` instances."""
+
     @staticmethod
     def make_cover(module, **kwargs):
+        """Construct a dummy cover using the provided ``module``."""
         class DummyCover(module.AdaptiveVerticalCover):
             __test__ = False
+
             def __post_init__(self):
                 pass
         defaults = {
@@ -60,6 +70,8 @@ class TestVerticalCover:
 
 
 def test_sunset_valid_offset(monkeypatch, module):
+    """Validate ``sunset_valid`` after the sunset offset has passed."""
+
     cover = TestVerticalCover.make_cover(module, sunset_off=30)
     sunset = dt.datetime(2022, 1, 1, 18, 0, tzinfo=dt.UTC)
     sunrise = dt.datetime(2022, 1, 1, 6, 0, tzinfo=dt.UTC)
@@ -73,6 +85,8 @@ def test_sunset_valid_offset(monkeypatch, module):
 
 
 def test_default_after_sunset(monkeypatch, module):
+    """Ensure the default position changes to ``sunset_pos`` after sunset."""
+
     cover = TestVerticalCover.make_cover(module, h_def=20, sunset_pos=80)
     sunset = dt.datetime(2022, 1, 1, 18, 0, tzinfo=dt.UTC)
     sunrise = dt.datetime(2022, 1, 1, 6, 0, tzinfo=dt.UTC)
@@ -86,6 +100,8 @@ def test_default_after_sunset(monkeypatch, module):
 
 
 def test_normal_cover_state_uses_final_position(monkeypatch, module):
+    """Normal cover state should apply ``sunset_pos`` after sunset."""
+
     cover = TestVerticalCover.make_cover(module, h_def=10, sunset_pos=75)
     sunset = dt.datetime(2022, 1, 1, 18, 0, tzinfo=dt.UTC)
     sunrise = dt.datetime(2022, 1, 1, 6, 0, tzinfo=dt.UTC)
