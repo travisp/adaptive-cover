@@ -1,3 +1,7 @@
+"""Tests for solar calculations in :mod:`sun`."""
+
+from __future__ import annotations
+
 import types
 import datetime as dt
 
@@ -5,9 +9,9 @@ import custom_components.simple_auto_cover.sun as sun
 
 
 def test_solar_azimuth_and_elevation(monkeypatch):
+    """Verify solar azimuth and elevation results for ``SunData``."""
     times = [
-        dt.datetime(2025, 1, 1, 0, 0) + dt.timedelta(minutes=5 * i)
-        for i in range(3)
+        dt.datetime(2025, 1, 1, 0, 0) + dt.timedelta(minutes=5 * i) for i in range(3)
     ]
 
     az_calls = []
