@@ -11,7 +11,13 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import _LOGGER, CONF_ENTITIES, CONF_SENSOR_TYPE, DOMAIN
+from .const import (
+    _LOGGER,
+    CONF_ENTITIES,
+    CONF_SENSOR_TYPE,
+    DOMAIN,
+    COVER_TYPE_DISPLAY,
+)
 from .coordinator import AdaptiveDataUpdateCoordinator
 
 
@@ -56,11 +62,7 @@ class AdaptiveCoverButton(
     ) -> None:
         """Initialize the button."""
         super().__init__(coordinator=coordinator)
-        self.type = {
-            "cover_blind": "Vertical",
-            "cover_awning": "Horizontal",
-            "cover_tilt": "Tilt",
-        }
+        self.type = COVER_TYPE_DISPLAY
         self._name = config_entry.data["name"]
         self._device_name = self.type[config_entry.data[CONF_SENSOR_TYPE]]
         self._attr_unique_id = f"{unique_id}_{button_name}"

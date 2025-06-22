@@ -15,7 +15,7 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import CONF_SENSOR_TYPE, DOMAIN
+from .const import CONF_SENSOR_TYPE, DOMAIN, COVER_TYPE_DISPLAY
 from .coordinator import AdaptiveDataUpdateCoordinator
 
 
@@ -70,11 +70,7 @@ class AdaptiveCoverBinarySensor(
     ) -> None:
         """Initialize the binary sensor."""
         super().__init__(coordinator=coordinator)
-        self.type = {
-            "cover_blind": "Vertical",
-            "cover_awning": "Horizontal",
-            "cover_tilt": "Tilt",
-        }
+        self.type = COVER_TYPE_DISPLAY
         self._key = key
         self._attr_translation_key = key
         self._name = config_entry.data["name"]
