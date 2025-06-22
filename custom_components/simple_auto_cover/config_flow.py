@@ -278,6 +278,42 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
         """Get the options flow for this handler."""
         return OptionsFlowHandler(config_entry)
 
+    async def _handle_blind_step(
+        self,
+        user_input: dict[str, Any] | None,
+        schema: vol.Schema,
+        sensor_type: SensorType,
+        step_id: str,
+    ) -> FlowResult:
+        """Process shared validation and branching logic for blind steps."""
+        self.type_blind = sensor_type
+
+        if user_input is not None:
+            if (
+                user_input.get(CONF_MAX_ELEVATION) is not None
+                and user_input.get(CONF_MIN_ELEVATION) is not None
+                and user_input[CONF_MAX_ELEVATION]
+                <= user_input[CONF_MIN_ELEVATION]
+            ):
+                return self.async_show_form(
+                    step_id=step_id,
+                    data_schema=schema,
+                    errors={
+                        CONF_MAX_ELEVATION: "Must be greater than 'Minimal Elevation'"
+                    },
+                )
+
+            self.config.update(user_input)
+
+            if self.config[CONF_INTERP]:
+                return await self.async_step_interp()
+            if self.config[CONF_ENABLE_BLIND_SPOT]:
+                return await self.async_step_blind_spot()
+
+            return await self.async_step_automation()
+
+        return self.async_show_form(step_id=step_id, data_schema=schema)
+
     async def async_step_user(self, user_input: dict[str, Any] | None = None):
         """Handle the initial step."""
         # errors = {}
@@ -293,81 +329,30 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
 
     async def async_step_vertical(self, user_input: dict[str, Any] | None = None):
         """Show basic config for vertical blinds."""
-        self.type_blind = SensorType.BLIND
-        if user_input is not None:
-            if (
-                user_input.get(CONF_MAX_ELEVATION) is not None
-                and user_input.get(CONF_MIN_ELEVATION) is not None
-            ):
-                if user_input[CONF_MAX_ELEVATION] <= user_input[CONF_MIN_ELEVATION]:
-                    return self.async_show_form(
-                        step_id="vertical",
-                        data_schema=VERTICAL_OPTIONS,
-                        errors={
-                            CONF_MAX_ELEVATION: "Must be greater than 'Minimal Elevation'"
-                        },
-                    )
-            self.config.update(user_input)
-            if self.config[CONF_INTERP]:
-                return await self.async_step_interp()
-            if self.config[CONF_ENABLE_BLIND_SPOT]:
-                return await self.async_step_blind_spot()
-            return await self.async_step_automation()
-        return self.async_show_form(
-            step_id="vertical",
-            data_schema=VERTICAL_OPTIONS,
+        return await self._handle_blind_step(
+            user_input,
+            VERTICAL_OPTIONS,
+            SensorType.BLIND,
+            "vertical",
         )
 
     async def async_step_horizontal(self, user_input: dict[str, Any] | None = None):
         """Show basic config for horizontal blinds."""
-        self.type_blind = SensorType.AWNING
-        if user_input is not None:
-            if (
-                user_input.get(CONF_MAX_ELEVATION) is not None
-                and user_input.get(CONF_MIN_ELEVATION) is not None
-            ):
-                if user_input[CONF_MAX_ELEVATION] <= user_input[CONF_MIN_ELEVATION]:
-                    return self.async_show_form(
-                        step_id="horizontal",
-                        data_schema=HORIZONTAL_OPTIONS,
-                        errors={
-                            CONF_MAX_ELEVATION: "Must be greater than 'Minimal Elevation'"
-                        },
-                    )
-            self.config.update(user_input)
-            if self.config[CONF_INTERP]:
-                return await self.async_step_interp()
-            if self.config[CONF_ENABLE_BLIND_SPOT]:
-                return await self.async_step_blind_spot()
-            return await self.async_step_automation()
-        return self.async_show_form(
-            step_id="horizontal",
-            data_schema=HORIZONTAL_OPTIONS,
+        return await self._handle_blind_step(
+            user_input,
+            HORIZONTAL_OPTIONS,
+            SensorType.AWNING,
+            "horizontal",
         )
 
     async def async_step_tilt(self, user_input: dict[str, Any] | None = None):
         """Show basic config for tilted blinds."""
-        self.type_blind = SensorType.TILT
-        if user_input is not None:
-            if (
-                user_input.get(CONF_MAX_ELEVATION) is not None
-                and user_input.get(CONF_MIN_ELEVATION) is not None
-            ):
-                if user_input[CONF_MAX_ELEVATION] <= user_input[CONF_MIN_ELEVATION]:
-                    return self.async_show_form(
-                        step_id="tilt",
-                        data_schema=TILT_OPTIONS,
-                        errors={
-                            CONF_MAX_ELEVATION: "Must be greater than 'Minimal Elevation'"
-                        },
-                    )
-            self.config.update(user_input)
-            if self.config[CONF_INTERP]:
-                return await self.async_step_interp()
-            if self.config[CONF_ENABLE_BLIND_SPOT]:
-                return await self.async_step_blind_spot()
-            return await self.async_step_automation()
-        return self.async_show_form(step_id="tilt", data_schema=TILT_OPTIONS)
+        return await self._handle_blind_step(
+            user_input,
+            TILT_OPTIONS,
+            SensorType.TILT,
+            "tilt",
+        )
 
     async def async_step_interp(self, user_input: dict[str, Any] | None = None):
         """Show interpolation options."""
