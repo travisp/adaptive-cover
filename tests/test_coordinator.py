@@ -32,6 +32,7 @@ def make_coordinator(module, cover_type="cover_blind"):
     coord._cover_type = cover_type
     coord.min_change = 10
     coord.time_threshold = 2
+    coord.logger = types.SimpleNamespace(debug=lambda *a, **k: None)
     return coord, hass
 
 
