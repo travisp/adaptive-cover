@@ -158,15 +158,19 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         """Control state at end time."""
 
         now = dt.datetime.now()
+        time = None
         if self.end_time is not None:
             time = self.end_time
         if self.end_time_entity is not None:
             time = get_safe_state(self.hass, self.end_time_entity)
 
         self.logger.debug("Checking timed refresh. End time: %s, now: %s", time, now)
+        if time is None:
+            self.logger.debug("Timed refresh aborted: no end time configured")
+            return
 
         time_check = now - get_datetime_from_str(time)
-        if time is not None and (time_check <= dt.timedelta(seconds=1)):
+        if time_check <= dt.timedelta(seconds=1):
             self.timed_refresh = True
             self.logger.debug("Timed refresh triggered")
             await self.async_refresh()

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import types
 import pytest
 
 
@@ -44,6 +45,7 @@ class TestVerticalCover:
             "max_elevation": None,
             "distance": 1,
             "h_win": 2,
+            "logger": types.SimpleNamespace(debug=lambda *a, **kw: None),
         }
         defaults.update(kwargs)
         cover = DummyCover(**defaults)
@@ -66,6 +68,7 @@ def test_normal_cover_state_default(module):
             self.apply_min_position = False
             self.max_pos = 100
             self.min_pos = 0
+            self.logger = types.SimpleNamespace(debug=lambda *a, **kw: None)
 
         def calculate_percentage(self):
             return 80
@@ -83,6 +86,7 @@ def test_normal_cover_state_apply_max(module):
             self.max_pos = 50
             self.apply_min_position = False
             self.min_pos = 0
+            self.logger = types.SimpleNamespace(debug=lambda *a, **kw: None)
 
         def calculate_percentage(self):
             return 80
