@@ -62,8 +62,11 @@ STRATEGY_MODE_BASIC = "basic"
 STRATEGY_MODES = [STRATEGY_MODE_BASIC]
 
 
-class SensorType:
-    """Possible modes for a number selector."""
+from enum import StrEnum
+
+
+class SensorType(StrEnum):
+    """Supported cover sensor types."""
 
     BLIND = "cover_blind"
     AWNING = "cover_awning"

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import datetime as dt
 
+from .const import SensorType
+
 
 class AdaptiveCoverManager:
     """Track position changes."""
@@ -42,7 +44,7 @@ class AdaptiveCoverManager:
 
         new_state = event.new_state
 
-        if blind_type == "cover_tilt":
+        if blind_type == SensorType.TILT:
             new_position = new_state.attributes.get("current_tilt_position")
         else:
             new_position = new_state.attributes.get("current_position")

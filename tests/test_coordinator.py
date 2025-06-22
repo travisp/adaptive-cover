@@ -6,6 +6,8 @@ import datetime as dt
 import types
 import pytest
 
+from custom_components.simple_auto_cover.const import SensorType
+
 
 @pytest.fixture
 def module(coordinator):
@@ -31,7 +33,7 @@ class HomeAssistant:
         self.config = types.SimpleNamespace(time_zone="UTC")
 
 
-def make_coordinator(module, cover_type="cover_blind"):
+def make_coordinator(module, cover_type: SensorType = SensorType.BLIND):
     """Instantiate a coordinator and its surrounding fixtures."""
     hass = HomeAssistant()
     coord = module.AdaptiveDataUpdateCoordinator.__new__(
@@ -49,13 +51,13 @@ def make_coordinator(module, cover_type="cover_blind"):
 
 def test_get_current_position(module):
     """Verify that the current position is read correctly."""
-    coord, hass = make_coordinator(module, "cover_blind")
+    coord, hass = make_coordinator(module, SensorType.BLIND)
     hass.states["cover.test"] = module.State(
         "cover.test", "open", {"current_position": 40}
     )
     assert coord._get_current_position("cover.test") == 40
 
-    coord._cover_type = "cover_tilt"
+    coord._cover_type = SensorType.TILT
     hass.states["cover.test"] = module.State(
         "cover.test", "open", {"current_tilt_position": 30}
     )
