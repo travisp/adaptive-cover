@@ -24,14 +24,18 @@ async def async_setup_entry(
     async_add_entities([SimpleAutoCoverSelect(entry, coordinator)])
 
 
-class SimpleAutoCoverSelect(CoordinatorEntity[AdaptiveDataUpdateCoordinator], SelectEntity):
+class SimpleAutoCoverSelect(
+    CoordinatorEntity[AdaptiveDataUpdateCoordinator], SelectEntity
+):
     """Select entity to force cover position."""
 
     _attr_options = OPTIONS
     _attr_has_entity_name = True
     _attr_translation_key = FORCE_MODE
 
-    def __init__(self, entry: ConfigEntry, coordinator: AdaptiveDataUpdateCoordinator) -> None:
+    def __init__(
+        self, entry: ConfigEntry, coordinator: AdaptiveDataUpdateCoordinator
+    ) -> None:
         """Initialize the select entity."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_force_mode"

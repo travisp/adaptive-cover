@@ -271,7 +271,6 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         # Update manager with covers
         self._update_manager_and_covers()
 
-
         self.logger.debug("Control method is %s", self.control_method)
 
         # calculate the state of the cover
@@ -311,7 +310,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
             or dt.datetime.now(pytz.UTC).date() != self._sun_start_time.date()
         ):
             self.logger.debug("Calculating solar times")
-            loop = asyncio.get_event_loop()
+            loop = asyncio.get_running_loop()
             start, end = await loop.run_in_executor(None, normal_cover.solar_times)
             self._sun_start_time = start
             self._sun_end_time = end
@@ -705,7 +704,6 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
                 state = 100
         return state
 
-
     @property
     def control_toggle(self):
         """Toggle automation."""
@@ -723,9 +721,6 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
     @manual_toggle.setter
     def manual_toggle(self, value):
         self._manual_toggle = value
-
-
-
 
 
 def inverse_state(state: int) -> int:

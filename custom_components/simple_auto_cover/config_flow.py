@@ -203,7 +203,6 @@ TILT_OPTIONS = vol.Schema(
 ).extend(OPTIONS.schema)
 
 
-
 AUTOMATION_CONFIG = vol.Schema(
     {
         vol.Required(CONF_DELTA_POSITION, default=1): selector.NumberSelector(
@@ -367,9 +366,7 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
             if self.config[CONF_ENABLE_BLIND_SPOT]:
                 return await self.async_step_blind_spot()
             return await self.async_step_automation()
-        return self.async_show_form(
-            step_id="tilt", data_schema=TILT_OPTIONS.schema
-        )
+        return self.async_show_form(step_id="tilt", data_schema=TILT_OPTIONS.schema)
 
     async def async_step_interp(self, user_input: dict[str, Any] | None = None):
         """Show interpolation options."""
@@ -430,7 +427,6 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
             self.config.update(user_input)
             return await self.async_step_update()
         return self.async_show_form(step_id="automation", data_schema=AUTOMATION_CONFIG)
-
 
     async def async_step_update(self, user_input: dict[str, Any] | None = None):
         """Create entry."""
@@ -697,7 +693,6 @@ class OptionsFlowHandler(OptionsFlow):
                 schema, user_input or self.options
             ),
         )
-
 
     async def _update_options(self) -> FlowResult:
         """Update config entry options."""

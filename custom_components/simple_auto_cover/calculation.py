@@ -225,6 +225,7 @@ class NormalCoverState:
             return self.cover.min_pos
         return result
 
+
 @dataclass
 class AdaptiveVerticalCover(AdaptiveGeneralCover):
     """Calculate state for Vertical blinds."""
