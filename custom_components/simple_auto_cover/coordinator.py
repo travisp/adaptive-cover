@@ -125,7 +125,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         self._start_time = None
         self._sun_end_time = None
         self._sun_start_time = None
-        # self._end_time = None
+        self._end_time: dt.datetime | None = None
         self.force_mode = "auto"
         self.manual_reset = self.config_entry.options.get(
             CONF_MANUAL_OVERRIDE_RESET, False
@@ -265,6 +265,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
 
         options = self.config_entry.options
         self._update_options(options)
+        self._update_datetime_objects()
 
         # Get data for the blind
         cover_data = self.get_blind_data(options=options)
@@ -465,6 +466,32 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
             for entity in self.manager.manual_controlled:
                 self.manager.reset(entity)
 
+    def _update_datetime_objects(self) -> None:
+        """Calculate and store start and end time datetimes."""
+        start_time_str = None
+        if self.start_time_entity:
+            start_time_str = get_safe_state(self.hass, self.start_time_entity)
+        elif self.start_time:
+            start_time_str = self.start_time
+
+        self._start_time = (
+            get_datetime_from_str(start_time_str) if start_time_str else None
+        )
+
+        end_time_str = None
+        if self.end_time_entity:
+            end_time_str = get_safe_state(self.hass, self.end_time_entity)
+        elif self.end_time:
+            end_time_str = self.end_time
+
+        if end_time_str:
+            time = get_datetime_from_str(end_time_str)
+            if time and time.time() == dt.time(0, 0):
+                time += dt.timedelta(days=1)
+            self._end_time = time
+        else:
+            self._end_time = None
+
     def get_blind_data(self, options):
         """Assign correct class for type of blind."""
         if self._cover_type == SensorType.BLIND:
@@ -503,40 +530,17 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
 
     @property
     def after_start_time(self):
-        """Check if time is after start time."""
+        """Check if the current time is after the start time."""
+        if self._start_time is None:
+            return True
         now = dt.datetime.now()
-        if self.start_time_entity is not None:
-            time = get_datetime_from_str(
-                get_safe_state(self.hass, self.start_time_entity)
-            )
-            self.logger.debug(
-                "Start time: %s, now: %s, now >= time: %s ", time, now, now >= time
-            )
-            self._start_time = time
-            return now >= time
-        if self.start_time is not None:
-            time = get_datetime_from_str(self.start_time)
-
-            self.logger.debug(
-                "Start time: %s, now: %s, now >= time: %s", time, now, now >= time
-            )
-            self._start_time
-            return now >= time
-        return True
-
-    @property
-    def _end_time(self) -> dt.datetime | None:
-        """Get end time."""
-        time = None
-        if self.end_time_entity is not None:
-            time = get_datetime_from_str(
-                get_safe_state(self.hass, self.end_time_entity)
-            )
-        elif self.end_time is not None:
-            time = get_datetime_from_str(self.end_time)
-            if time.time() == dt.time(0, 0):
-                time = time + dt.timedelta(days=1)
-        return time
+        self.logger.debug(
+            "Start time: %s, now: %s, now >= time: %s",
+            self._start_time,
+            now,
+            now >= self._start_time,
+        )
+        return now >= self._start_time
 
     @property
     def before_end_time(self):

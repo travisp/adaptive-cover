@@ -45,6 +45,8 @@ def make_coordinator(module, cover_type: SensorType = SensorType.BLIND):
     coord.min_change = 10
     coord.time_threshold = 2
     coord.logger = types.SimpleNamespace(debug=lambda *a, **k: None)
+    coord._start_time = None
+    coord._end_time = None
 
     return coord, hass
 
@@ -124,3 +126,15 @@ def test_async_timed_refresh_without_end_time(module):
 
     asyncio.run(coord.async_timed_refresh(None))
     assert coord.timed_refresh is False
+
+
+def test_update_datetime_objects_sets_times(module):
+    """Ensure time strings are parsed and stored."""
+    coord, hass = make_coordinator(module)
+    coord.start_time = "08:00"
+    coord.end_time = "17:00"
+    coord.start_time_entity = None
+    coord.end_time_entity = None
+    coord._update_datetime_objects()
+    assert coord._start_time is not None
+    assert coord._end_time is not None
