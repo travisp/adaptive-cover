@@ -1,3 +1,5 @@
+"""Fixtures and helper utilities for the test suite."""
+
 import sys
 import types
 import math
@@ -23,7 +25,7 @@ numpy_stub.rad2deg = math.degrees
 numpy_stub.arctan = math.atan
 numpy_stub.sqrt = math.sqrt
 numpy_stub.where = lambda cond, a, b: a if cond else b
-numpy_stub.isscalar = lambda obj: isinstance(obj, (int, float, complex))
+numpy_stub.isscalar = lambda obj: isinstance(obj, int | float | complex)
 sys.modules.setdefault("numpy", numpy_stub)
 
 pandas_stub = types.ModuleType("pandas")
@@ -46,6 +48,7 @@ sys.modules.setdefault("dateutil.parser", parser_stub)
 # ---------------------------------------------------------------------------
 
 def import_module(path: str, name: str):
+    """Load ``name`` from the specified ``path``."""
     root = Path(__file__).resolve().parents[1]
     if str(root) not in sys.path:
         sys.path.insert(0, str(root))
@@ -62,6 +65,7 @@ def import_module(path: str, name: str):
 
 @pytest.fixture
 def calculation():
+    """Provide the calculation module used in tests."""
     return import_module(
         "custom_components/simple_auto_cover/calculation.py",
         "custom_components.simple_auto_cover.calculation",
@@ -70,6 +74,7 @@ def calculation():
 
 @pytest.fixture
 def coordinator():
+    """Provide the coordinator module used in tests."""
     return import_module(
         "custom_components/simple_auto_cover/coordinator.py",
         "custom_components.simple_auto_cover.coordinator",
