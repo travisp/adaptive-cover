@@ -7,6 +7,8 @@ import types
 
 import pytest
 
+from custom_components.simple_auto_cover.const import SensorType
+
 
 @pytest.fixture
 def manager_module():
@@ -34,14 +36,14 @@ def make_manager(manager_module, seconds=30):
     return manager_module.AdaptiveCoverManager({"seconds": seconds}, logger)
 
 
-def make_state(entity_id: str, position: int, cover_type="cover"):
+def make_state(entity_id: str, position: int, cover_type: str | SensorType = "cover"):
     """Return a `State` object with the desired position."""
 
     from homeassistant.core import State
 
     attr = {
         "current_tilt_position"
-        if cover_type == "cover_tilt"
+        if cover_type == SensorType.TILT or cover_type == "cover_tilt"
         else "current_position": position
     }
     return State(entity_id, "open", attr, last_updated=dt.datetime.now(dt.UTC))
@@ -64,7 +66,7 @@ def test_handle_state_change_marks_manual(manager_module, state_data_class):
     manager.add_covers({"cover.test"})
     our_state = 10
     event = state_data_class("cover.test", None, make_state("cover.test", 50))
-    manager.handle_state_change(event, our_state, "cover", True, {}, None)
+    manager.handle_state_change(event, our_state, SensorType.BLIND, True, {}, None)
     assert manager.is_cover_manual("cover.test") is True
     assert "cover.test" in manager.manual_control_time
 
@@ -75,7 +77,7 @@ def test_handle_state_change_threshold(manager_module, state_data_class):
     manager.add_covers({"cover.test"})
     our_state = 10
     event = state_data_class("cover.test", None, make_state("cover.test", 12))
-    manager.handle_state_change(event, our_state, "cover", True, {}, 5)
+    manager.handle_state_change(event, our_state, SensorType.BLIND, True, {}, 5)
     assert manager.is_cover_manual("cover.test") is False
 
 
@@ -86,7 +88,7 @@ def test_reset_if_needed(manager_module, state_data_class):
     past_state = make_state("cover.test", 50)
     past_state.last_updated = dt.datetime.now(dt.UTC) - dt.timedelta(seconds=1)
     event = state_data_class("cover.test", None, past_state)
-    manager.handle_state_change(event, 10, "cover", True, {}, None)
+    manager.handle_state_change(event, 10, SensorType.BLIND, True, {}, None)
     assert manager.is_cover_manual("cover.test")
     import asyncio
 

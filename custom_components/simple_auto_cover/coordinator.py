@@ -82,6 +82,7 @@ from .const import (
     CONF_TILT_MODE,
     DOMAIN,
     LOGGER,
+    SensorType,
 )
 from .helpers import get_datetime_from_str, get_last_updated, get_safe_state
 from .cover_manager import AdaptiveCoverManager
@@ -224,7 +225,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         if self.wait_for_target.get(entity_id):
             position = event.new_state.attributes.get(
                 "current_position"
-                if self._cover_type != "cover_tilt"
+                if self._cover_type != SensorType.TILT
                 else "current_tilt_position"
             )
             if position == self.target_call.get(entity_id):
@@ -423,7 +424,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
             service_data = {}
             service_data[ATTR_ENTITY_ID] = entity
 
-            if self._cover_type == "cover_tilt":
+            if self._cover_type == SensorType.TILT:
                 service = SERVICE_SET_COVER_TILT_POSITION
                 service_data[ATTR_TILT_POSITION] = state
             else:
@@ -466,7 +467,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
 
     def get_blind_data(self, options):
         """Assign correct class for type of blind."""
-        if self._cover_type == "cover_blind":
+        if self._cover_type == SensorType.BLIND:
             cover_data = AdaptiveVerticalCover(
                 self.hass,
                 self.logger,
@@ -474,7 +475,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
                 *self.common_data(options),
                 *self.vertical_data(options),
             )
-        if self._cover_type == "cover_awning":
+        if self._cover_type == SensorType.AWNING:
             cover_data = AdaptiveHorizontalCover(
                 self.hass,
                 self.logger,
@@ -483,7 +484,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
                 *self.vertical_data(options),
                 *self.horizontal_data(options),
             )
-        if self._cover_type == "cover_tilt":
+        if self._cover_type == SensorType.TILT:
             cover_data = AdaptiveTiltCover(
                 self.hass,
                 self.logger,
@@ -553,7 +554,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
 
     def _get_current_position(self, entity) -> int | None:
         """Get current position of cover."""
-        if self._cover_type == "cover_tilt":
+        if self._cover_type == SensorType.TILT:
             return state_attr(self.hass, entity, "current_tilt_position")
         return state_attr(self.hass, entity, "current_position")
 
