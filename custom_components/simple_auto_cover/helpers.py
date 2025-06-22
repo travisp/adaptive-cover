@@ -23,5 +23,3 @@ def get_last_updated(entity_id: str, hass: HomeAssistant):
     if entity_id is not None:
         if hass.states.get(entity_id):
             return hass.states.get(entity_id).last_updated
-
-

@@ -126,4 +126,3 @@ class AdaptiveCoverManager:
     def manual_controlled(self) -> list[str]:
         """Get the list of covers under manual control."""
         return [k for k, v in self.manual_control.items() if v]
-
