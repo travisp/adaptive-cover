@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime as dt
+from homeassistant.util import dt as dt_util
 
 from .const import SensorType
 
@@ -99,7 +100,7 @@ class AdaptiveCoverManager:
 
     async def reset_if_needed(self) -> None:
         """Reset manual control state of the covers."""
-        current_time = dt.datetime.now(dt.UTC)
+        current_time = dt_util.utcnow()
         manual_control_time_copy = dict(self.manual_control_time)
         for entity_id, last_updated in manual_control_time_copy.items():
             if current_time - last_updated > self.reset_duration:

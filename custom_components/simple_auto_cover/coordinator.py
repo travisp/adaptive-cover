@@ -7,7 +7,7 @@ import datetime as dt
 from dataclasses import dataclass
 
 import numpy as np
-import pytz
+from homeassistant.util import dt as dt_util
 from homeassistant.components.cover import DOMAIN as COVER_DOMAIN
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -300,7 +300,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         if (
             self.first_refresh
             or self._sun_start_time is None
-            or dt.datetime.now(pytz.UTC).date() != self._sun_start_time.date()
+            or dt_util.utcnow().date() != self._sun_start_time.date()
         ):
             self.logger.debug("Calculating solar times")
             loop = asyncio.get_running_loop()
@@ -598,7 +598,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
 
     def check_time_delta(self, entity):
         """Check if time delta is passed."""
-        now = dt.datetime.now(dt.UTC)
+        now = dt_util.utcnow()
         last_updated = get_last_updated(entity, self.hass)
         if last_updated is not None:
             condition = now - last_updated >= dt.timedelta(minutes=self.time_threshold)
