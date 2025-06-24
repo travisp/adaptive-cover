@@ -60,8 +60,6 @@ from .const import (
     COVER_TYPE_DISPLAY,
     SensorType,
     CONF_MIN_POSITION,
-    CONF_ENABLE_MAX_POSITION,
-    CONF_ENABLE_MIN_POSITION,
 )
 
 # DEFAULT_NAME = "Simple Auto Cover"
@@ -96,11 +94,9 @@ OPTIONS = vol.Schema(
         vol.Optional(CONF_MAX_POSITION): vol.All(
             vol.Coerce(int), vol.Range(min=1, max=100)
         ),
-        vol.Optional(CONF_ENABLE_MAX_POSITION, default=False): bool,
         vol.Optional(CONF_MIN_POSITION): vol.All(
             vol.Coerce(int), vol.Range(min=0, max=99)
         ),
-        vol.Optional(CONF_ENABLE_MIN_POSITION, default=False): bool,
         vol.Optional(CONF_MIN_ELEVATION): vol.All(
             vol.Coerce(int), vol.Range(min=0, max=90)
         ),
