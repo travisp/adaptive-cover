@@ -54,8 +54,8 @@ class TestVerticalCover:
             "h_def": 0,
             "max_pos": 100,
             "min_pos": 0,
-            "max_pos_bool": False,
-            "min_pos_bool": False,
+            "apply_max_limit_on_sun": False,
+            "apply_min_limit_on_sun": False,
             "blind_spot_left": None,
             "blind_spot_right": None,
             "blind_spot_elevation": None,
@@ -67,7 +67,19 @@ class TestVerticalCover:
             "logger": types.SimpleNamespace(debug=lambda *a, **k: None),
         }
         defaults.update(kwargs)
-        cover = DummyCover(**defaults)
+        config_kwargs = {
+            key: defaults[key]
+            for key in module.CoverConfig.__dataclass_fields__
+            if key in defaults
+        }
+        config = module.CoverConfig(**config_kwargs)
+        cover = DummyCover(
+            defaults["hass"],
+            defaults["logger"],
+            defaults["sol_azi"],
+            defaults["sol_elev"],
+            config,
+        )
         cover.sun_data = None
         return cover
 

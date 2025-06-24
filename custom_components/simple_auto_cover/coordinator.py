@@ -7,11 +7,12 @@ import datetime as dt
 from dataclasses import dataclass
 
 import numpy as np
-import pytz
+from homeassistant.util import dt as dt_util
 from homeassistant.components.cover import DOMAIN as COVER_DOMAIN
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_ENTITY_ID,
+    CONF_NAME,
     SERVICE_SET_COVER_POSITION,
     SERVICE_SET_COVER_TILT_POSITION,
 )
@@ -33,6 +34,7 @@ from .calculation import (
     AdaptiveTiltCover,
     AdaptiveVerticalCover,
     NormalCoverState,
+    CoverConfig,
 )
 from .const import (
     _LOGGER,
@@ -48,6 +50,8 @@ from .const import (
     CONF_DELTA_TIME,
     CONF_DISTANCE,
     CONF_ENABLE_BLIND_SPOT,
+    CONF_ENABLE_MAX_POSITION,
+    CONF_ENABLE_MIN_POSITION,
     CONF_END_ENTITY,
     CONF_END_TIME,
     CONF_ENTITIES,
@@ -69,6 +73,8 @@ from .const import (
     CONF_MAX_POSITION,
     CONF_MIN_ELEVATION,
     CONF_MIN_POSITION,
+    CONF_ENABLE_MAX_POSITION,
+    CONF_ENABLE_MIN_POSITION,
     CONF_RETURN_SUNSET,
     CONF_START_ENTITY,
     CONF_START_TIME,
@@ -78,6 +84,7 @@ from .const import (
     CONF_TILT_DEPTH,
     CONF_TILT_DISTANCE,
     CONF_TILT_MODE,
+    CONF_SENSOR_TYPE,
     DOMAIN,
     LOGGER,
     SensorType,
@@ -113,8 +120,8 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         super().__init__(hass, LOGGER, name=DOMAIN)
 
         self.logger = ConfigContextAdapter(_LOGGER)
-        self.logger.set_config_name(self.config_entry.data.get("name"))
-        self._cover_type = self.config_entry.data.get("sensor_type")
+        self.logger.set_config_name(self.config_entry.data.get(CONF_NAME))
+        self._cover_type = self.config_entry.data.get(CONF_SENSOR_TYPE)
         self._inverse_state = self.config_entry.options.get(CONF_INVERSE_STATE, False)
         self._use_interpolation = self.config_entry.options.get(CONF_INTERP, False)
         self._track_end_time = self.config_entry.options.get(CONF_RETURN_SUNSET)
@@ -300,7 +307,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         if (
             self.first_refresh
             or self._sun_start_time is None
-            or dt.datetime.now(pytz.UTC).date() != self._sun_start_time.date()
+            or dt_util.utcnow().date() != self._sun_start_time.date()
         ):
             self.logger.debug("Calculating solar times")
             loop = asyncio.get_running_loop()
@@ -496,30 +503,32 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
 
     def get_blind_data(self, options):
         """Assign correct class for type of blind."""
+        config = CoverConfig()
+        self.common_data(options, config)
         if self._cover_type == SensorType.BLIND:
+            self.vertical_data(options, config)
             cover_data = AdaptiveVerticalCover(
                 self.hass,
                 self.logger,
                 *self.pos_sun,
-                *self.common_data(options),
-                *self.vertical_data(options),
+                config,
             )
         if self._cover_type == SensorType.AWNING:
+            self.vertical_data(options, config)
+            self.horizontal_data(options, config)
             cover_data = AdaptiveHorizontalCover(
                 self.hass,
                 self.logger,
                 *self.pos_sun,
-                *self.common_data(options),
-                *self.vertical_data(options),
-                *self.horizontal_data(options),
+                config,
             )
         if self._cover_type == SensorType.TILT:
+            self.tilt_data(options, config)
             cover_data = AdaptiveTiltCover(
                 self.hass,
                 self.logger,
                 *self.pos_sun,
-                *self.common_data(options),
-                *self.tilt_data(options),
+                config,
             )
         return cover_data
 
@@ -598,7 +607,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
 
     def check_time_delta(self, entity):
         """Check if time delta is passed."""
-        now = dt.datetime.now(dt.UTC)
+        now = dt_util.utcnow()
         last_updated = get_last_updated(entity, self.hass)
         if last_updated is not None:
             condition = now - last_updated >= dt.timedelta(minutes=self.time_threshold)
@@ -620,48 +629,48 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
             state_attr(self.hass, "sun.sun", "elevation"),
         ]
 
-    def common_data(self, options):
+    def common_data(self, options, config):
         """Update shared parameters."""
-        return [
-            options.get(CONF_SUNSET_POS),
-            options.get(CONF_SUNSET_OFFSET),
-            options.get(CONF_SUNRISE_OFFSET, options.get(CONF_SUNSET_OFFSET)),
-            self.hass.config.time_zone,
-            options.get(CONF_FOV_LEFT),
-            options.get(CONF_FOV_RIGHT),
-            options.get(CONF_AZIMUTH),
-            options.get(CONF_DEFAULT_HEIGHT),
-            options.get(CONF_MAX_POSITION),
-            options.get(CONF_MIN_POSITION),
-            options.get(CONF_BLIND_SPOT_LEFT),
-            options.get(CONF_BLIND_SPOT_RIGHT),
-            options.get(CONF_BLIND_SPOT_ELEVATION),
-            options.get(CONF_ENABLE_BLIND_SPOT, False),
-            options.get(CONF_MIN_ELEVATION, None),
-            options.get(CONF_MAX_ELEVATION, None),
-        ]
+        config.sunset_pos = options.get(CONF_SUNSET_POS)
+        config.sunset_off = options.get(CONF_SUNSET_OFFSET)
+        config.sunrise_off = options.get(
+            CONF_SUNRISE_OFFSET, options.get(CONF_SUNSET_OFFSET)
+        )
+        config.timezone = self.hass.config.time_zone
+        config.fov_left = options.get(CONF_FOV_LEFT)
+        config.fov_right = options.get(CONF_FOV_RIGHT)
+        config.win_azi = options.get(CONF_AZIMUTH)
+        config.h_def = options.get(CONF_DEFAULT_HEIGHT)
+        config.max_pos = options.get(CONF_MAX_POSITION)
+        config.min_pos = options.get(CONF_MIN_POSITION)
+        config.apply_max_limit_on_sun = options.get(CONF_ENABLE_MAX_POSITION, False)
+        config.apply_min_limit_on_sun = options.get(CONF_ENABLE_MIN_POSITION, False)
+        config.blind_spot_left = options.get(CONF_BLIND_SPOT_LEFT)
+        config.blind_spot_right = options.get(CONF_BLIND_SPOT_RIGHT)
+        config.blind_spot_elevation = options.get(CONF_BLIND_SPOT_ELEVATION)
+        config.blind_spot_on = options.get(CONF_ENABLE_BLIND_SPOT, False)
+        config.min_elevation = options.get(CONF_MIN_ELEVATION, None)
+        config.max_elevation = options.get(CONF_MAX_ELEVATION, None)
+        return config
 
-    def vertical_data(self, options):
+    def vertical_data(self, options, config):
         """Update data for vertical blinds."""
-        return [
-            options.get(CONF_DISTANCE),
-            options.get(CONF_HEIGHT_WIN),
-        ]
+        config.distance = options.get(CONF_DISTANCE)
+        config.h_win = options.get(CONF_HEIGHT_WIN)
+        return config
 
-    def horizontal_data(self, options):
+    def horizontal_data(self, options, config):
         """Update data for horizontal blinds."""
-        return [
-            options.get(CONF_LENGTH_AWNING),
-            options.get(CONF_AWNING_ANGLE),
-        ]
+        config.awn_length = options.get(CONF_LENGTH_AWNING)
+        config.awn_angle = options.get(CONF_AWNING_ANGLE)
+        return config
 
-    def tilt_data(self, options):
+    def tilt_data(self, options, config):
         """Update data for tilted blinds."""
-        return [
-            options.get(CONF_TILT_DISTANCE),
-            options.get(CONF_TILT_DEPTH),
-            options.get(CONF_TILT_MODE),
-        ]
+        config.slat_distance = options.get(CONF_TILT_DISTANCE)
+        config.depth = options.get(CONF_TILT_DEPTH)
+        config.mode = options.get(CONF_TILT_MODE)
+        return config
 
     @property
     def state(self) -> int:
