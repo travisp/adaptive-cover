@@ -14,6 +14,7 @@ from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import selector
 
+from homeassistant.const import CONF_NAME
 from .const import (
     CONF_AWNING_ANGLE,
     CONF_AZIMUTH,
@@ -58,8 +59,11 @@ from .const import (
     CONF_TILT_MODE,
     DOMAIN,
     COVER_TYPE_DISPLAY,
+    STRATEGY_MODE_BASIC,
     SensorType,
     CONF_MIN_POSITION,
+    CONF_ENABLE_MAX_POSITION,
+    CONF_ENABLE_MIN_POSITION,
 )
 
 # DEFAULT_NAME = "Simple Auto Cover"
@@ -69,7 +73,7 @@ SENSOR_TYPE_MENU = [SensorType.BLIND, SensorType.AWNING, SensorType.TILT]
 
 CONFIG_SCHEMA = vol.Schema(
     {
-        vol.Required("name"): selector.TextSelector(),
+        vol.Required(CONF_NAME): selector.TextSelector(),
         vol.Optional(CONF_MODE): selector.SelectSelector(
             selector.SelectSelectorConfig(
                 options=SENSOR_TYPE_MENU, translation_key="mode"
@@ -94,9 +98,11 @@ OPTIONS = vol.Schema(
         vol.Optional(CONF_MAX_POSITION): vol.All(
             vol.Coerce(int), vol.Range(min=1, max=100)
         ),
+        vol.Optional(CONF_ENABLE_MAX_POSITION, default=False): bool,
         vol.Optional(CONF_MIN_POSITION): vol.All(
             vol.Coerce(int), vol.Range(min=0, max=99)
         ),
+        vol.Optional(CONF_ENABLE_MIN_POSITION, default=False): bool,
         vol.Optional(CONF_MIN_ELEVATION): vol.All(
             vol.Coerce(int), vol.Range(min=0, max=90)
         ),
@@ -275,7 +281,7 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
         super().__init__()
         self.type_blind: str | None = None
         self.config: dict[str, Any] = {}
-        self.mode: str = "basic"
+        self.mode: str = STRATEGY_MODE_BASIC
 
     @staticmethod
     @callback
@@ -417,9 +423,9 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
     async def async_step_update(self, user_input: dict[str, Any] | None = None):
         """Create entry."""
         return self.async_create_entry(
-            title=f"{COVER_TYPE_DISPLAY[self.type_blind]} {self.config['name']}",
+            title=f"{COVER_TYPE_DISPLAY[self.type_blind]} {self.config[CONF_NAME]}",
             data={
-                "name": self.config["name"],
+                CONF_NAME: self.config[CONF_NAME],
                 CONF_SENSOR_TYPE: self.type_blind,
             },
             options={
