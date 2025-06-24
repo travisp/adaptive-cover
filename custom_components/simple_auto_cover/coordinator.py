@@ -7,7 +7,7 @@ import datetime as dt
 from dataclasses import dataclass
 
 import numpy as np
-import pytz
+from homeassistant.util import dt as dt_util
 from homeassistant.components.cover import DOMAIN as COVER_DOMAIN
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -297,21 +297,14 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
             await self.async_timed_end_time()
 
         # Handle types of changes
-        if self.state_change:
-            await self.async_handle_state_change(state, options)
-        if self.cover_state_change:
-            await self.async_handle_cover_state_change(state)
-        if self.first_refresh:
-            await self.async_handle_first_refresh(state, options)
-        if self.timed_refresh:
-            await self.async_handle_timed_refresh(options)
+        await self.async_handle_changes(state, options)
 
         normal_cover = self.normal_cover_state.cover
         # Run the solar_times method in a separate thread
         if (
             self.first_refresh
             or self._sun_start_time is None
-            or dt.datetime.now(pytz.UTC).date() != self._sun_start_time.date()
+            or dt_util.utcnow().date() != self._sun_start_time.date()
         ):
             self.logger.debug("Calculating solar times")
             loop = asyncio.get_running_loop()
@@ -346,7 +339,18 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
             },
         )
 
-    async def async_handle_state_change(self, state: int, options):
+    async def async_handle_changes(self, state: int, options) -> None:
+        """Dispatch handling for the different update scenarios."""
+        if self.state_change:
+            await self.async_handle_state_change(state, options)
+        if self.cover_state_change:
+            await self.async_handle_cover_state_change(state)
+        if self.first_refresh:
+            await self.async_handle_first_refresh(state, options)
+        if self.timed_refresh:
+            await self.async_handle_timed_refresh(options)
+
+    async def async_handle_state_change(self, state: int, options) -> None:
         """Handle state change from tracked entities."""
         if self.control_toggle:
             for cover in self.entities:
@@ -356,7 +360,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         self.state_change = False
         self.logger.debug("State change handled")
 
-    async def async_handle_cover_state_change(self, state: int):
+    async def async_handle_cover_state_change(self, state: int) -> None:
         """Handle state change from assigned covers."""
         if self.manual_toggle and self.control_toggle:
             self.manager.handle_state_change(
@@ -370,7 +374,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         self.cover_state_change = False
         self.logger.debug("Cover state change handled")
 
-    async def async_handle_first_refresh(self, state: int, options):
+    async def async_handle_first_refresh(self, state: int, options) -> None:
         """Handle first refresh."""
         if self.control_toggle:
             for cover in self.entities:
@@ -385,7 +389,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         self.first_refresh = False
         self.logger.debug("First refresh handled")
 
-    async def async_handle_timed_refresh(self, options):
+    async def async_handle_timed_refresh(self, options) -> None:
         """Handle timed refresh."""
         self.logger.debug(
             "This is a timed refresh, using sunset position: %s",
@@ -406,8 +410,8 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         self.timed_refresh = False
         self.logger.debug("Timed refresh handled")
 
-    async def async_handle_call_service(self, entity, state: int, options):
-        """Handle call service."""
+    async def async_handle_call_service(self, entity, state: int, options) -> None:
+        """Call the appropriate service for state changes."""
         if (
             self.check_adaptive_time
             and self.check_position_delta(entity, state, options)
@@ -598,7 +602,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
 
     def check_time_delta(self, entity):
         """Check if time delta is passed."""
-        now = dt.datetime.now(dt.UTC)
+        now = dt_util.utcnow()
         last_updated = get_last_updated(entity, self.hass)
         if last_updated is not None:
             condition = now - last_updated >= dt.timedelta(minutes=self.time_threshold)

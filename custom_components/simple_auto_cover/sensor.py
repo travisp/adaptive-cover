@@ -170,7 +170,6 @@ class AdaptiveCoverTimeSensorEntity(AdaptiveCoverEntity, SensorEntity):
         return self.data.states[self.key]
 
 
-
 class AdaptiveCoverControlSensorEntity(AdaptiveCoverEntity, SensorEntity):
     """Simple Auto Cover Control method Sensor."""
 
@@ -219,4 +218,3 @@ class AdaptiveCoverControlSensorEntity(AdaptiveCoverEntity, SensorEntity):
     def native_value(self) -> str | None:
         """Handle when entity is added."""
         return self.data.states["control"]
-

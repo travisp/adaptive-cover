@@ -1,18 +1,10 @@
 """Tests for the config flow helpers."""
 
-import importlib
-import sys
-from pathlib import Path
 import pytest
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-for mod in ["numpy", "pandas", "pytz", "dateutil", "dateutil.parser"]:
-    sys.modules.pop(mod, None)
-importlib.invalidate_caches()
 
 try:
     import custom_components.simple_auto_cover.config_flow as cf
-except Exception as exc:
+except Exception as exc:  # pragma: no cover - import failure should fail test
     pytest.fail(f"Failed to import config flow: {exc}")
 
 
@@ -55,17 +47,23 @@ class DummyFlow(cf.ConfigFlowHandler):
     async def async_step_interp(self):
         """Handle the interpolation step."""
         self.called.append("interp")
-        return self.async_show_form(step_id="interp", data_schema=cf.INTERPOLATION_OPTIONS)
+        return self.async_show_form(
+            step_id="interp", data_schema=cf.INTERPOLATION_OPTIONS
+        )
 
     async def async_step_blind_spot(self):
         """Handle the blind spot configuration step."""
         self.called.append("blind_spot")
-        return self.async_show_form(step_id="blind_spot", data_schema=cf.AUTOMATION_CONFIG)
+        return self.async_show_form(
+            step_id="blind_spot", data_schema=cf.AUTOMATION_CONFIG
+        )
 
     async def async_step_automation(self):
         """Handle the automation configuration step."""
         self.called.append("automation")
-        return self.async_show_form(step_id="automation", data_schema=cf.AUTOMATION_CONFIG)
+        return self.async_show_form(
+            step_id="automation", data_schema=cf.AUTOMATION_CONFIG
+        )
 
 
 @pytest.mark.asyncio
@@ -102,4 +100,23 @@ async def test_blind_step_validation():
     }
     result = await handler.async_step_vertical(data)
     assert result["type"] == "form"
-    assert result["errors"] == {cf.CONF_MAX_ELEVATION: "Must be greater than 'Minimal Elevation'"}
+    assert result["errors"] == {
+        cf.CONF_MAX_ELEVATION: "Must be greater than 'Minimal Elevation'"
+    }
+
+
+def test_validate_elevation_range():
+    """Verify the helper correctly compares min and max elevation."""
+    params = {
+        (10, 5): True,
+        (5, 10): False,
+        (None, 5): True,
+        (10, None): True,
+    }
+    for (max_elev, min_elev), expected in params.items():
+        data = {}
+        if max_elev is not None:
+            data[cf.CONF_MAX_ELEVATION] = max_elev
+        if min_elev is not None:
+            data[cf.CONF_MIN_ELEVATION] = min_elev
+        assert cf._validate_elevation_range(data) is expected

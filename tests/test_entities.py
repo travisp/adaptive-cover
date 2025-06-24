@@ -89,6 +89,7 @@ def make_entry(*, name="Test", sensor_type=None):
         entry_id="1",
     )
 
+
 def test_base_entity_initialization(entity_module):
     """Ensure base entity is initialized with the correct attributes."""
     entry = make_entry()
@@ -136,10 +137,16 @@ def test_binary_sensor_is_on(entity_module, binary_sensor_module):
 def test_sensor_native_value(entity_module, sensor_module):
     """Validate sensor entities expose the expected values."""
     entry = make_entry()
-    states = {"state": 55, "start": "2025-01-01", "end": "2025-01-02", "control": "auto"}
+    states = {
+        "state": 55,
+        "start": "2025-01-01",
+        "end": "2025-01-02",
+        "control": "auto",
+    }
     coord = DummyCoordinator(states=states, attrs={"foo": "bar"})
 
     sensor = sensor_module.AdaptiveCoverSensorEntity("uid", None, entry, entry.data[CONF_NAME], coord)
+
     assert sensor.native_value == 55
     assert sensor.extra_state_attributes == {"foo": "bar"}
 
@@ -156,6 +163,7 @@ def test_sensor_native_value(entity_module, sensor_module):
     assert time_sensor.native_value == states["start"]
 
     control_sensor = sensor_module.AdaptiveCoverControlSensorEntity("uid", None, entry, entry.data[CONF_NAME], coord)
+    
     assert control_sensor.native_value == "auto"
 
 
@@ -163,7 +171,9 @@ def test_switch_initial_state(entity_module, switch_module):
     """Check initial attributes of the manual override switch."""
     entry = make_entry()
     coord = DummyCoordinator()
-    switch = switch_module.AdaptiveCoverSwitch(entry, "uid", "Manual", True, "manual_toggle", coord)
+    switch = switch_module.AdaptiveCoverSwitch(
+        entry, "uid", "Manual", True, "manual_toggle", coord
+    )
 
     assert isinstance(switch, entity_module.AdaptiveCoverEntity)
     assert switch.name == "Manual " + entry.data[CONF_NAME]

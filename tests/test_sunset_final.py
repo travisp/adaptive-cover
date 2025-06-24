@@ -18,6 +18,7 @@ def make_sundata(sunset, sunrise):
 
 def patch_time(monkeypatch, module, new_time):
     """Patch ``datetime.utcnow`` for the calculation module."""
+
     class FixedDateTime(dt.datetime):
         @classmethod
         def utcnow(cls):
@@ -32,11 +33,13 @@ class TestVerticalCover:
     @staticmethod
     def make_cover(module, **kwargs):
         """Construct a dummy cover using the provided ``module``."""
+
         class DummyCover(module.AdaptiveVerticalCover):
             __test__ = False
 
             def __post_init__(self):
                 pass
+
         defaults = {
             "hass": None,
             "sol_azi": 0,

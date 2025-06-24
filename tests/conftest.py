@@ -1,44 +1,10 @@
 """Fixtures and helper utilities for the test suite."""
 
 import sys
-import types
-import math
-import datetime as dt
 from pathlib import Path
 from importlib import util
+
 import pytest
-
-# ---------------------------------------------------------------------------
-# Minimal stubs for third party dependencies (numpy, pandas, pytz, dateutil)
-# ---------------------------------------------------------------------------
-
-numpy_stub = types.ModuleType("numpy")
-numpy_stub.interp = (
-    lambda x, xp, fp: fp[0] + (fp[1] - fp[0]) * (x - xp[0]) / (xp[1] - xp[0])
-    if xp[1] - xp[0]
-    else fp[0]
-)
-numpy_stub.cos = math.cos
-numpy_stub.sin = math.sin
-numpy_stub.tan = math.tan
-numpy_stub.clip = lambda x, low, high: max(min(x, high), low)
-numpy_stub.radians = math.radians
-numpy_stub.rad2deg = math.degrees
-numpy_stub.arctan = math.atan
-numpy_stub.sqrt = math.sqrt
-numpy_stub.where = lambda cond, a, b: a if cond else b
-numpy_stub.isscalar = lambda obj: isinstance(obj, int | float | complex)
-
-pandas_stub = types.ModuleType("pandas")
-pandas_stub.DatetimeIndex = list
-
-pytz_stub = types.ModuleType("pytz")
-pytz_stub.UTC = dt.UTC
-
-dateutil = types.ModuleType("dateutil")
-parser_stub = types.ModuleType("dateutil.parser")
-parser_stub.parse = lambda *a, **k: dt.datetime.now(dt.UTC)
-dateutil.parser = parser_stub
 
 
 # ---------------------------------------------------------------------------
@@ -58,24 +24,8 @@ def import_module(path: str, name: str):
     module = util.module_from_spec(spec)
     assert spec.loader is not None
 
-    stubs = {
-        "numpy": numpy_stub,
-        "pandas": pandas_stub,
-        "pytz": pytz_stub,
-        "dateutil": dateutil,
-        "dateutil.parser": parser_stub,
-    }
-    originals = {k: sys.modules.get(k) for k in stubs}
-    sys.modules.update(stubs)
-    try:
-        sys.modules[spec.name] = module
-        spec.loader.exec_module(module)
-    finally:
-        for key, mod in originals.items():
-            if mod is None:
-                sys.modules.pop(key, None)
-            else:
-                sys.modules[key] = mod
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
     return module
 
 

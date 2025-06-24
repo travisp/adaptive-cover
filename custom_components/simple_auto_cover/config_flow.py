@@ -265,6 +265,15 @@ def _get_azimuth_edges(data) -> tuple[int, int]:
     return data[CONF_FOV_LEFT] + data[CONF_FOV_RIGHT]
 
 
+def _validate_elevation_range(user_input: dict[str, Any]) -> bool:
+    """Return True if max elevation is greater than min elevation."""
+    return not (
+        user_input.get(CONF_MAX_ELEVATION) is not None
+        and user_input.get(CONF_MIN_ELEVATION) is not None
+        and user_input[CONF_MAX_ELEVATION] <= user_input[CONF_MIN_ELEVATION]
+    )
+
+
 class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
     """Handle ConfigFlow."""
 
@@ -291,12 +300,7 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
         self.type_blind = sensor_type
 
         if user_input is not None:
-            if (
-                user_input.get(CONF_MAX_ELEVATION) is not None
-                and user_input.get(CONF_MIN_ELEVATION) is not None
-                and user_input[CONF_MAX_ELEVATION]
-                <= user_input[CONF_MIN_ELEVATION]
-            ):
+            if not _validate_elevation_range(user_input):
                 return self.async_show_form(
                     step_id=step_id,
                     data_schema=schema,
@@ -530,18 +534,14 @@ class OptionsFlowHandler(OptionsFlow):
                 CONF_MAX_ELEVATION,
             ]
             self.optional_entities(keys, user_input)
-            if (
-                user_input.get(CONF_MAX_ELEVATION) is not None
-                and user_input.get(CONF_MIN_ELEVATION) is not None
-            ):
-                if user_input[CONF_MAX_ELEVATION] <= user_input[CONF_MIN_ELEVATION]:
-                    return self.async_show_form(
-                        step_id="vertical",
-                        data_schema=VERTICAL_OPTIONS.schema,
-                        errors={
-                            CONF_MAX_ELEVATION: "Must be greater than 'Minimal Elevation'"
-                        },
-                    )
+            if not _validate_elevation_range(user_input):
+                return self.async_show_form(
+                    step_id="vertical",
+                    data_schema=VERTICAL_OPTIONS.schema,
+                    errors={
+                        CONF_MAX_ELEVATION: "Must be greater than 'Minimal Elevation'"
+                    },
+                )
             self.options.update(user_input)
             if self.options.get(CONF_INTERP, False):
                 return await self.async_step_interp()
@@ -565,18 +565,14 @@ class OptionsFlowHandler(OptionsFlow):
                 CONF_MAX_ELEVATION,
             ]
             self.optional_entities(keys, user_input)
-            if (
-                user_input.get(CONF_MAX_ELEVATION) is not None
-                and user_input.get(CONF_MIN_ELEVATION) is not None
-            ):
-                if user_input[CONF_MAX_ELEVATION] <= user_input[CONF_MIN_ELEVATION]:
-                    return self.async_show_form(
-                        step_id="horizontal",
-                        data_schema=HORIZONTAL_OPTIONS.schema,
-                        errors={
-                            CONF_MAX_ELEVATION: "Must be greater than 'Minimal Elevation'"
-                        },
-                    )
+            if not _validate_elevation_range(user_input):
+                return self.async_show_form(
+                    step_id="horizontal",
+                    data_schema=HORIZONTAL_OPTIONS.schema,
+                    errors={
+                        CONF_MAX_ELEVATION: "Must be greater than 'Minimal Elevation'"
+                    },
+                )
             self.options.update(user_input)
             return await self._update_options()
         return self.async_show_form(
@@ -596,18 +592,14 @@ class OptionsFlowHandler(OptionsFlow):
                 CONF_MAX_ELEVATION,
             ]
             self.optional_entities(keys, user_input)
-            if (
-                user_input.get(CONF_MAX_ELEVATION) is not None
-                and user_input.get(CONF_MIN_ELEVATION) is not None
-            ):
-                if user_input[CONF_MAX_ELEVATION] <= user_input[CONF_MIN_ELEVATION]:
-                    return self.async_show_form(
-                        step_id="tilt",
-                        data_schema=TILT_OPTIONS.schema,
-                        errors={
-                            CONF_MAX_ELEVATION: "Must be greater than 'Minimal Elevation'"
-                        },
-                    )
+            if not _validate_elevation_range(user_input):
+                return self.async_show_form(
+                    step_id="tilt",
+                    data_schema=TILT_OPTIONS.schema,
+                    errors={
+                        CONF_MAX_ELEVATION: "Must be greater than 'Minimal Elevation'"
+                    },
+                )
             self.options.update(user_input)
             return await self._update_options()
         return self.async_show_form(

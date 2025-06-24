@@ -30,4 +30,3 @@ class AdaptiveCoverEntity(CoordinatorEntity[AdaptiveDataUpdateCoordinator]):
             identifiers={(DOMAIN, self._device_id)},
             name=self._device_name,
         )
-

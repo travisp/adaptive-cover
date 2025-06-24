@@ -47,7 +47,6 @@ version-resolver:
       - "dependencies"
       - "📚 documentation"
       - "enhancement"
-      - "blueprint"
       - "📈 performance"
       - "refactor"
   default: patch

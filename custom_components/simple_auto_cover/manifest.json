@@ -1,12 +1,12 @@
 {
   "domain": "simple_auto_cover",
   "name": "Simple Auto Cover",
-  "codeowners": ["@basbruss"],
+  "codeowners": ["@travisp"],
   "config_flow": true,
   "dependencies": ["sun"],
-  "documentation": "https://github.com/basbruss/adaptive-cover",
+  "documentation": "https://github.com/travisp/adaptive-cover",
   "iot_class": "calculated",
-  "issue_tracker": "https://github.com/basbruss/adaptive-cover/issues",
+  "issue_tracker": "https://github.com/travisp/adaptive-cover/issues",
   "requirements": ["astral", "pandas"],
   "version": "0.3.0b0"
 }
