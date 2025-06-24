@@ -1,8 +1,7 @@
 """Fetch sun data."""
 
 from datetime import date, datetime, timedelta
-
-import pandas as pd
+from zoneinfo import ZoneInfo
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.sun import get_astral_location
 
@@ -15,17 +14,21 @@ class SunData:
         location, elevation = get_astral_location(self.hass)
         self.location = location  # astral.location.Location
         self.elevation = elevation
-        self.timezone = timezone
+        self.timezone = ZoneInfo(str(timezone))
 
     @property
-    def times(self) -> pd.DatetimeIndex:
-        """Define time interval."""
+    def times(self) -> list[datetime]:
+        """Return 5 minute intervals from midnight today to tomorrow."""
         start_date = date.today()
         end_date = start_date + timedelta(days=1)
+        start_time = datetime.combine(start_date, datetime.min.time(), tzinfo=self.timezone)
+        end_time = datetime.combine(end_date, datetime.min.time(), tzinfo=self.timezone)
 
-        times = pd.date_range(
-            start=start_date, end=end_date, freq="5min", tz=self.timezone, name="time"
-        )
+        times = []
+        current_time = start_time
+        while current_time <= end_time:
+            times.append(current_time)
+            current_time += timedelta(minutes=5)
         return times
 
     @property

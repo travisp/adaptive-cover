@@ -5,7 +5,6 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
 import numpy as np
-import pandas as pd
 from homeassistant.core import HomeAssistant
 from numpy import cos, sin, tan
 from numpy import radians as rad
@@ -111,28 +110,21 @@ class AdaptiveGeneralCover(ABC):
         self.sun_data = SunData(self.timezone, self.hass)
 
     def solar_times(self):
-        """Determine start/end times."""
-        df_today = pd.DataFrame(
-            {
-                "azimuth": self.sun_data.solar_azimuth,
-                "elevation": self.sun_data.solar_elevation,
-            }
-        )
-        solpos = df_today.set_index(self.sun_data.times)
+        """Determine the first and last valid sun positions."""
+        times = self.sun_data.times
+        azimuths = self.sun_data.solar_azimuth
+        elevations = self.sun_data.solar_elevation
 
-        alpha = solpos["azimuth"]
-        frame = (
-            (alpha - self.azi_min_abs) % 360
-            <= (self.azi_max_abs - self.azi_min_abs) % 360
-        ) & (solpos["elevation"] > 0)
+        filtered_times = [
+            t
+            for t, az, el in zip(times, azimuths, elevations)
+            if ((az - self.azi_min_abs) % 360 <= (self.azi_max_abs - self.azi_min_abs) % 360) and el > 0
+        ]
 
-        if solpos[frame].empty:
+        if not filtered_times:
             return None, None
-        else:
-            return (
-                solpos[frame].index[0].to_pydatetime(),
-                solpos[frame].index[-1].to_pydatetime(),
-            )
+
+        return filtered_times[0], filtered_times[-1]
 
     @property
     def _get_azimuth_edges(self) -> tuple[int, int]:
