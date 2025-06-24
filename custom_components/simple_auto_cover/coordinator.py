@@ -696,8 +696,11 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         """Interpolate states."""
         normal_range = [0, 100]
         new_range = []
-        if self.start_value and self.end_value:
-            new_range = [self.start_value, self.end_value]
+        # Allow partial range overrides by falling back to defaults
+        if self.start_value is not None or self.end_value is not None:
+            start = self.start_value if self.start_value is not None else 0
+            end = self.end_value if self.end_value is not None else 100
+            new_range = [start, end]
         if self.normal_list and self.new_list:
             normal_range = list(map(int, self.normal_list))
             new_range = list(map(int, self.new_list))

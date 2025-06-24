@@ -28,22 +28,18 @@ numpy_stub.arctan = math.atan
 numpy_stub.sqrt = math.sqrt
 numpy_stub.where = lambda cond, a, b: a if cond else b
 numpy_stub.isscalar = lambda obj: isinstance(obj, int | float | complex)
-sys.modules.setdefault("numpy", numpy_stub)
 
 pandas_stub = types.ModuleType("pandas")
 pandas_stub.DatetimeIndex = list
-sys.modules.setdefault("pandas", pandas_stub)
 
 pytz_stub = types.ModuleType("pytz")
 pytz_stub.UTC = dt.UTC
-sys.modules.setdefault("pytz", pytz_stub)
 
 dateutil = types.ModuleType("dateutil")
 parser_stub = types.ModuleType("dateutil.parser")
 parser_stub.parse = lambda *a, **k: dt.datetime.now(dt.UTC)
 dateutil.parser = parser_stub
-sys.modules.setdefault("dateutil", dateutil)
-sys.modules.setdefault("dateutil.parser", parser_stub)
+
 
 # ---------------------------------------------------------------------------
 # Helper to load integration modules from file paths
@@ -61,8 +57,25 @@ def import_module(path: str, name: str):
     spec = util.spec_from_file_location(name, root / path)
     module = util.module_from_spec(spec)
     assert spec.loader is not None
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
+
+    stubs = {
+        "numpy": numpy_stub,
+        "pandas": pandas_stub,
+        "pytz": pytz_stub,
+        "dateutil": dateutil,
+        "dateutil.parser": parser_stub,
+    }
+    originals = {k: sys.modules.get(k) for k in stubs}
+    sys.modules.update(stubs)
+    try:
+        sys.modules[spec.name] = module
+        spec.loader.exec_module(module)
+    finally:
+        for key, mod in originals.items():
+            if mod is None:
+                sys.modules.pop(key, None)
+            else:
+                sys.modules[key] = mod
     return module
 
 

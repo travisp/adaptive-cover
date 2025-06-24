@@ -9,7 +9,7 @@ from custom_components.simple_auto_cover import const
 
 @pytest.fixture
 def entity_module():
-    """Return the base entity module."""
+    """Return the entity module for import testing."""
     return import_module(
         "custom_components/simple_auto_cover/entity.py",
         "custom_components.simple_auto_cover.entity",
@@ -18,7 +18,7 @@ def entity_module():
 
 @pytest.fixture
 def button_module():
-    """Return the button module."""
+    """Return the button module for import testing."""
     return import_module(
         "custom_components/simple_auto_cover/button.py",
         "custom_components.simple_auto_cover.button",
@@ -27,7 +27,7 @@ def button_module():
 
 @pytest.fixture
 def binary_sensor_module():
-    """Return the binary sensor module."""
+    """Return the binary sensor module for import testing."""
     return import_module(
         "custom_components/simple_auto_cover/binary_sensor.py",
         "custom_components.simple_auto_cover.binary_sensor",
@@ -36,7 +36,7 @@ def binary_sensor_module():
 
 @pytest.fixture
 def sensor_module():
-    """Return the sensor module."""
+    """Return the sensor module for import testing."""
     return import_module(
         "custom_components/simple_auto_cover/sensor.py",
         "custom_components.simple_auto_cover.sensor",
@@ -45,7 +45,7 @@ def sensor_module():
 
 @pytest.fixture
 def switch_module():
-    """Return the switch module."""
+    """Return the switch module for import testing."""
     return import_module(
         "custom_components/simple_auto_cover/switch.py",
         "custom_components.simple_auto_cover.switch",
