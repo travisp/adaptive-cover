@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from homeassistant.const import CONF_NAME
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -22,7 +23,7 @@ class AdaptiveCoverEntity(CoordinatorEntity[AdaptiveDataUpdateCoordinator]):
         super().__init__(coordinator=coordinator)
         self.type = COVER_TYPE_DISPLAY
         self.config_entry = config_entry
-        self._name = config_entry.data["name"]
+        self._name = config_entry.data[CONF_NAME]
         self._device_id = unique_id
         self._device_name = self.type[config_entry.data[CONF_SENSOR_TYPE]]
         self._attr_device_info = DeviceInfo(

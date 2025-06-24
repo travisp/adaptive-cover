@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform
+from homeassistant.const import CONF_NAME, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.event import (
     async_track_state_change_event,
@@ -48,7 +48,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if _end_time_entity is not None:
         _entities.append(_end_time_entity)
 
-    _LOGGER.debug("Setting up entry %s", entry.data.get("name"))
+    _LOGGER.debug("Setting up entry %s", entry.data.get(CONF_NAME))
 
     entry.async_on_unload(
         async_track_state_change_event(
