@@ -1,4 +1,4 @@
-"""Constants for integration_blueprint."""
+"""Constants for Simple Auto Cover."""
 
 from enum import StrEnum
 import logging

@@ -5,7 +5,6 @@
       "user": {
         "data": {
           "name": "Name",
-          "blueprint": "Add blueprint to HomeAssistant",
           "mode": "Type of blind"
         }
       },

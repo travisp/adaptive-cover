@@ -38,7 +38,6 @@ Blinds](https://community.home-assistant.io/t/automatic-blinds-sunscreen-control
   - [Entities](#entities)
   - [Features Planned](#features-planned)
     - [Simulation](#simulation)
-    - [Blueprint (deprecated since v1.0.0)](#blueprint-deprecated-since-v100)
 
 ## Features
 
