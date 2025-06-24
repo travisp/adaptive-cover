@@ -118,7 +118,11 @@ class AdaptiveGeneralCover(ABC):
         filtered_times = [
             t
             for t, az, el in zip(times, azimuths, elevations)
-            if ((az - self.azi_min_abs) % 360 <= (self.azi_max_abs - self.azi_min_abs) % 360) and el > 0
+            if (
+                (az - self.azi_min_abs) % 360
+                <= (self.azi_max_abs - self.azi_min_abs) % 360
+            )
+            and el > 0
         ]
 
         if not filtered_times:
