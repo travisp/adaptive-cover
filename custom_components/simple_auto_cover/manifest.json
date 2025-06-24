@@ -7,6 +7,6 @@
   "documentation": "https://github.com/travisp/adaptive-cover",
   "iot_class": "calculated",
   "issue_tracker": "https://github.com/travisp/adaptive-cover/issues",
-  "requirements": ["astral", "pandas"],
+  "requirements": ["astral"],
   "version": "0.3.0b0"
 }

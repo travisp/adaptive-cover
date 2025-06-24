@@ -32,7 +32,6 @@ ruff = "0.6.9"
 pytest = "8.3.5"
 pytest-homeassistant-custom-component = "0.13.252"
 numpy = "*"
-pandas = "*"
 pytz = "*"
 python-dateutil = "*"
 
