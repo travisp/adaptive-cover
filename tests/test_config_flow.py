@@ -103,3 +103,20 @@ async def test_blind_step_validation():
     result = await handler.async_step_vertical(data)
     assert result["type"] == "form"
     assert result["errors"] == {cf.CONF_MAX_ELEVATION: "Must be greater than 'Minimal Elevation'"}
+
+
+def test_validate_elevation_range():
+    """Verify the helper correctly compares min and max elevation."""
+    params = {
+        (10, 5): True,
+        (5, 10): False,
+        (None, 5): True,
+        (10, None): True,
+    }
+    for (max_elev, min_elev), expected in params.items():
+        data = {}
+        if max_elev is not None:
+            data[cf.CONF_MAX_ELEVATION] = max_elev
+        if min_elev is not None:
+            data[cf.CONF_MIN_ELEVATION] = min_elev
+        assert cf._validate_elevation_range(data) is expected
