@@ -73,6 +73,8 @@ from .const import (
     CONF_MAX_POSITION,
     CONF_MIN_ELEVATION,
     CONF_MIN_POSITION,
+    CONF_ENABLE_MAX_POSITION,
+    CONF_ENABLE_MIN_POSITION,
     CONF_RETURN_SUNSET,
     CONF_START_ENTITY,
     CONF_START_TIME,
@@ -641,8 +643,8 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         config.h_def = options.get(CONF_DEFAULT_HEIGHT)
         config.max_pos = options.get(CONF_MAX_POSITION)
         config.min_pos = options.get(CONF_MIN_POSITION)
-        config.max_pos_bool = options.get(CONF_ENABLE_MAX_POSITION, False)
-        config.min_pos_bool = options.get(CONF_ENABLE_MIN_POSITION, False)
+        config.apply_max_limit_on_sun = options.get(CONF_ENABLE_MAX_POSITION, False)
+        config.apply_min_limit_on_sun = options.get(CONF_ENABLE_MIN_POSITION, False)
         config.blind_spot_left = options.get(CONF_BLIND_SPOT_LEFT)
         config.blind_spot_right = options.get(CONF_BLIND_SPOT_RIGHT)
         config.blind_spot_elevation = options.get(CONF_BLIND_SPOT_ELEVATION)
