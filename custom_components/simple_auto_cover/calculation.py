@@ -32,8 +32,8 @@ class AdaptiveGeneralCover(ABC):
     h_def: int
     max_pos: int
     min_pos: int
-    max_pos_bool: bool
-    min_pos_bool: bool
+    apply_max_limit_on_sun: bool
+    apply_min_limit_on_sun: bool
     blind_spot_left: int
     blind_spot_right: int
     blind_spot_elevation: int
@@ -168,7 +168,7 @@ class AdaptiveGeneralCover(ABC):
     def apply_min_position(self) -> bool:
         """Check if min position is applied."""
         if self.min_pos is not None and self.min_pos != 0:
-            if self.min_pos_bool:
+            if self.apply_min_limit_on_sun:
                 return self.direct_sun_valid
             return True
         return False
@@ -177,7 +177,7 @@ class AdaptiveGeneralCover(ABC):
     def apply_max_position(self) -> bool:
         """Check if max position is applied."""
         if self.max_pos is not None and self.max_pos != 100:
-            if self.max_pos_bool:
+            if self.apply_max_limit_on_sun:
                 return self.direct_sun_valid
             return True
         return False
