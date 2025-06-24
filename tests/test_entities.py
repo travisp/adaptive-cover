@@ -17,6 +17,7 @@ from custom_components.simple_auto_cover.const import (
 def entity_module():
     """Return the entity module for import testing."""
     import custom_components.simple_auto_cover.entity as entity
+
     return entity
 
 
@@ -24,6 +25,7 @@ def entity_module():
 def button_module():
     """Return the button module for import testing."""
     import custom_components.simple_auto_cover.button as button
+
     return button
 
 
@@ -31,6 +33,7 @@ def button_module():
 def binary_sensor_module():
     """Return the binary sensor module for import testing."""
     import custom_components.simple_auto_cover.binary_sensor as binary_sensor
+
     return binary_sensor
 
 
@@ -38,6 +41,7 @@ def binary_sensor_module():
 def sensor_module():
     """Return the sensor module for import testing."""
     import custom_components.simple_auto_cover.sensor as sensor
+
     return sensor
 
 
@@ -45,6 +49,7 @@ def sensor_module():
 def switch_module():
     """Return the switch module for import testing."""
     import custom_components.simple_auto_cover.switch as switch
+
     return switch
 
 
@@ -99,7 +104,9 @@ def test_button_inherits_base(entity_module, button_module):
 
     assert isinstance(button, entity_module.AdaptiveCoverEntity)
     assert button.name == "Reset " + entry.data[CONF_NAME]
-    assert button.device_info["name"] == COVER_TYPE_DISPLAY[entry.data[CONF_SENSOR_TYPE]]
+    assert (
+        button.device_info["name"] == COVER_TYPE_DISPLAY[entry.data[CONF_SENSOR_TYPE]]
+    )
     assert button.unique_id == "uid_Reset"
 
 
@@ -134,7 +141,9 @@ def test_sensor_native_value(entity_module, sensor_module):
     }
     coord = DummyCoordinator(states=states, attrs={"foo": "bar"})
 
-    sensor = sensor_module.AdaptiveCoverSensorEntity("uid", None, entry, entry.data[CONF_NAME], coord)
+    sensor = sensor_module.AdaptiveCoverSensorEntity(
+        "uid", None, entry, entry.data[CONF_NAME], coord
+    )
 
     assert sensor.native_value == 55
     assert sensor.extra_state_attributes == {"foo": "bar"}
@@ -151,8 +160,10 @@ def test_sensor_native_value(entity_module, sensor_module):
     )
     assert time_sensor.native_value == states["start"]
 
-    control_sensor = sensor_module.AdaptiveCoverControlSensorEntity("uid", None, entry, entry.data[CONF_NAME], coord)
-    
+    control_sensor = sensor_module.AdaptiveCoverControlSensorEntity(
+        "uid", None, entry, entry.data[CONF_NAME], coord
+    )
+
     assert control_sensor.native_value == "auto"
 
 

@@ -32,11 +32,7 @@ def test_solar_times_returns_first_and_last_valid(monkeypatch):
         def calculate_percentage(self) -> int:
             return 0
 
-    cover = DummyCover(
-        hass=None,
-        logger=types.SimpleNamespace(debug=lambda *a, **k: None),
-        sol_azi=0,
-        sol_elev=0,
+    config = calculation.CoverConfig(
         sunset_pos=0,
         sunset_off=0,
         sunrise_off=0,
@@ -55,6 +51,14 @@ def test_solar_times_returns_first_and_last_valid(monkeypatch):
         blind_spot_on=False,
         min_elevation=None,
         max_elevation=None,
+    )
+
+    cover = DummyCover(
+        hass=None,
+        logger=types.SimpleNamespace(debug=lambda *a, **k: None),
+        sol_azi=0,
+        sol_elev=0,
+        config=config,
     )
 
     start, end = cover.solar_times()
