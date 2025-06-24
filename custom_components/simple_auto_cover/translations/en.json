@@ -70,7 +70,9 @@
           "sunset_position": "Position to switch to after sunset",
           "sunset_offset": "Offset (±) from sunset time in minutes",
           "sunrise_offset": "Offset (±) from sunrise time in minutes"
-        }
+        },
+        "title": "Vertical cover",
+        "description": "Add configuration variables to the sensor"
       },
       "horizontal": {
         "data": {

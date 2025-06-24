@@ -110,7 +110,9 @@ def test_button_inherits_base(entity_module, button_module):
 
     assert isinstance(button, entity_module.AdaptiveCoverEntity)
     assert button.name == "Reset " + entry.data[CONF_NAME]
-    assert button.device_info["name"] == COVER_TYPE_DISPLAY[entry.data[CONF_SENSOR_TYPE]]
+    assert (
+        button.device_info["name"] == COVER_TYPE_DISPLAY[entry.data[CONF_SENSOR_TYPE]]
+    )
     assert button.unique_id == "uid_Reset"
 
 
@@ -145,7 +147,9 @@ def test_sensor_native_value(entity_module, sensor_module):
     }
     coord = DummyCoordinator(states=states, attrs={"foo": "bar"})
 
-    sensor = sensor_module.AdaptiveCoverSensorEntity("uid", None, entry, entry.data[CONF_NAME], coord)
+    sensor = sensor_module.AdaptiveCoverSensorEntity(
+        "uid", None, entry, entry.data[CONF_NAME], coord
+    )
 
     assert sensor.native_value == 55
     assert sensor.extra_state_attributes == {"foo": "bar"}
@@ -162,8 +166,10 @@ def test_sensor_native_value(entity_module, sensor_module):
     )
     assert time_sensor.native_value == states["start"]
 
-    control_sensor = sensor_module.AdaptiveCoverControlSensorEntity("uid", None, entry, entry.data[CONF_NAME], coord)
-    
+    control_sensor = sensor_module.AdaptiveCoverControlSensorEntity(
+        "uid", None, entry, entry.data[CONF_NAME], coord
+    )
+
     assert control_sensor.native_value == "auto"
 
 
