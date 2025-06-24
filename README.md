@@ -87,10 +87,7 @@ This component provides a simple `basic` strategy for positioning shades based s
   A[("fa:fa-sun Sundata")]
   A --> B["Basic Mode"]
   subgraph "Basic Mode"
-      B --> BM{"Force mode"}
-      BM --> |"force open"| BN["Return fully open"]
-      BM --> |"force close"| BO["Return fully closed"]
-      BM --> |auto| BA("Sun within field of view")
+      B --> BA("Sun within field of view?")
 
       BA --> |No| BC{{Default}}
       BC --> BD("Within sunrise+offset and sunset+offset?")
@@ -104,6 +101,13 @@ This component provides a simple `basic` strategy for positioning shades based s
       BH --> |Yes| BI("Within start and end times?")
       BI --> |No| BC
       BI --> |Yes| BJ{{"Calculated Position"}}
+
+      BE --> BM{"Force mode"}
+      BF --> BM
+      BJ --> BM
+      BM --> |"force open"| BN["Return fully open"]
+      BM --> |"force close"| BO["Return fully closed"]
+      BM --> |auto| BP["Return computed position"]
   end
 ```
 
