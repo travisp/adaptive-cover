@@ -52,7 +52,8 @@
           "blind_spot": "Configureer schaduwzone",
           "min_elevation": "Minimale zonhoogte",
           "max_elevation": "Maximale zonhoogte",
-          "interp": "Stel aangepaste open/sluit posities in voor jouw Cover, als deze niet volledig functioneert bij 0-100%"
+          "interp": "Stel aangepaste open/sluit posities in voor jouw Cover, als deze niet volledig functioneert bij 0-100%",
+          "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten"
         },
         "data_description": {
           "set_azimuth": "Stel Azimuth in",
@@ -94,7 +95,8 @@
           "blind_spot": "Configureer schaduwzone",
           "min_elevation": "Minimale zonhoogte",
           "max_elevation": "Maximale zonhoogte",
-          "interp": "Stel aangepaste open/sluit posities in voor jouw Cover, als deze niet volledig functioneert bij 0-100%"
+          "interp": "Stel aangepaste open/sluit posities in voor jouw Cover, als deze niet volledig functioneert bij 0-100%",
+          "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten"
         },
         "data_description": {
           "set_azimuth": "Stel Azimuth in",
@@ -137,7 +139,8 @@
           "blind_spot": "Configureer schaduwzone",
           "min_elevation": "Minimale zonhoogte",
           "max_elevation": "Maximale zonhoogte",
-          "interp": "Stel aangepaste open/sluit posities in voor jouw Cover, als deze niet volledig functioneert bij 0-100%"
+          "interp": "Stel aangepaste open/sluit posities in voor jouw Cover, als deze niet volledig functioneert bij 0-100%",
+          "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten"
         },
         "data_description": {
           "set_azimuth": "Stel Azimuth in",
@@ -219,7 +222,6 @@
           "start_entity": "Entiteit die de status van de starttijd vertegenwoordigt, die de hierboven ingestelde statische starttijd overschrijft. Handig voor het automatiseren van de starttijd met een entiteit",
           "manual_override_duration": "De duur van handmatige bediening voordat wordt teruggekeerd naar automatische bediening",
           "manual_override_reset": "Optie om de duur van handmatige overschrijving na elke handmatige aanpassing te resetten; als dit is uitgeschakeld, geldt de duur alleen voor de eerste handmatige aanpassing",
-          "return_sunset": "Zorg ervoor dat de positie altijd wordt aangepast naar de standaard zonsonderganginstelling tegen het eindtijdstip. Dit is vooral handig wanneer het eindtijdstip voor de daadwerkelijke zonsondergang valt.",
           "end_time": "Eindtijd voor elke dag; na deze tijd blijft de bekleding stationair",
           "end_entity": "Entiteit die de status van de eindtijd vertegenwoordigt, die de hierboven ingestelde statische eindtijd overschrijft. Handig voor het automatiseren van de eindtijd met een entiteit"
         }
@@ -243,7 +245,8 @@
           "blind_spot": "Configureer schaduwzone",
           "min_elevation": "Minimale zonhoogte",
           "max_elevation": "Maximale zonhoogte",
-          "interp": "Stel aangepaste open/sluit posities in voor jouw Cover, als deze niet volledig functioneert bij 0-100%"
+          "interp": "Stel aangepaste open/sluit posities in voor jouw Cover, als deze niet volledig functioneert bij 0-100%",
+          "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten"
         },
         "data_description": {
           "set_azimuth": "Stel Azimuth in",
@@ -285,7 +288,8 @@
           "blind_spot": "Configureer schaduwzone",
           "min_elevation": "Minimale zonhoogte",
           "max_elevation": "Maximale zonhoogte",
-          "interp": "Stel aangepaste open/sluit posities in voor jouw Cover, als deze niet volledig functioneert bij 0-100%"
+          "interp": "Stel aangepaste open/sluit posities in voor jouw Cover, als deze niet volledig functioneert bij 0-100%",
+          "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten"
         },
         "data_description": {
           "set_azimuth": "Stel Azimuth in",
@@ -328,7 +332,8 @@
           "blind_spot": "Configureer schaduwzone",
           "min_elevation": "Minimale zonhoogte",
           "max_elevation": "Maximale zonhoogte",
-          "interp": "Stel aangepaste open/sluit posities in voor jouw Cover, als deze niet volledig functioneert bij 0-100%"
+          "interp": "Stel aangepaste open/sluit posities in voor jouw Cover, als deze niet volledig functioneert bij 0-100%",
+          "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten"
         },
         "data_description": {
           "set_azimuth": "Stel Azimuth in",
