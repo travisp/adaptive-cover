@@ -33,7 +33,6 @@ Blinds](https://community.home-assistant.io/t/automatic-blinds-sunscreen-control
     - [Horizontal](#horizontal)
     - [Tilt](#tilt)
     - [Automation](#automation)
-    - [Climate](#climate)
     - [Blindspot](#blindspot)
   - [Entities](#entities)
   - [Features Planned](#features-planned)
