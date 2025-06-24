@@ -14,12 +14,9 @@ from custom_components.simple_auto_cover.const import SensorType
 def manager_module():
     """Import and return the cover_manager module under test."""
 
-    from tests.conftest import import_module
+    import custom_components.simple_auto_cover.cover_manager as manager
 
-    return import_module(
-        "custom_components/simple_auto_cover/cover_manager.py",
-        "custom_components.simple_auto_cover.cover_manager",
-    )
+    return manager
 
 
 @pytest.fixture
