@@ -47,7 +47,6 @@
           "sunset_position": "Sunset Position",
           "sunset_offset": "Sunset Offset",
           "sunrise_offset": "Sunrise Offset",
-          "climate_mode": "Climate Mode",
           "blind_spot": "Setup Blindspot",
           "min_elevation": "Minimum Elevation of the sun",
           "max_elevation": "Maximum Elevation of the sun",
@@ -64,34 +63,10 @@
           "group": "Select entities to control via integration",
           "sunset_position": "Position to switch to after sunset",
           "sunset_offset": "Offset (±) from sunset time in minutes",
-          "sunrise_offset": "Offset (±) from sunrise time in minutes",
-          "climate_mode": "Configure variables for climate mode"
+          "sunrise_offset": "Offset (±) from sunrise time in minutes"
         },
         "description": "Add configuration variables to the sensor",
         "title": "Vertical cover"
-      },
-      "climate": {
-        "data": {
-          "temp_entity": "Inside temperature entity",
-          "presence_entity": "Presence entity (optional)",
-          "temp_low": "Low temperature threshold",
-          "temp_high": "High temperature threshold",
-          "lux_entity": "Lux sensor (optional)",
-          "lux_threshold": "Lux threshold",
-          "irradiance_entity": "Irradiance sensor (optional)",
-          "irradiance_threshold": "Irradiance threshold"
-        },
-        "data_description": {
-          "presence_entity": "Entity representing room or home presence status",
-          "temp_low": "Minimum comfortable temperature",
-          "temp_high": "Maximum comfortable temperature",
-          "lux_entity": "Use lux sensor to determine if cover should reduce glare in presence mode",
-          "lux_threshold": "Threshold for lux sensor, above this value glare should be reduced",
-          "irradiance_entity": "Use irradiance sensor to determine if cover should reduce glare in presence mode",
-          "irradiance_threshold": "Threshold for irradiance sensor, above this value glare should be reduced"
-        },
-        "description": "Add additional climate configuration variables.",
-        "title": "Climate settings"
       },
       "horizontal": {
         "data": {
@@ -109,7 +84,6 @@
           "sunset_position": "Sunset Position",
           "sunset_offset": "Sunset Offset",
           "sunrise_offset": "Sunrise Offset",
-          "climate_mode": "Climate Mode",
           "blind_spot": "Setup Blindspot",
           "min_elevation": "Minimum Elevation of the sun",
           "max_elevation": "Maximum Elevation of the sun",
@@ -128,8 +102,7 @@
           "group": "Select entities to control via integration",
           "sunset_position": "Position to switch to after sunset",
           "sunset_offset": "Offset (±) from sunset time in minutes",
-          "sunrise_offset": "Offset (±) from sunrise time in minutes",
-          "climate_mode": "Configure variables for climate mode"
+          "sunrise_offset": "Offset (±) from sunrise time in minutes"
         },
         "description": "Add configuration variables to the sensor",
         "title": "Horizontal cover"
@@ -148,7 +121,6 @@
           "sunset_position": "Sunset Position",
           "sunset_offset": "Sunset Offset",
           "sunrise_offset": "Sunrise Offset",
-          "climate_mode": "Climate Mode",
           "tilt_mode": "Type of movement",
           "blind_spot": "Setup Blindspot",
           "min_elevation": "Minimum Elevation of the sun",
@@ -167,7 +139,6 @@
           "sunset_position": "Position to transition to after sunset",
           "sunset_offset": "Offset (±) from sunset time in minutes",
           "sunrise_offset": "Offset (±) from sunrise time in minutes",
-          "climate_mode": "Configure variables for climate mode",
           "tilt_mode": "Choose the type of movement"
         },
         "description": "Add configuration variables to the sensor",
@@ -209,7 +180,6 @@
         "menu_options": {
           "automation": "Modify Automation Configuration",
           "blind": "Fine-tune Blind Settings",
-          "climate": "Edit Climate Configuration",
           "blind_spot": "Setup Blindspot",
           "interp": "Range Adjustment"
         }
@@ -253,7 +223,6 @@
           "sunset_position": "Sunset Position",
           "sunset_offset": "Sunset Offset",
           "sunrise_offset": "Sunrise Offset",
-          "climate_mode": "Climate Mode",
           "blind_spot": "Setup Blindspot",
           "min_elevation": "Minimum Elevation of the sun",
           "max_elevation": "Maximum Elevation of the sun",
@@ -270,34 +239,10 @@
           "group": "Select entities to control via integration",
           "sunset_position": "Position to switch to after sunset",
           "sunset_offset": "Offset (±) from sunset time in minutes",
-          "sunrise_offset": "Offset (±) from sunrise time in minutes",
-          "climate_mode": "Configure variables for climate mode"
+          "sunrise_offset": "Offset (±) from sunrise time in minutes"
         },
         "description": "Add configuration variables to the sensor",
         "title": "Vertical cover"
-      },
-      "climate": {
-        "data": {
-          "temp_entity": "Inside temperature entity",
-          "presence_entity": "Presence entity (optional)",
-          "temp_low": "Low temperature threshold",
-          "temp_high": "High temperature threshold",
-          "lux_entity": "Lux sensor (optional)",
-          "lux_threshold": "Lux threshold",
-          "irradiance_entity": "Irradiance sensor (optional)",
-          "irradiance_threshold": "Irradiance threshold"
-        },
-        "data_description": {
-          "presence_entity": "Entity representing room or home presence status",
-          "temp_low": "Minimum comfortable temperature",
-          "temp_high": "Maximum comfortable temperature",
-          "lux_entity": "Use lux sensor to determine if cover should reduce glare in presence mode",
-          "lux_threshold": "Threshold for lux sensor, above this value glare should be reduced",
-          "irradiance_entity": "Use irradiance sensor to determine if cover should reduce glare in presence mode",
-          "irradiance_threshold": "Threshold for irradiance sensor, above this value glare should be reduced"
-        },
-        "description": "Add additional climate configuration variables.",
-        "title": "Climate settings"
       },
       "horizontal": {
         "data": {
@@ -315,7 +260,6 @@
           "sunset_position": "Sunset Position",
           "sunset_offset": "Sunset Offset",
           "sunrise_offset": "Sunrise Offset",
-          "climate_mode": "Climate Mode",
           "blind_spot": "Setup Blindspot",
           "min_elevation": "Minimum Elevation of the sun",
           "max_elevation": "Maximum Elevation of the sun",
@@ -334,8 +278,7 @@
           "group": "Select entities to control via integration",
           "sunset_position": "Position to switch to after sunset",
           "sunset_offset": "Offset (±) from sunset time in minutes",
-          "sunrise_offset": "Offset (±) from sunrise time in minutes",
-          "climate_mode": "Configure variables for climate mode"
+          "sunrise_offset": "Offset (±) from sunrise time in minutes"
         },
         "description": "Add configuration variables to the sensor",
         "title": "Horizontal cover"
@@ -354,7 +297,6 @@
           "sunset_position": "Sunset Position",
           "sunset_offset": "Sunset Offset",
           "sunrise_offset": "Sunrise Offset",
-          "climate_mode": "Climate Mode",
           "tilt_mode": "Type of movement",
           "blind_spot": "Setup Blindspot",
           "min_elevation": "Minimum Elevation of the sun",
@@ -373,7 +315,6 @@
           "sunset_position": "Position to transition to after sunset",
           "sunset_offset": "Offset (±) from sunset time in minutes",
           "sunrise_offset": "Offset (±) from sunrise time in minutes",
-          "climate_mode": "Configure variables for climate mode",
           "tilt_mode": "Choose the type of movement"
         },
         "description": "Add configuration variables to the sensor",
