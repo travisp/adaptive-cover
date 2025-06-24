@@ -25,13 +25,13 @@ Blinds](https://community.home-assistant.io/t/automatic-blinds-sunscreen-control
     - [Manual](#manual)
   - [Setup](#setup)
   - [Cover Types](#cover-types)
+    - [Vertical](#vertical)
+    - [Horizontal](#horizontal)
+    - [Tilt](#tilt)
   - [Modes](#modes)
     - [Basic mode](#basic-mode)
   - [Variables](#variables)
     - [Common](#common)
-    - [Vertical](#vertical)
-    - [Horizontal](#horizontal)
-    - [Tilt](#tilt)
     - [Automation](#automation)
     - [Climate](#climate)
     - [Blindspot](#blindspot)
@@ -71,12 +71,34 @@ Each type has its own specific parameters to setup a sensor. To setup the sensor
 
 ## Cover Types
 
-|              | Vertical                      | Horizontal                      | Tilted                          |
-| ------------ | ----------------------------- | ------------------------------- | ------------------------------- |
+|              | Vertical                      | Horizontal                     | Tilted                          |
+| ------------ | ----------------------------- | ------------------------------ | ------------------------------- |
 |              | ![alt text](images/image.png) | ![alt text](images/image-2.png) | ![alt text](images/image-1.png) |
 | **Movement** | Up/Down                       | In/Out                          | Tilting                         |
-|              | [variables](#vertical)        | [variables](#horizontal)        | [variables](#tilt)              |
 
+### Vertical
+
+| Variables         | Default | Range | Description                                                    |
+| ----------------- | ------- | ----- | ------------------------------------------------------------- |
+| Window Height     | 2.1     | 0.1-6 | Length of fully extended cover/window                         |
+| Workarea Distance | 0.5     | 0.1-2 | Distance to the workarea on equal height to the bottom of the cover when fully extended |
+
+### Horizontal
+
+| Variables                  | Default | Range | Description                        |
+| -------------------------- | ------- | ----- | ---------------------------------- |
+| Awning Height              | 2       | 0.1-6 | Height from work area to awning mounting point |
+| Awning Length (horizontal) | 2.1     | 0.3-6 | Length of the awning when fully extended       |
+| Awning Angle               | 0       | 0-45  | Angle of the awning from the wall              |
+| Workarea Distance          | 0.5     | 0.1-2 | Distance to the work area                      |
+
+### Tilt
+
+| Variables     | Default        | Range  | Description                                               |
+| ------------- | -------------- | ------ | --------------------------------------------------------- |
+| Slat Depth    | 3              | 0.1-15 | Width of each slat                                        |
+| Slat Distance | 2              | 0.1-15 | Vertical distance between two slats in horizontal position |
+| Tilt Mode     | Bi-directional |        |                                                           |
 ## Modes
 
 This component provides a simple `basic` strategy for positioning shades based solely on the sun's location.
@@ -131,29 +153,6 @@ This mode uses the calculated position only when the sun is in front of the wind
 | Offset Sunrise time           | 0       |       | Additional minutes before/after sunrise                                                                  |
 | Inverse State                 | False   |       | Calculates inverse state for covers fully closed at 100%                                                 |
 
-### Vertical
-
-| Variables         | Default | Range | Description                                                                                 |
-| ----------------- | ------- | ----- | ------------------------------------------------------------------------------------------- |
-| Window Height     | 2.1     | 0.1-6 | Length of fully extended cover/window                                                       |
-| Workarea Distance | 0.5     | 0.1-2 | The distance to the workarea on equal height to the bottom of the cover when fully extended |
-
-### Horizontal
-
-| Variables                  | Default | Range | Description                                    |
-| -------------------------- | ------- | ----- | ---------------------------------------------- |
-| Awning Height              | 2       | 0.1-6 | Height from work area to awning mounting point |
-| Awning Length (horizontal) | 2.1     | 0.3-6 | Length of the awning when fully extended       |
-| Awning Angle               | 0       | 0-45  | Angle of the awning from the wall              |
-| Workarea Distance          | 0.5     | 0.1-2 | Distance to the work area                      |
-
-### Tilt
-
-| Variables     | Default        | Range  | Description                                                |
-| ------------- | -------------- | ------ | ---------------------------------------------------------- |
-| Slat Depth    | 3              | 0.1-15 | Width of each slat                                         |
-| Slat Distance | 2              | 0.1-15 | Vertical distance between two slats in horizontal position |
-| Tilt Mode     | Bi-directional |        |                                                            |
 
 ### Automation
 
