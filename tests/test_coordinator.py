@@ -140,6 +140,26 @@ def test_update_datetime_objects_sets_times(module):
     assert coord._end_time is not None
 
 
+def test_update_datetime_objects_midnight_rollover(module, monkeypatch):
+    """Ensure midnight end time rolls over to the next day."""
+
+    coord, _ = make_coordinator(module)
+
+    def fake_get_datetime(value):
+        return dt.datetime(2022, 1, 1, 0, 0)
+
+    monkeypatch.setattr(module, "get_datetime_from_str", fake_get_datetime)
+
+    coord.start_time = None
+    coord.end_time = "00:00"
+    coord.start_time_entity = None
+    coord.end_time_entity = None
+
+    coord._update_datetime_objects()
+
+    assert coord._end_time == dt.datetime(2022, 1, 2, 0, 0)
+
+
 def test_interpolate_states_default(module):
     """Ensure no adjustment occurs with no custom range."""
     coord, _ = make_coordinator(module)
