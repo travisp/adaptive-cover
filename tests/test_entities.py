@@ -4,7 +4,14 @@ import types
 import pytest
 
 from tests.conftest import import_module
-from custom_components.simple_auto_cover import const
+from homeassistant.const import CONF_NAME
+from custom_components.simple_auto_cover.const import (
+    CONF_ENTITIES,
+    CONF_SENSOR_TYPE,
+    COVER_TYPE_DISPLAY,
+    DOMAIN,
+    SensorType,
+)
 
 
 @pytest.fixture
@@ -77,8 +84,8 @@ class DummyCoordinator:
 def make_entry(*, name="Test", sensor_type=None):
     """Create a simple config entry namespace for tests."""
     return types.SimpleNamespace(
-        data={"name": name, const.CONF_SENSOR_TYPE: sensor_type or const.SensorType.BLIND},
-        options={const.CONF_ENTITIES: ["cover.one"]},
+        data={CONF_NAME: name, CONF_SENSOR_TYPE: sensor_type or SensorType.BLIND},
+        options={CONF_ENTITIES: ["cover.one"]},
         entry_id="1",
     )
 
@@ -89,9 +96,9 @@ def test_base_entity_initialization(entity_module):
     entity = entity_module.AdaptiveCoverEntity(entry, "uid", coord)
 
     assert entity._device_id == "uid"
-    assert entity._name == entry.data["name"]
-    assert entity._device_name == const.COVER_TYPE_DISPLAY[entry.data[const.CONF_SENSOR_TYPE]]
-    assert entity.device_info["identifiers"] == {(const.DOMAIN, "uid")}
+    assert entity._name == entry.data[CONF_NAME]
+    assert entity._device_name == COVER_TYPE_DISPLAY[entry.data[CONF_SENSOR_TYPE]]
+    assert entity.device_info["identifiers"] == {(DOMAIN, "uid")}
 
 
 def test_button_inherits_base(entity_module, button_module):
@@ -101,8 +108,8 @@ def test_button_inherits_base(entity_module, button_module):
     button = button_module.AdaptiveCoverButton(entry, "uid", "Reset", coord)
 
     assert isinstance(button, entity_module.AdaptiveCoverEntity)
-    assert button.name == "Reset " + entry.data["name"]
-    assert button.device_info["name"] == const.COVER_TYPE_DISPLAY[entry.data[const.CONF_SENSOR_TYPE]]
+    assert button.name == "Reset " + entry.data[CONF_NAME]
+    assert button.device_info["name"] == COVER_TYPE_DISPLAY[entry.data[CONF_SENSOR_TYPE]]
     assert button.unique_id == "uid_Reset"
 
 
@@ -122,7 +129,7 @@ def test_binary_sensor_is_on(entity_module, binary_sensor_module):
 
     assert isinstance(sensor, entity_module.AdaptiveCoverEntity)
     assert sensor.is_on is True
-    assert sensor.name == "Sun " + entry.data["name"]
+    assert sensor.name == "Sun " + entry.data[CONF_NAME]
     assert sensor.unique_id == "uid_Sun"
 
 
@@ -132,7 +139,7 @@ def test_sensor_native_value(entity_module, sensor_module):
     states = {"state": 55, "start": "2025-01-01", "end": "2025-01-02", "control": "auto"}
     coord = DummyCoordinator(states=states, attrs={"foo": "bar"})
 
-    sensor = sensor_module.AdaptiveCoverSensorEntity("uid", None, entry, entry.data["name"], coord)
+    sensor = sensor_module.AdaptiveCoverSensorEntity("uid", None, entry, entry.data[CONF_NAME], coord)
     assert sensor.native_value == 55
     assert sensor.extra_state_attributes == {"foo": "bar"}
 
@@ -140,7 +147,7 @@ def test_sensor_native_value(entity_module, sensor_module):
         "uid",
         None,
         entry,
-        entry.data["name"],
+        entry.data[CONF_NAME],
         "Start Sun",
         "start",
         "icon",
@@ -148,7 +155,7 @@ def test_sensor_native_value(entity_module, sensor_module):
     )
     assert time_sensor.native_value == states["start"]
 
-    control_sensor = sensor_module.AdaptiveCoverControlSensorEntity("uid", None, entry, entry.data["name"], coord)
+    control_sensor = sensor_module.AdaptiveCoverControlSensorEntity("uid", None, entry, entry.data[CONF_NAME], coord)
     assert control_sensor.native_value == "auto"
 
 
@@ -159,5 +166,5 @@ def test_switch_initial_state(entity_module, switch_module):
     switch = switch_module.AdaptiveCoverSwitch(entry, "uid", "Manual", True, "manual_toggle", coord)
 
     assert isinstance(switch, entity_module.AdaptiveCoverEntity)
-    assert switch.name == "Manual " + entry.data["name"]
+    assert switch.name == "Manual " + entry.data[CONF_NAME]
     assert switch.unique_id == "uid_Manual"
