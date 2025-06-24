@@ -3,7 +3,6 @@
 import types
 import pytest
 
-from tests.conftest import import_module
 from homeassistant.const import CONF_NAME
 from custom_components.simple_auto_cover.const import (
     CONF_ENTITIES,
@@ -17,46 +16,36 @@ from custom_components.simple_auto_cover.const import (
 @pytest.fixture
 def entity_module():
     """Return the entity module for import testing."""
-    return import_module(
-        "custom_components/simple_auto_cover/entity.py",
-        "custom_components.simple_auto_cover.entity",
-    )
+    import custom_components.simple_auto_cover.entity as entity
+    return entity
 
 
 @pytest.fixture
 def button_module():
     """Return the button module for import testing."""
-    return import_module(
-        "custom_components/simple_auto_cover/button.py",
-        "custom_components.simple_auto_cover.button",
-    )
+    import custom_components.simple_auto_cover.button as button
+    return button
 
 
 @pytest.fixture
 def binary_sensor_module():
     """Return the binary sensor module for import testing."""
-    return import_module(
-        "custom_components/simple_auto_cover/binary_sensor.py",
-        "custom_components.simple_auto_cover.binary_sensor",
-    )
+    import custom_components.simple_auto_cover.binary_sensor as binary_sensor
+    return binary_sensor
 
 
 @pytest.fixture
 def sensor_module():
     """Return the sensor module for import testing."""
-    return import_module(
-        "custom_components/simple_auto_cover/sensor.py",
-        "custom_components.simple_auto_cover.sensor",
-    )
+    import custom_components.simple_auto_cover.sensor as sensor
+    return sensor
 
 
 @pytest.fixture
 def switch_module():
     """Return the switch module for import testing."""
-    return import_module(
-        "custom_components/simple_auto_cover/switch.py",
-        "custom_components.simple_auto_cover.switch",
-    )
+    import custom_components.simple_auto_cover.switch as switch
+    return switch
 
 
 class DummyCoordinator:
