@@ -55,17 +55,23 @@ class DummyFlow(cf.ConfigFlowHandler):
     async def async_step_interp(self):
         """Handle the interpolation step."""
         self.called.append("interp")
-        return self.async_show_form(step_id="interp", data_schema=cf.INTERPOLATION_OPTIONS)
+        return self.async_show_form(
+            step_id="interp", data_schema=cf.INTERPOLATION_OPTIONS
+        )
 
     async def async_step_blind_spot(self):
         """Handle the blind spot configuration step."""
         self.called.append("blind_spot")
-        return self.async_show_form(step_id="blind_spot", data_schema=cf.AUTOMATION_CONFIG)
+        return self.async_show_form(
+            step_id="blind_spot", data_schema=cf.AUTOMATION_CONFIG
+        )
 
     async def async_step_automation(self):
         """Handle the automation configuration step."""
         self.called.append("automation")
-        return self.async_show_form(step_id="automation", data_schema=cf.AUTOMATION_CONFIG)
+        return self.async_show_form(
+            step_id="automation", data_schema=cf.AUTOMATION_CONFIG
+        )
 
 
 @pytest.mark.asyncio
@@ -102,7 +108,9 @@ async def test_blind_step_validation():
     }
     result = await handler.async_step_vertical(data)
     assert result["type"] == "form"
-    assert result["errors"] == {cf.CONF_MAX_ELEVATION: "Must be greater than 'Minimal Elevation'"}
+    assert result["errors"] == {
+        cf.CONF_MAX_ELEVATION: "Must be greater than 'Minimal Elevation'"
+    }
 
 
 def test_validate_elevation_range():

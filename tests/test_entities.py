@@ -77,10 +77,14 @@ class DummyCoordinator:
 def make_entry(*, name="Test", sensor_type=None):
     """Create a simple config entry namespace for tests."""
     return types.SimpleNamespace(
-        data={"name": name, const.CONF_SENSOR_TYPE: sensor_type or const.SensorType.BLIND},
+        data={
+            "name": name,
+            const.CONF_SENSOR_TYPE: sensor_type or const.SensorType.BLIND,
+        },
         options={const.CONF_ENTITIES: ["cover.one"]},
         entry_id="1",
     )
+
 
 def test_base_entity_initialization(entity_module):
     """Ensure base entity is initialized with the correct attributes."""
@@ -90,7 +94,10 @@ def test_base_entity_initialization(entity_module):
 
     assert entity._device_id == "uid"
     assert entity._name == entry.data["name"]
-    assert entity._device_name == const.COVER_TYPE_DISPLAY[entry.data[const.CONF_SENSOR_TYPE]]
+    assert (
+        entity._device_name
+        == const.COVER_TYPE_DISPLAY[entry.data[const.CONF_SENSOR_TYPE]]
+    )
     assert entity.device_info["identifiers"] == {(const.DOMAIN, "uid")}
 
 
@@ -102,7 +109,10 @@ def test_button_inherits_base(entity_module, button_module):
 
     assert isinstance(button, entity_module.AdaptiveCoverEntity)
     assert button.name == "Reset " + entry.data["name"]
-    assert button.device_info["name"] == const.COVER_TYPE_DISPLAY[entry.data[const.CONF_SENSOR_TYPE]]
+    assert (
+        button.device_info["name"]
+        == const.COVER_TYPE_DISPLAY[entry.data[const.CONF_SENSOR_TYPE]]
+    )
     assert button.unique_id == "uid_Reset"
 
 
@@ -129,10 +139,17 @@ def test_binary_sensor_is_on(entity_module, binary_sensor_module):
 def test_sensor_native_value(entity_module, sensor_module):
     """Validate sensor entities expose the expected values."""
     entry = make_entry()
-    states = {"state": 55, "start": "2025-01-01", "end": "2025-01-02", "control": "auto"}
+    states = {
+        "state": 55,
+        "start": "2025-01-01",
+        "end": "2025-01-02",
+        "control": "auto",
+    }
     coord = DummyCoordinator(states=states, attrs={"foo": "bar"})
 
-    sensor = sensor_module.AdaptiveCoverSensorEntity("uid", None, entry, entry.data["name"], coord)
+    sensor = sensor_module.AdaptiveCoverSensorEntity(
+        "uid", None, entry, entry.data["name"], coord
+    )
     assert sensor.native_value == 55
     assert sensor.extra_state_attributes == {"foo": "bar"}
 
@@ -148,7 +165,9 @@ def test_sensor_native_value(entity_module, sensor_module):
     )
     assert time_sensor.native_value == states["start"]
 
-    control_sensor = sensor_module.AdaptiveCoverControlSensorEntity("uid", None, entry, entry.data["name"], coord)
+    control_sensor = sensor_module.AdaptiveCoverControlSensorEntity(
+        "uid", None, entry, entry.data["name"], coord
+    )
     assert control_sensor.native_value == "auto"
 
 
@@ -156,7 +175,9 @@ def test_switch_initial_state(entity_module, switch_module):
     """Check initial attributes of the manual override switch."""
     entry = make_entry()
     coord = DummyCoordinator()
-    switch = switch_module.AdaptiveCoverSwitch(entry, "uid", "Manual", True, "manual_toggle", coord)
+    switch = switch_module.AdaptiveCoverSwitch(
+        entry, "uid", "Manual", True, "manual_toggle", coord
+    )
 
     assert isinstance(switch, entity_module.AdaptiveCoverEntity)
     assert switch.name == "Manual " + entry.data["name"]
