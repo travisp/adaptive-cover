@@ -11,7 +11,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import DOMAIN, FORCE_MODE
 from .coordinator import AdaptiveDataUpdateCoordinator
 
-OPTIONS = ["auto", "force open", "force close"]
+OPTIONS = ["auto", "force_open", "force_close"]
 
 
 async def async_setup_entry(

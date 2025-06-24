@@ -403,8 +403,8 @@
       "name": "Forceermodus",
       "options": {
         "auto": "Auto",
-        "force open": "Openen afdwingen",
-        "force close": "Sluiten afdwingen"
+        "force_open": "Openen afdwingen",
+        "force_close": "Sluiten afdwingen"
       }
     }
   }
