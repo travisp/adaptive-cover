@@ -5,7 +5,6 @@
       "user": {
         "data": {
           "name": "Naam",
-          "blueprint": "Voeg blueprint toe aan HomeAssistant",
           "mode": "Type zonwering"
         }
       },
