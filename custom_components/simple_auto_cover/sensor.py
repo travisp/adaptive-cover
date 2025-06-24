@@ -11,13 +11,13 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import PERCENTAGE
+from homeassistant.const import CONF_NAME, PERCENTAGE
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.device_registry import DeviceEntryType
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN
+from .const import CONF_SENSOR_TYPE, DOMAIN
 from .coordinator import AdaptiveDataUpdateCoordinator
 from .entity import AdaptiveCoverEntity
 
@@ -29,7 +29,7 @@ async def async_setup_entry(
 ) -> None:
     """Initialize Simple Auto Cover config entry."""
 
-    name = config_entry.data["name"]
+    name = config_entry.data[CONF_NAME]
     coordinator: AdaptiveDataUpdateCoordinator = hass.data[DOMAIN][
         config_entry.entry_id
     ]
@@ -145,7 +145,7 @@ class AdaptiveCoverTimeSensorEntity(AdaptiveCoverEntity, SensorEntity):
         self.hass = hass
         self.config_entry = config_entry
         self._name = name
-        self._cover_type = self.config_entry.data["sensor_type"]
+        self._cover_type = self.config_entry.data[CONF_SENSOR_TYPE]
         self._sensor_name = sensor_name
         self._attr_device_info = DeviceInfo(
             entry_type=DeviceEntryType.SERVICE,
@@ -196,7 +196,7 @@ class AdaptiveCoverControlSensorEntity(AdaptiveCoverEntity, SensorEntity):
         self.hass = hass
         self.config_entry = config_entry
         self._name = name
-        self._cover_type = self.config_entry.data["sensor_type"]
+        self._cover_type = self.config_entry.data[CONF_SENSOR_TYPE]
         self._attr_device_info = DeviceInfo(
             entry_type=DeviceEntryType.SERVICE,
             identifiers={(DOMAIN, self._device_id)},

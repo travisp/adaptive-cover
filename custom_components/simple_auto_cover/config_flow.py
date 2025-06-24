@@ -14,6 +14,7 @@ from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import selector
 
+from homeassistant.const import CONF_NAME
 from .const import (
     CONF_AWNING_ANGLE,
     CONF_AZIMUTH,
@@ -58,8 +59,11 @@ from .const import (
     CONF_TILT_MODE,
     DOMAIN,
     COVER_TYPE_DISPLAY,
+    STRATEGY_MODE_BASIC,
     SensorType,
     CONF_MIN_POSITION,
+    CONF_ENABLE_MAX_POSITION,
+    CONF_ENABLE_MIN_POSITION,
 )
 
 # DEFAULT_NAME = "Simple Auto Cover"
@@ -69,7 +73,7 @@ SENSOR_TYPE_MENU = [SensorType.BLIND, SensorType.AWNING, SensorType.TILT]
 
 CONFIG_SCHEMA = vol.Schema(
     {
-        vol.Required("name"): selector.TextSelector(),
+        vol.Required(CONF_NAME): selector.TextSelector(),
         vol.Optional(CONF_MODE): selector.SelectSelector(
             selector.SelectSelectorConfig(
                 options=SENSOR_TYPE_MENU, translation_key="mode"
@@ -91,17 +95,21 @@ OPTIONS = vol.Schema(
                 min=0, max=100, step=1, mode="slider", unit_of_measurement="%"
             )
         ),
-        vol.Optional(CONF_MAX_POSITION): vol.All(
-            vol.Coerce(int), vol.Range(min=1, max=100)
+        # Use raw selectors for optional numbers so missing values skip validation
+        # rather than failing the Coerce step.
+        vol.Optional(CONF_MAX_POSITION): selector.NumberSelector(
+            selector.NumberSelectorConfig(min=1, max=100, mode="slider")
         ),
-        vol.Optional(CONF_MIN_POSITION): vol.All(
-            vol.Coerce(int), vol.Range(min=0, max=99)
+        vol.Optional(CONF_ENABLE_MAX_POSITION, default=False): bool,
+        vol.Optional(CONF_MIN_POSITION): selector.NumberSelector(
+            selector.NumberSelectorConfig(min=0, max=99, mode="slider")
         ),
-        vol.Optional(CONF_MIN_ELEVATION): vol.All(
-            vol.Coerce(int), vol.Range(min=0, max=90)
+        vol.Optional(CONF_ENABLE_MIN_POSITION, default=False): bool,
+        vol.Optional(CONF_MIN_ELEVATION): selector.NumberSelector(
+            selector.NumberSelectorConfig(min=0, max=90, mode="slider")
         ),
-        vol.Optional(CONF_MAX_ELEVATION): vol.All(
-            vol.Coerce(int), vol.Range(min=0, max=90)
+        vol.Optional(CONF_MAX_ELEVATION): selector.NumberSelector(
+            selector.NumberSelectorConfig(min=0, max=90, mode="slider")
         ),
         vol.Required(CONF_FOV_LEFT, default=90): selector.NumberSelector(
             selector.NumberSelectorConfig(
@@ -220,8 +228,8 @@ AUTOMATION_CONFIG = vol.Schema(
             CONF_MANUAL_OVERRIDE_DURATION, default={"minutes": 15}
         ): selector.DurationSelector(),
         vol.Required(CONF_MANUAL_OVERRIDE_RESET, default=False): bool,
-        vol.Optional(CONF_MANUAL_THRESHOLD): vol.All(
-            vol.Coerce(int), vol.Range(min=0, max=99)
+        vol.Optional(CONF_MANUAL_THRESHOLD): selector.NumberSelector(
+            selector.NumberSelectorConfig(min=0, max=99, mode="slider")
         ),
         vol.Optional(CONF_MANUAL_IGNORE_INTERMEDIATE, default=False): bool,
         vol.Optional(CONF_END_TIME, default="00:00:00"): selector.TimeSelector(),
@@ -234,11 +242,11 @@ AUTOMATION_CONFIG = vol.Schema(
 
 INTERPOLATION_OPTIONS = vol.Schema(
     {
-        vol.Optional(CONF_INTERP_START): vol.All(
-            vol.Coerce(int), vol.Range(min=0, max=100)
+        vol.Optional(CONF_INTERP_START): selector.NumberSelector(
+            selector.NumberSelectorConfig(min=0, max=100, mode="slider")
         ),
-        vol.Optional(CONF_INTERP_END): vol.All(
-            vol.Coerce(int), vol.Range(min=0, max=100)
+        vol.Optional(CONF_INTERP_END): selector.NumberSelector(
+            selector.NumberSelectorConfig(min=0, max=100, mode="slider")
         ),
         vol.Optional(CONF_INTERP_LIST, default=[]): selector.SelectSelector(
             selector.SelectSelectorConfig(
@@ -275,7 +283,7 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
         super().__init__()
         self.type_blind: str | None = None
         self.config: dict[str, Any] = {}
-        self.mode: str = "basic"
+        self.mode: str = STRATEGY_MODE_BASIC
 
     @staticmethod
     @callback
@@ -388,8 +396,8 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
                         mode="slider", unit_of_measurement="°", min=1, max=edges
                     )
                 ),
-                vol.Optional(CONF_BLIND_SPOT_ELEVATION): vol.All(
-                    vol.Coerce(int), vol.Range(min=0, max=90)
+                vol.Optional(CONF_BLIND_SPOT_ELEVATION): selector.NumberSelector(
+                    selector.NumberSelectorConfig(min=0, max=90, mode="slider")
                 ),
             }
         )
@@ -417,9 +425,9 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
     async def async_step_update(self, user_input: dict[str, Any] | None = None):
         """Create entry."""
         return self.async_create_entry(
-            title=f"{COVER_TYPE_DISPLAY[self.type_blind]} {self.config['name']}",
+            title=f"{COVER_TYPE_DISPLAY[self.type_blind]} {self.config[CONF_NAME]}",
             data={
-                "name": self.config["name"],
+                CONF_NAME: self.config[CONF_NAME],
                 CONF_SENSOR_TYPE: self.type_blind,
             },
             options={
@@ -640,8 +648,8 @@ class OptionsFlowHandler(OptionsFlow):
                         mode="slider", unit_of_measurement="°", min=1, max=edges
                     )
                 ),
-                vol.Optional(CONF_BLIND_SPOT_ELEVATION): vol.All(
-                    vol.Coerce(int), vol.Range(min=0, max=90)
+                vol.Optional(CONF_BLIND_SPOT_ELEVATION): selector.NumberSelector(
+                    selector.NumberSelectorConfig(min=0, max=90, mode="slider")
                 ),
             }
         )

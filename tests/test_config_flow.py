@@ -1,18 +1,10 @@
 """Tests for the config flow helpers."""
 
-import importlib
-import sys
-from pathlib import Path
 import pytest
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-for mod in ["numpy", "pandas", "pytz", "dateutil", "dateutil.parser"]:
-    sys.modules.pop(mod, None)
-importlib.invalidate_caches()
 
 try:
     import custom_components.simple_auto_cover.config_flow as cf
-except Exception as exc:
+except Exception as exc:  # pragma: no cover - import failure should fail test
     pytest.fail(f"Failed to import config flow: {exc}")
 
 

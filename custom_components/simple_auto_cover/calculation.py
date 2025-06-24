@@ -14,6 +14,37 @@ from .config_context_adapter import ConfigContextAdapter
 
 
 @dataclass
+class CoverConfig:
+    """Parameters for adaptive cover calculations."""
+
+    sunset_pos: int | None = 0
+    sunset_off: int | None = 0
+    sunrise_off: int | None = 0
+    timezone: str | None = "UTC"
+    fov_left: int | None = 0
+    fov_right: int | None = 0
+    win_azi: int | None = 0
+    h_def: int | None = 0
+    max_pos: int | None = 100
+    min_pos: int | None = 0
+    max_pos_bool: bool | None = False
+    min_pos_bool: bool | None = False
+    blind_spot_left: int | None = None
+    blind_spot_right: int | None = None
+    blind_spot_elevation: int | None = None
+    blind_spot_on: bool | None = False
+    min_elevation: int | None = None
+    max_elevation: int | None = None
+    distance: float | None = None
+    h_win: float | None = None
+    awn_length: float | None = None
+    awn_angle: float | None = None
+    slat_distance: float | None = None
+    depth: float | None = None
+    mode: str | None = None
+
+
+@dataclass(init=False)
 class AdaptiveGeneralCover(ABC):
     """Collect common data."""
 
@@ -31,8 +62,8 @@ class AdaptiveGeneralCover(ABC):
     h_def: int
     max_pos: int
     min_pos: int
-    max_pos_bool: bool
-    min_pos_bool: bool
+    apply_max_limit_on_sun: bool
+    apply_min_limit_on_sun: bool
     blind_spot_left: int
     blind_spot_right: int
     blind_spot_elevation: int
@@ -40,6 +71,39 @@ class AdaptiveGeneralCover(ABC):
     min_elevation: int
     max_elevation: int
     sun_data: SunData = field(init=False)
+
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        logger: ConfigContextAdapter,
+        sol_azi: float,
+        sol_elev: float,
+        config: CoverConfig,
+    ) -> None:
+        """Initialize with environment and configuration."""
+        self.hass = hass
+        self.logger = logger
+        self.sol_azi = sol_azi
+        self.sol_elev = sol_elev
+        self.sunset_pos = config.sunset_pos
+        self.sunset_off = config.sunset_off
+        self.sunrise_off = config.sunrise_off
+        self.timezone = config.timezone
+        self.fov_left = config.fov_left
+        self.fov_right = config.fov_right
+        self.win_azi = config.win_azi
+        self.h_def = config.h_def
+        self.max_pos = config.max_pos
+        self.min_pos = config.min_pos
+        self.max_pos_bool = config.max_pos_bool
+        self.min_pos_bool = config.min_pos_bool
+        self.blind_spot_left = config.blind_spot_left
+        self.blind_spot_right = config.blind_spot_right
+        self.blind_spot_elevation = config.blind_spot_elevation
+        self.blind_spot_on = config.blind_spot_on
+        self.min_elevation = config.min_elevation
+        self.max_elevation = config.max_elevation
+        self.__post_init__()
 
     def __post_init__(self):
         """Add solar data to dataset."""
@@ -160,7 +224,7 @@ class AdaptiveGeneralCover(ABC):
     def apply_min_position(self) -> bool:
         """Check if min position is applied."""
         if self.min_pos is not None and self.min_pos != 0:
-            if self.min_pos_bool:
+            if self.apply_min_limit_on_sun:
                 return self.direct_sun_valid
             return True
         return False
@@ -169,7 +233,7 @@ class AdaptiveGeneralCover(ABC):
     def apply_max_position(self) -> bool:
         """Check if max position is applied."""
         if self.max_pos is not None and self.max_pos != 100:
-            if self.max_pos_bool:
+            if self.apply_max_limit_on_sun:
                 return self.direct_sun_valid
             return True
         return False
@@ -218,12 +282,25 @@ class NormalCoverState:
         return result
 
 
-@dataclass
+@dataclass(init=False)
 class AdaptiveVerticalCover(AdaptiveGeneralCover):
     """Calculate state for Vertical blinds."""
 
     distance: float
     h_win: float
+
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        logger: ConfigContextAdapter,
+        sol_azi: float,
+        sol_elev: float,
+        config: CoverConfig,
+    ) -> None:
+        """Initialize vertical cover parameters."""
+        super().__init__(hass, logger, sol_azi, sol_elev, config)
+        self.distance = config.distance
+        self.h_win = config.h_win
 
     def calculate_position(self) -> float:
         """Calculate blind height."""
@@ -245,12 +322,25 @@ class AdaptiveVerticalCover(AdaptiveGeneralCover):
         return round(result)
 
 
-@dataclass
+@dataclass(init=False)
 class AdaptiveHorizontalCover(AdaptiveVerticalCover):
     """Calculate state for Horizontal blinds."""
 
     awn_length: float
     awn_angle: float
+
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        logger: ConfigContextAdapter,
+        sol_azi: float,
+        sol_elev: float,
+        config: CoverConfig,
+    ) -> None:
+        """Initialize horizontal cover parameters."""
+        super().__init__(hass, logger, sol_azi, sol_elev, config)
+        self.awn_length = config.awn_length
+        self.awn_angle = config.awn_angle
 
     def calculate_position(self) -> float:
         """Calculate awn length from blind height."""
@@ -271,13 +361,27 @@ class AdaptiveHorizontalCover(AdaptiveVerticalCover):
         return round(result)
 
 
-@dataclass
+@dataclass(init=False)
 class AdaptiveTiltCover(AdaptiveGeneralCover):
     """Calculate state for tilted blinds."""
 
     slat_distance: float
     depth: float
     mode: str
+
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        logger: ConfigContextAdapter,
+        sol_azi: float,
+        sol_elev: float,
+        config: CoverConfig,
+    ) -> None:
+        """Initialize tilt cover parameters."""
+        super().__init__(hass, logger, sol_azi, sol_elev, config)
+        self.slat_distance = config.slat_distance
+        self.depth = config.depth
+        self.mode = config.mode
 
     @property
     def beta(self):
