@@ -178,3 +178,27 @@ def test_switch_initial_state(entity_module, switch_module):
     assert isinstance(switch, entity_module.AdaptiveCoverEntity)
     assert switch.name == "Manual " + entry.data[CONF_NAME]
     assert switch.unique_id == "uid_Manual"
+
+
+def test_control_sensor_manual(sensor_module):
+    """Control sensor reports manual mode."""
+    entry = make_entry()
+    states = {"control": "manual"}
+    coord = DummyCoordinator(states=states)
+    control_sensor = sensor_module.AdaptiveCoverControlSensorEntity(
+        "uid", None, entry, entry.data[CONF_NAME], coord
+    )
+
+    assert control_sensor.native_value == "manual"
+
+
+def test_control_sensor_force(sensor_module):
+    """Control sensor reports force mode."""
+    entry = make_entry()
+    states = {"control": "force"}
+    coord = DummyCoordinator(states=states)
+    control_sensor = sensor_module.AdaptiveCoverControlSensorEntity(
+        "uid", None, entry, entry.data[CONF_NAME], coord
+    )
+
+    assert control_sensor.native_value == "force"

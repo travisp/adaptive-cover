@@ -189,7 +189,7 @@ These entities are always available:
 | Entities | Default | Description |
 | --------------------------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `sensor.{type}_cover_position_{name}` | | Reflects the current state determined by predefined settings and factors such as sun position, weather, and temperature |
-| `sensor.{type}_control_method_{name}` | `intermediate` | Indicates the active control strategy based on weather conditions. Options include `winter`, `summer`, and `intermediate` |
+| `sensor.{type}_control_method_{name}` | `auto` | Indicates the active control mode. Values are `auto`, `force`, and `manual`. |
 | `sensor.{type}_start_sun_{name}` | | Shows the starting time when the sun enters the window's view, with an interval of every 5 minutes. |
 | `sensor.{type}_end_sun_{name}` | | Indicates the ending time when the sun exits the window's view, with an interval of every 5 minutes. |
 | `binary_sensor.{type}_manual_override_{name}` | `off` | Indicates if manual override is engaged for any blinds. |
