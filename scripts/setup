@@ -2,10 +2,8 @@
 set -e
 cd "$(dirname "$0")/.."
 
-# Install development requirements using Poetry
-# This will install both main and dev dependencies from the lock file
-echo "Installing project dependencies with Poetry..."
-poetry install --with dev
+echo "Installing project dependencies with UV..."
+uv pip sync
 
 poetry env activate
 
