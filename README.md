@@ -202,7 +202,6 @@ These entities are always available:
 ## Features Planned
 
 - Manual override controls
-
   - ~~Time to revert back to adaptive control~~
   - ~~Reset button~~
   - Wait until next manual/none adaptive change

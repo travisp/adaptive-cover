@@ -9,6 +9,6 @@ poetry install --with dev
 
 # Setup git commit hooks
 echo "Installing pre-commit hooks..."
-pre-commit install --install-hooks
+poetry run pre-commit install --install-hooks
 
 echo "Setup complete. You can now activate the virtual environment with 'poetry env activate' or 'poetry run'."
