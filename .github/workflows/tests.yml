@@ -13,11 +13,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
+      - uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install pre_commit
-          pip install pre_commit
           scripts/setup
       - name: Run tests
-        run: scripts/test
+        run: poetry run scripts/test
