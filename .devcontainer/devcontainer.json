@@ -41,6 +41,6 @@
   "forwardPorts": [8123],
   "image": "mcr.microsoft.com/devcontainers/python:3.12",
   "name": "Simple Auto Cover Dev-env",
-  "postCreateCommand": "scripts/setup",
+  "postCreateCommand": "pip install uv && scripts/setup",
   "remoteUser": "vscode"
 }
