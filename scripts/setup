@@ -2,15 +2,12 @@
 set -e
 cd "$(dirname "$0")/.."
 
-# Install development requirements using Poetry
-# This will install both main and dev dependencies from the lock file
-echo "Installing project dependencies with Poetry..."
-poetry install --with dev
+echo "Installing project dependencies with UV..."
+uv sync --no-progress --all-groups
 
-poetry env activate
 
 # Setup git commit hooks
 echo "Installing pre-commit hooks..."
-poetry run pre-commit install --install-hooks
+uv run pre-commit install --install-hooks
 
-echo "Setup complete. You can now activate the virtual environment with 'poetry env activate' or 'poetry run'."
+echo "Setup complete. You can now run commands with 'uv run' or activate the '.venv' virtual environment."

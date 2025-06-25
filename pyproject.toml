@@ -1,49 +1,57 @@
-[tool.poetry]
-authors = ["Travis Pew"]
-classifiers = [
-  "Development Status :: 3 - Alpha",
-  "Framework :: AsyncIO",
-  "Intended Audience :: Developers",
-  "Natural Language :: English",
-  "Programming Language :: Python :: 3.13",
-  "Programming Language :: Python :: 3",
-]
-description = "Simple Auto Cover"
-documentation = "https://github.com/travisp/adaptive-cover"
-homepage = "https://github.com/travisp/adaptive-cover"
-license = "MIT"
-maintainers = ["Travis Pew"]
+[project]
 name = "simple_auto_cover"
-readme = "README.md"
-repository = "https://github.com/travisp/adaptive-cover"
 version = "2.0.0"
-packages = [{include = "simple_auto_cover", from = "custom_components"}]
+description = "Simple Auto Cover"
+authors = [{ name = "Travis Pew" }]
+requires-python = ">=3.13.2,<3.14"
+readme = "README.md"
+license = "MIT"
+maintainers = [{ name = "Travis Pew" }]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: AsyncIO",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3",
+]
+dependencies = ["homeassistant==2025.6.3"]
 
-[tool.poetry.dependencies]
-homeassistant = "2025.6.3"
-python = ">=3.13.2,<3.14"
-
-[tool.poetry.group.dev.dependencies]
-pre-commit = "4.2.0"
-pre-commit-hooks = "5.0.0"
-pylint = "3.3.1"
-ruff = "0.6.9"
-pytest = "8.3.5"
-pytest-homeassistant-custom-component = "0.13.254"
-numpy = "*"
-python-dateutil = "*"
-colorlog = "^6.8"
-pvlib = "^0.11"
-matplotlib = "^3.9"
-ipykernel = "^6.29"
-
-[tool.poetry.urls]
+[project.urls]
+Homepage = "https://github.com/travisp/adaptive-cover"
+Repository = "https://github.com/travisp/adaptive-cover"
+Documentation = "https://github.com/travisp/adaptive-cover"
 "Bug Tracker" = "https://github.com/travisp/adaptive-cover/issues"
 Changelog = "https://github.com/travisp/adaptive-cover/releases"
 
+[dependency-groups]
+dev = [
+    "pre-commit==4.2.0",
+    "pre-commit-hooks==5.0.0",
+    "pylint==3.3.1",
+    "ruff==0.6.9",
+    "pytest==8.3.5",
+    "pytest-homeassistant-custom-component==0.13.254",
+    "numpy",
+    "python-dateutil",
+    "colorlog~=6.8",
+    "pvlib>=0.11,<0.12",
+    "matplotlib~=3.9",
+    "ipykernel~=6.29",
+]
+
+[tool.hatch.build.targets.sdist]
+include = ["custom_components/simple_auto_cover"]
+
+[tool.hatch.build.targets.wheel]
+include = ["custom_components/simple_auto_cover"]
+
+[tool.hatch.build.targets.wheel.sources]
+"custom_components/simple_auto_cover" = "simple_auto_cover"
+
 [build-system]
-build-backend = "poetry.core.masonry.api"
-requires = ["poetry-core"]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.ruff]
 ignore = [
