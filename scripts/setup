@@ -7,6 +7,8 @@ cd "$(dirname "$0")/.."
 echo "Installing project dependencies with Poetry..."
 poetry install --with dev
 
+poetry env activate
+
 # Setup git commit hooks
 echo "Installing pre-commit hooks..."
 poetry run pre-commit install --install-hooks
