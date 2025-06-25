@@ -45,8 +45,9 @@ People _love_ thorough bug reports. I'm not even kidding.
 ## Use a Consistent Coding Style
 
 Use [ruff](https://docs.astral.sh/ruff/) to check formatting and linting. Run
-`scripts/lint` (which runs `ruff check . --fix`) to automatically format your
-code and ensure it meets the project's style guidelines.
+`scripts/lint` (which runs `ruff format .` followed by `ruff check . --fix`) to
+automatically format your code and ensure it meets the project's style
+guidelines.
 
 ## Test your code modification
 

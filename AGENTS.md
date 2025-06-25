@@ -4,8 +4,8 @@ This file defines conventions for automated tools contributing to this repositor
 
 ## Development workflow
 
-- **Formatting and linting**: run `scripts/lint` to automatically format the
-  codebase using `ruff`.
+- **Formatting and linting**: run `scripts/lint` to automatically format and
+  lint the codebase using `ruff`.
 - **Testing**: run `scripts/test` to execute the pytest suite.
 - Add or update tests when modifying functionality or fixing bugs.
 - Include helpful comments for any complicated logic.
