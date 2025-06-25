@@ -402,8 +402,8 @@
       "name": "Force mode",
       "options": {
         "auto": "Auto",
-        "force open": "Force open",
-        "force close": "Force close"
+        "force_open": "Force open",
+        "force_close": "Force close"
       }
     }
   }

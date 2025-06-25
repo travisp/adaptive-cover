@@ -673,10 +673,10 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
     @property
     def state(self) -> int:
         """Return the calculated shade position."""
-        if self.force_mode == "force open":
+        if self.force_mode == "force_open":
             state = 100
             self.logger.debug("Force open position: %s", state)
-        elif self.force_mode == "force close":
+        elif self.force_mode == "force_close":
             state = 0
             self.logger.debug("Force close position: %s", state)
         else:
