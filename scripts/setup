@@ -3,12 +3,11 @@ set -e
 cd "$(dirname "$0")/.."
 
 echo "Installing project dependencies with UV..."
-uv pip sync
+uv sync --no-progress --all-groups 
 
-poetry env activate
 
 # Setup git commit hooks
 echo "Installing pre-commit hooks..."
-poetry run pre-commit install --install-hooks
+uv run pre-commit install --install-hooks
 
 echo "Setup complete. You can now activate the virtual environment with 'poetry env activate' or 'poetry run'."
