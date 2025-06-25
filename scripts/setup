@@ -10,4 +10,4 @@ uv sync --no-progress --all-groups
 echo "Installing pre-commit hooks..."
 uv run pre-commit install --install-hooks
 
-echo "Setup complete. You can now activate the virtual environment with 'poetry env activate' or 'poetry run'."
+echo "Setup complete. You can now run commands with 'uv run' or activate the '.venv' virtual environment."

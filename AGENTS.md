@@ -12,7 +12,7 @@ This file defines conventions for automated tools contributing to this repositor
 - Provide docstrings for all functions and classes.
 - If these scripts fail because dependencies are missing or the environment lacks
   internet access, note it in the PR testing section.
-- If poetry is installed, which it should be, all commands should be prefixed with `poetry run`. So really run `poetry run scripts/lint` and `poetry run scripts/test`. Or alternatively activate `poetry env activate`
+- If uv is installed, prefix commands with `uv run`. So run `uv run scripts/lint` and `uv run scripts/test`. Alternatively, activate the `.venv` created by `scripts/setup`.
 
 ## Pull request message
 
