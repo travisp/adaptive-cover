@@ -26,10 +26,18 @@ repos:
       - id: check-yaml
         args:
           - --unsafe
+  - repo: https://github.com/python-poetry/poetry
+    rev: 2.1.3
+    hooks:
+      - id: poetry-check
+      - id: poetry-lock
+      - id: poetry-install
   - repo: https://github.com/rbubley/mirrors-prettier
     rev: v3.5.3
     hooks:
       - id: prettier
         name: 🎨 Format using prettier
+        additional_dependencies:
+          - prettier@3.5.3
 default_language_version:
-  node: system
+  node: 20.11.1

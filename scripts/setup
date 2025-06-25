@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
-
 set -e
-
 cd "$(dirname "$0")/.."
 
-# Install development requirements
-python3 -m pip install --requirement requirements-dev.txt
+# Install development requirements using Poetry
+# This will install both main and dev dependencies from the lock file
+echo "Installing project dependencies with Poetry..."
+poetry install --with dev
 
 # Setup git commit hooks
-pre-commit install
+echo "Installing pre-commit hooks..."
+pre-commit install --install-hooks
+
+echo "Setup complete. You can now activate the virtual environment with 'poetry env activate' or 'poetry run'."

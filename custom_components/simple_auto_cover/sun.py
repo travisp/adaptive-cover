@@ -21,7 +21,9 @@ class SunData:
         """Return 5 minute intervals from midnight today to tomorrow."""
         start_date = date.today()
         end_date = start_date + timedelta(days=1)
-        start_time = datetime.combine(start_date, datetime.min.time(), tzinfo=self.timezone)
+        start_time = datetime.combine(
+            start_date, datetime.min.time(), tzinfo=self.timezone
+        )
         end_time = datetime.combine(end_date, datetime.min.time(), tzinfo=self.timezone)
 
         times = []

@@ -3,7 +3,6 @@
 import pytest
 
 
-
 @pytest.fixture
 def calculation():
     """Provide the calculation module used in tests."""
