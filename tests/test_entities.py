@@ -53,6 +53,14 @@ def switch_module():
     return switch
 
 
+@pytest.fixture
+def select_module():
+    """Return the select module for import testing."""
+    import custom_components.simple_auto_cover.select as select
+
+    return select
+
+
 class DummyCoordinator:
     """Simplified coordinator for entity tests."""
 
@@ -178,3 +186,15 @@ def test_switch_initial_state(entity_module, switch_module):
     assert isinstance(switch, entity_module.AdaptiveCoverEntity)
     assert switch.name == "Manual " + entry.data[CONF_NAME]
     assert switch.unique_id == "uid_Manual"
+
+
+def test_select_initialization(entity_module, select_module):
+    """Validate select entity inherits from the base and is named correctly."""
+    entry = make_entry()
+    coord = DummyCoordinator()
+
+    select = select_module.SimpleAutoCoverSelect(entry, coord)
+
+    assert isinstance(select, entity_module.AdaptiveCoverEntity)
+    assert select.name == "Force mode " + entry.data[CONF_NAME]
+    assert select.unique_id == f"{entry.entry_id}_force_mode"
