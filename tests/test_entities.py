@@ -188,6 +188,30 @@ def test_switch_initial_state(entity_module, switch_module):
     assert switch.unique_id == "uid_Manual"
 
 
+def test_control_sensor_manual(sensor_module):
+    """Control sensor reports manual mode."""
+    entry = make_entry()
+    states = {"control": "manual"}
+    coord = DummyCoordinator(states=states)
+    control_sensor = sensor_module.AdaptiveCoverControlSensorEntity(
+        "uid", None, entry, entry.data[CONF_NAME], coord
+    )
+
+    assert control_sensor.native_value == "manual"
+
+
+def test_control_sensor_force(sensor_module):
+    """Control sensor reports force mode."""
+    entry = make_entry()
+    states = {"control": "force"}
+    coord = DummyCoordinator(states=states)
+    control_sensor = sensor_module.AdaptiveCoverControlSensorEntity(
+        "uid", None, entry, entry.data[CONF_NAME], coord
+    )
+
+    assert control_sensor.native_value == "force"
+
+    
 def test_select_initialization(entity_module, select_module):
     """Validate select entity inherits from the base and is named correctly."""
     entry = make_entry()
@@ -198,3 +222,4 @@ def test_select_initialization(entity_module, select_module):
     assert isinstance(select, entity_module.AdaptiveCoverEntity)
     assert select.name == "Force mode " + entry.data[CONF_NAME]
     assert select.unique_id == f"{entry.entry_id}_force_mode"
+
