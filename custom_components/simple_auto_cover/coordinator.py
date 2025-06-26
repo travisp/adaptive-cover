@@ -140,7 +140,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         self.cover_state_change = False
         self.first_refresh = False
         self.timed_refresh = False
-        self.control_method = "intermediate"
+        self.control_method = "auto"
         self.state_change_data: StateChangedData | None = None
         self.manager = AdaptiveCoverManager(self.manual_duration, self.logger)
         self.wait_for_target = {}
@@ -276,8 +276,6 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         # Update manager with covers
         self._update_manager_and_covers()
 
-        self.logger.debug("Control method is %s", self.control_method)
-
         # calculate the state of the cover
         self.normal_cover_state = NormalCoverState(cover_data)
         self.logger.debug(
@@ -289,6 +287,14 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         state = self.state
 
         await self.manager.reset_if_needed()
+
+        if self.manager.binary_cover_manual:
+            self.control_method = "manual"
+        elif self.force_mode != "auto":
+            self.control_method = "force"
+        else:
+            self.control_method = "auto"
+        self.logger.debug("Control method is %s", self.control_method)
 
         if (
             self._end_time
