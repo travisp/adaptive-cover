@@ -32,7 +32,7 @@ async def async_setup_entry(
     manual_switch = AdaptiveCoverSwitch(
         config_entry,
         config_entry.entry_id,
-        "Manual Override",
+        "Allow Manual Override",
         True,
         "manual_toggle",
         coordinator,
@@ -77,7 +77,7 @@ class AdaptiveCoverSwitch(AdaptiveCoverEntity, SwitchEntity, RestoreEntity):
         self._switch_name = switch_name
         self._attr_device_class = device_class
         self._initial_state = initial_state
-        self._attr_unique_id = f"{unique_id}_{switch_name}"
+        self._attr_unique_id = f"{unique_id}_{key}"
 
         self.coordinator.logger.debug("Setup switch")
 

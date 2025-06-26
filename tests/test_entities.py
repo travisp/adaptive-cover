@@ -172,9 +172,33 @@ def test_switch_initial_state(entity_module, switch_module):
     entry = make_entry()
     coord = DummyCoordinator()
     switch = switch_module.AdaptiveCoverSwitch(
-        entry, "uid", "Manual", True, "manual_toggle", coord
+        entry,
+        "uid",
+        "Allow Manual Override",
+        True,
+        "manual_toggle",
+        coord,
     )
 
     assert isinstance(switch, entity_module.AdaptiveCoverEntity)
-    assert switch.name == "Manual " + entry.data[CONF_NAME]
-    assert switch.unique_id == "uid_Manual"
+    assert switch.name == "Allow Manual Override " + entry.data[CONF_NAME]
+    assert switch.unique_id == "uid_manual_toggle"
+
+
+@pytest.mark.asyncio
+async def test_switch_async_setup_entry(switch_module):
+    """Verify switch setup via platform helper."""
+    entry = make_entry()
+    hass = types.SimpleNamespace(data={DOMAIN: {entry.entry_id: DummyCoordinator()}})
+    added: list = []
+
+    await switch_module.async_setup_entry(hass, entry, added.extend)
+
+    assert [e.name for e in added] == [
+        f"Toggle Control {entry.data[CONF_NAME]}",
+        f"Allow Manual Override {entry.data[CONF_NAME]}",
+    ]
+    assert sorted(e.unique_id for e in added) == [
+        f"{entry.entry_id}_control_toggle",
+        f"{entry.entry_id}_manual_toggle",
+    ]
