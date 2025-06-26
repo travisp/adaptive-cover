@@ -189,7 +189,6 @@ def test_switch_initial_state(entity_module, switch_module):
     )
 
     assert isinstance(switch, entity_module.AdaptiveCoverEntity)
-<<<<<<< 0kbwhy-codex/update-label-to--allow-manual-override
     assert switch.name == "Allow Manual Override " + entry.data[CONF_NAME]
     assert switch.unique_id == "uid_manual_toggle"
 
@@ -211,9 +210,6 @@ async def test_switch_async_setup_entry(switch_module):
         f"{entry.entry_id}_control_toggle",
         f"{entry.entry_id}_manual_toggle",
     ]
-=======
-    assert switch.name == "Manual " + entry.data[CONF_NAME]
-    assert switch.unique_id == "uid_Manual"
 
 
 def test_control_sensor_manual(sensor_module):
@@ -251,4 +247,3 @@ def test_select_initialization(entity_module, select_module):
     assert select.name == "Force mode " + entry.data[CONF_NAME]
     assert select.unique_id == f"{entry.entry_id}_force_mode"
 
->>>>>>> mini-cover
