@@ -32,7 +32,7 @@ async def async_setup_entry(
     manual_switch = AdaptiveCoverSwitch(
         config_entry,
         config_entry.entry_id,
-        "Manual Override",
+        "Allow Manual Override",
         True,
         "manual_toggle",
         coordinator,

@@ -172,9 +172,14 @@ def test_switch_initial_state(entity_module, switch_module):
     entry = make_entry()
     coord = DummyCoordinator()
     switch = switch_module.AdaptiveCoverSwitch(
-        entry, "uid", "Manual", True, "manual_toggle", coord
+        entry,
+        "uid",
+        "Allow Manual Override",
+        True,
+        "manual_toggle",
+        coord,
     )
 
     assert isinstance(switch, entity_module.AdaptiveCoverEntity)
-    assert switch.name == "Manual " + entry.data[CONF_NAME]
-    assert switch.unique_id == "uid_Manual"
+    assert switch.name == "Allow Manual Override " + entry.data[CONF_NAME]
+    assert switch.unique_id == "uid_Allow Manual Override"
