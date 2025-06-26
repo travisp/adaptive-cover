@@ -198,6 +198,7 @@
         "menu_options": {
           "automation": "Wijzig Automatiseringsinstellingen",
           "blind": "Pas parameters van de zonwering aan",
+          "blind_spot": "Configureer schaduwzone",
           "interp": "Pas bereik aan"
         }
       },
@@ -342,8 +343,6 @@
           "default_percentage": "Standaard bekledingspositie als percentage",
           "min_position": "Minimale verstelbare bekledingspositie als percentage",
           "max_position": "Maximale verstelbare bekledingspositie als percentage",
-          "enable_min_position": "Forceer alleen de minimale positie wanneer de zon voor het raam staat",
-          "enable_max_position": "Forceer alleen de maximale positie wanneer de zon voor het raam staat",
           "fov_left": "Gradaties om te overwegen vanaf de linkerkant van het raamcentrum",
           "fov_right": "Gradaties om te overwegen vanaf de rechterkant van het raamcentrum",
           "group": "Selecteer entiteiten om te besturen via integratie",
