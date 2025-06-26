@@ -88,7 +88,7 @@ from .const import (
     SensorType,
 )
 from .helpers import get_datetime_from_str, get_last_updated, get_safe_state
-from .cover_manager import AdaptiveCoverManager
+from .cover_manager import SimpleAutoCoverManager
 
 
 @dataclass
@@ -101,16 +101,18 @@ class StateChangedData:
 
 
 @dataclass
-class AdaptiveCoverData:
-    """AdaptiveCoverData class."""
+class SimpleAutoCoverData:
+    """SimpleAutoCoverData class."""
 
     climate_mode_toggle: bool
     states: dict
     attributes: dict
 
 
-class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
-    """Adaptive cover data update coordinator."""
+class SimpleAutoCoverDataUpdateCoordinator(
+    DataUpdateCoordinator[SimpleAutoCoverData]
+):
+    """Simple auto cover data update coordinator."""
 
     config_entry: ConfigEntry
 
@@ -142,7 +144,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         self.timed_refresh = False
         self.control_method = "auto"
         self.state_change_data: StateChangedData | None = None
-        self.manager = AdaptiveCoverManager(self.manual_duration, self.logger)
+        self.manager = SimpleAutoCoverManager(self.manual_duration, self.logger)
         self.wait_for_target = {}
         self.target_call = {}
         self.ignore_intermediate_states = self.config_entry.options.get(
@@ -261,7 +263,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         )
         self._scheduled_time = self._end_time
 
-    async def _async_update_data(self) -> AdaptiveCoverData:
+    async def _async_update_data(self) -> SimpleAutoCoverData:
         self.logger.debug("Updating data")
         if self.first_refresh:
             self._cached_options = self.config_entry.options
@@ -321,7 +323,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
             self.logger.debug("Sun start time: %s, Sun end time: %s", start, end)
         else:
             start, end = self._sun_start_time, self._sun_end_time
-        return AdaptiveCoverData(
+        return SimpleAutoCoverData(
             climate_mode_toggle=False,
             states={
                 "state": state,

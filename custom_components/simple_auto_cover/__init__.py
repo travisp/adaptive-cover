@@ -15,7 +15,7 @@ from .const import (
     DOMAIN,
     _LOGGER,
 )
-from .coordinator import AdaptiveDataUpdateCoordinator
+from .coordinator import SimpleAutoCoverDataUpdateCoordinator
 
 PLATFORMS = [
     Platform.SENSOR,
@@ -41,7 +41,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     hass.data.setdefault(DOMAIN, {})
 
-    coordinator = AdaptiveDataUpdateCoordinator(hass)
+    coordinator = SimpleAutoCoverDataUpdateCoordinator(hass)
     _cover_entities = entry.options.get(CONF_ENTITIES, [])
     _end_time_entity = entry.options.get(CONF_END_ENTITY)
     _entities = ["sun.sun"]

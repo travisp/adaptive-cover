@@ -15,8 +15,8 @@ from .const import (
     CONF_ENTITIES,
     DOMAIN,
 )
-from .coordinator import AdaptiveDataUpdateCoordinator
-from .entity import AdaptiveCoverEntity
+from .coordinator import SimpleAutoCoverDataUpdateCoordinator
+from .entity import SimpleAutoCoverEntity
 
 
 async def async_setup_entry(
@@ -25,11 +25,11 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the demo switch platform."""
-    coordinator: AdaptiveDataUpdateCoordinator = hass.data[DOMAIN][
+    coordinator: SimpleAutoCoverDataUpdateCoordinator = hass.data[DOMAIN][
         config_entry.entry_id
     ]
 
-    manual_switch = AdaptiveCoverSwitch(
+    manual_switch = SimpleAutoCoverSwitch(
         config_entry,
         config_entry.entry_id,
         "Manual Override",
@@ -37,7 +37,7 @@ async def async_setup_entry(
         "manual_toggle",
         coordinator,
     )
-    control_switch = AdaptiveCoverSwitch(
+    control_switch = SimpleAutoCoverSwitch(
         config_entry,
         config_entry.entry_id,
         "Toggle Control",
@@ -53,7 +53,7 @@ async def async_setup_entry(
     async_add_entities(switches)
 
 
-class AdaptiveCoverSwitch(AdaptiveCoverEntity, SwitchEntity, RestoreEntity):
+class SimpleAutoCoverSwitch(SimpleAutoCoverEntity, SwitchEntity, RestoreEntity):
     """Representation of a simple auto cover switch."""
 
     _attr_has_entity_name = True
@@ -66,7 +66,7 @@ class AdaptiveCoverSwitch(AdaptiveCoverEntity, SwitchEntity, RestoreEntity):
         switch_name: str,
         initial_state: bool,
         key: str,
-        coordinator: AdaptiveDataUpdateCoordinator,
+        coordinator: SimpleAutoCoverDataUpdateCoordinator,
         device_class: SwitchDeviceClass | None = None,
     ) -> None:
         """Initialize the switch."""
