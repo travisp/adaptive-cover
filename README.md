@@ -57,7 +57,7 @@ Restart Home-Assistant and add the integration.
 
 ### Manual
 
-Download the `adaptive_cover` folder from this github.
+Download the `simple_auto_cover` folder from this github.
 Add the folder to `config/custom_components/`.
 
 Restart Home-Assistant and add the integration.
@@ -195,7 +195,7 @@ These entities are always available:
 | `binary_sensor.{type}_manual_override_{name}` | `off` | Indicates if manual override is engaged for any blinds. |
 | `binary_sensor.{type}_sun_infront_{name}` | `off` | Indicates whether the sun is in front of the window within the designated field of view. |
 | `switch.{type}_toggle_control_{name}` | `on` | Activates the adaptive control feature. When enabled, blinds adjust based on calculated position, unless manually overridden. |
-| `switch.{type}_manual_override_{name}` | `on` | Enables detection of manual overrides. A cover is marked if its position differs from the calculated one, resetting to adaptive control after a set duration. |
+| `switch.{type}_manual_override_{name}` | `on` | Allows detection of manual overrides. A cover is marked if its position differs from the calculated one, resetting to adaptive control after a set duration. |
 | `button.{type}_reset_manual_override_{name}` | `on` | Resets manual override tags for all covers; if `switch.{type}_toggle_control_{name}` is on, it also restores blinds to their correct positions. |
 | `select.{type}_force_mode_{name}` | `auto` | Forces the covers to be fully open or closed regardless of normal calculations. Options are `auto`, `force_open`, and `force_close`. |
 
@@ -210,4 +210,4 @@ These entities are always available:
 
 ### Simulation
 
-![combined_simulation](custom_components/adaptive_cover/simulation/sim_plot.png)
+![combined_simulation](custom_components/simple_auto_cover/simulation/sim_plot.png)
