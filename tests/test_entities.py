@@ -235,7 +235,7 @@ def test_control_sensor_force(sensor_module):
 
     assert control_sensor.native_value == "force"
 
-    
+
 def test_select_initialization(entity_module, select_module):
     """Validate select entity inherits from the base and is named correctly."""
     entry = make_entry()
