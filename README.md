@@ -105,6 +105,7 @@ This component provides a simple `basic` strategy for positioning shades based s
       BJ --> BM
       BM --> |"force_open"| BN["Return fully open"]
       BM --> |"force_close"| BO["Return fully closed"]
+      BM --> |"force_no_sunny_area"| BQ["No sunny area"]
       BM --> |auto| BP["Return computed position"]
   end
 ```
@@ -197,7 +198,7 @@ These entities are always available:
 | `switch.{type}_toggle_control_{name}` | `on` | Activates the adaptive control feature. When enabled, blinds adjust based on calculated position, unless manually overridden. |
 | `switch.{type}_manual_override_{name}` | `on` | Enables detection of manual overrides. A cover is marked if its position differs from the calculated one, resetting to adaptive control after a set duration. |
 | `button.{type}_reset_manual_override_{name}` | `on` | Resets manual override tags for all covers; if `switch.{type}_toggle_control_{name}` is on, it also restores blinds to their correct positions. |
-| `select.{type}_force_mode_{name}` | `auto` | Forces the covers to be fully open or closed regardless of normal calculations. Options are `auto`, `force_open`, and `force_close`. |
+| `select.{type}_force_mode_{name}` | `auto` | Forces the covers to be fully open or closed regardless of normal calculations. Options are `auto`, `force_open`, `force_close`, and `force_no_sunny_area`. |
 
 ## Features Planned
 

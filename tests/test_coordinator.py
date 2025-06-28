@@ -198,3 +198,16 @@ def test_interpolate_states_full_range(module):
     coord.normal_list = []
     coord.new_list = []
     assert coord.interpolate_states(50) == 50
+
+
+def test_vertical_data_force_no_sunny_area(module):
+    """Distance is set to zero when forcing no sunny area."""
+    from custom_components.simple_auto_cover.const import CONF_DISTANCE, CONF_HEIGHT_WIN, FORCE_NO_SUNNY_AREA
+
+    coord, _ = make_coordinator(module)
+    coord.force_mode = FORCE_NO_SUNNY_AREA
+    options = {CONF_DISTANCE: 0.5, CONF_HEIGHT_WIN: 2.0}
+    config = module.CoverConfig()
+    coord.vertical_data(options, config)
+
+    assert config.distance == 0

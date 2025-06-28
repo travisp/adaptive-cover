@@ -9,10 +9,10 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .entity import AdaptiveCoverEntity
 
-from .const import DOMAIN, FORCE_MODE
+from .const import DOMAIN, FORCE_MODE, FORCE_NO_SUNNY_AREA
 from .coordinator import AdaptiveDataUpdateCoordinator
 
-OPTIONS = ["auto", "force_open", "force_close"]
+OPTIONS = ["auto", "force_open", "force_close", FORCE_NO_SUNNY_AREA]
 
 
 async def async_setup_entry(

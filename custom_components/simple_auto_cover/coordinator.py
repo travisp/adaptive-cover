@@ -82,6 +82,7 @@ from .const import (
     CONF_TILT_DEPTH,
     CONF_TILT_DISTANCE,
     CONF_TILT_MODE,
+    FORCE_NO_SUNNY_AREA,
     CONF_SENSOR_TYPE,
     DOMAIN,
     LOGGER,
@@ -659,7 +660,10 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
 
     def vertical_data(self, options, config):
         """Update data for vertical blinds."""
-        config.distance = options.get(CONF_DISTANCE)
+        if self.force_mode == FORCE_NO_SUNNY_AREA:
+            config.distance = 0
+        else:
+            config.distance = options.get(CONF_DISTANCE)
         config.h_win = options.get(CONF_HEIGHT_WIN)
         return config
 
