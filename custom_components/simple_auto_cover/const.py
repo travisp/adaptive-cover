@@ -58,6 +58,7 @@ CONF_MANUAL_THRESHOLD = "manual_threshold"
 CONF_MANUAL_IGNORE_INTERMEDIATE = "manual_ignore_intermediate"
 
 FORCE_MODE = "force_mode"
+FORCE_NO_SUNNY_AREA = "force_no_sunny_area"
 
 STRATEGY_MODE_BASIC = "basic"
 STRATEGY_MODES = [STRATEGY_MODE_BASIC]
