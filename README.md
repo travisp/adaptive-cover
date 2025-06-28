@@ -57,7 +57,7 @@ Restart Home-Assistant and add the integration.
 
 ### Manual
 
-Download the `adaptive_cover` folder from this github.
+Download the `simple_auto_cover` folder from this github.
 Add the folder to `config/custom_components/`.
 
 Restart Home-Assistant and add the integration.
@@ -210,4 +210,4 @@ These entities are always available:
 
 ### Simulation
 
-![combined_simulation](custom_components/adaptive_cover/simulation/sim_plot.png)
+![combined_simulation](custom_components/simple_auto_cover/simulation/sim_plot.png)
