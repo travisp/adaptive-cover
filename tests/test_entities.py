@@ -188,7 +188,7 @@ def test_switch_initial_state(entity_module, switch_module):
         coord,
     )
 
-    assert isinstance(switch, entity_module.AdaptiveCoverEntity)
+    assert isinstance(switch, entity_module.SimpleAutoCoverEntity)
     assert switch.name == "Allow Manual Override " + entry.data[CONF_NAME]
     assert switch.unique_id == "uid_manual_toggle"
 
