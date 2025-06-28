@@ -14,8 +14,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import DOMAIN
-from .coordinator import AdaptiveDataUpdateCoordinator
-from .entity import AdaptiveCoverEntity
+from .coordinator import SimpleAutoCoverDataUpdateCoordinator
+from .entity import SimpleAutoCoverEntity
 
 
 async def async_setup_entry(
@@ -24,11 +24,11 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the Simple Auto Cover binary sensor platform."""
-    coordinator: AdaptiveDataUpdateCoordinator = hass.data[DOMAIN][
+    coordinator: SimpleAutoCoverDataUpdateCoordinator = hass.data[DOMAIN][
         config_entry.entry_id
     ]
 
-    binary_sensor = AdaptiveCoverBinarySensor(
+    binary_sensor = SimpleAutoCoverBinarySensor(
         config_entry,
         config_entry.entry_id,
         "Sun Infront",
@@ -37,7 +37,7 @@ async def async_setup_entry(
         BinarySensorDeviceClass.MOTION,
         coordinator,
     )
-    manual_override = AdaptiveCoverBinarySensor(
+    manual_override = SimpleAutoCoverBinarySensor(
         config_entry,
         config_entry.entry_id,
         "Manual Override",
@@ -49,7 +49,7 @@ async def async_setup_entry(
     async_add_entities([binary_sensor, manual_override])
 
 
-class AdaptiveCoverBinarySensor(AdaptiveCoverEntity, BinarySensorEntity):
+class SimpleAutoCoverBinarySensor(SimpleAutoCoverEntity, BinarySensorEntity):
     """Representation of a simple auto cover binary sensor."""
 
     _attr_has_entity_name = True
@@ -63,7 +63,7 @@ class AdaptiveCoverBinarySensor(AdaptiveCoverEntity, BinarySensorEntity):
         state: bool,
         key: str,
         device_class: BinarySensorDeviceClass,
-        coordinator: AdaptiveDataUpdateCoordinator,
+        coordinator: SimpleAutoCoverDataUpdateCoordinator,
     ) -> None:
         """Initialize the binary sensor."""
         super().__init__(config_entry, unique_id, coordinator)

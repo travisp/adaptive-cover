@@ -7,17 +7,17 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import CONF_SENSOR_TYPE, COVER_TYPE_DISPLAY, DOMAIN
-from .coordinator import AdaptiveDataUpdateCoordinator
+from .coordinator import SimpleAutoCoverDataUpdateCoordinator
 
 
-class AdaptiveCoverEntity(CoordinatorEntity[AdaptiveDataUpdateCoordinator]):
+class SimpleAutoCoverEntity(CoordinatorEntity[SimpleAutoCoverDataUpdateCoordinator]):
     """Common entity base class for Simple Auto Cover."""
 
     def __init__(
         self,
         config_entry,
         unique_id: str,
-        coordinator: AdaptiveDataUpdateCoordinator,
+        coordinator: SimpleAutoCoverDataUpdateCoordinator,
     ) -> None:
         """Initialize the entity."""
         super().__init__(coordinator=coordinator)

@@ -18,8 +18,8 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import CONF_SENSOR_TYPE, DOMAIN
-from .coordinator import AdaptiveDataUpdateCoordinator
-from .entity import AdaptiveCoverEntity
+from .coordinator import SimpleAutoCoverDataUpdateCoordinator
+from .entity import SimpleAutoCoverEntity
 
 
 async def async_setup_entry(
@@ -30,14 +30,14 @@ async def async_setup_entry(
     """Initialize Simple Auto Cover config entry."""
 
     name = config_entry.data[CONF_NAME]
-    coordinator: AdaptiveDataUpdateCoordinator = hass.data[DOMAIN][
+    coordinator: SimpleAutoCoverDataUpdateCoordinator = hass.data[DOMAIN][
         config_entry.entry_id
     ]
 
-    sensor = AdaptiveCoverSensorEntity(
+    sensor = SimpleAutoCoverSensorEntity(
         config_entry.entry_id, hass, config_entry, name, coordinator
     )
-    start = AdaptiveCoverTimeSensorEntity(
+    start = SimpleAutoCoverTimeSensorEntity(
         config_entry.entry_id,
         hass,
         config_entry,
@@ -47,7 +47,7 @@ async def async_setup_entry(
         "mdi:sun-clock-outline",
         coordinator,
     )
-    end = AdaptiveCoverTimeSensorEntity(
+    end = SimpleAutoCoverTimeSensorEntity(
         config_entry.entry_id,
         hass,
         config_entry,
@@ -57,13 +57,13 @@ async def async_setup_entry(
         "mdi:sun-clock",
         coordinator,
     )
-    control = AdaptiveCoverControlSensorEntity(
+    control = SimpleAutoCoverControlSensorEntity(
         config_entry.entry_id, hass, config_entry, name, coordinator
     )
     async_add_entities([sensor, start, end, control])
 
 
-class AdaptiveCoverSensorEntity(AdaptiveCoverEntity, SensorEntity):
+class SimpleAutoCoverSensorEntity(SimpleAutoCoverEntity, SensorEntity):
     """Simple Auto Cover Sensor."""
 
     _attr_state_class = SensorStateClass.MEASUREMENT
@@ -78,7 +78,7 @@ class AdaptiveCoverSensorEntity(AdaptiveCoverEntity, SensorEntity):
         hass,
         config_entry,
         name: str,
-        coordinator: AdaptiveDataUpdateCoordinator,
+        coordinator: SimpleAutoCoverDataUpdateCoordinator,
     ) -> None:
         """Initialize simple_auto_cover Sensor."""
         super().__init__(config_entry, unique_id, coordinator)
@@ -116,7 +116,7 @@ class AdaptiveCoverSensorEntity(AdaptiveCoverEntity, SensorEntity):
         return self.data.attributes
 
 
-class AdaptiveCoverTimeSensorEntity(AdaptiveCoverEntity, SensorEntity):
+class SimpleAutoCoverTimeSensorEntity(SimpleAutoCoverEntity, SensorEntity):
     """Simple Auto Cover Time Sensor."""
 
     _attr_device_class = SensorDeviceClass.TIMESTAMP
@@ -132,7 +132,7 @@ class AdaptiveCoverTimeSensorEntity(AdaptiveCoverEntity, SensorEntity):
         sensor_name: str,
         key: str,
         icon: str,
-        coordinator: AdaptiveDataUpdateCoordinator,
+        coordinator: SimpleAutoCoverDataUpdateCoordinator,
     ) -> None:
         """Initialize simple_auto_cover Sensor."""
         super().__init__(config_entry, unique_id, coordinator)
@@ -170,7 +170,7 @@ class AdaptiveCoverTimeSensorEntity(AdaptiveCoverEntity, SensorEntity):
         return self.data.states[self.key]
 
 
-class AdaptiveCoverControlSensorEntity(AdaptiveCoverEntity, SensorEntity):
+class SimpleAutoCoverControlSensorEntity(SimpleAutoCoverEntity, SensorEntity):
     """Simple Auto Cover Control method Sensor."""
 
     _attr_has_entity_name = True
@@ -183,7 +183,7 @@ class AdaptiveCoverControlSensorEntity(AdaptiveCoverEntity, SensorEntity):
         hass,
         config_entry,
         name: str,
-        coordinator: AdaptiveDataUpdateCoordinator,
+        coordinator: SimpleAutoCoverDataUpdateCoordinator,
     ) -> None:
         """Initialize simple_auto_cover Sensor."""
         super().__init__(config_entry, unique_id, coordinator)

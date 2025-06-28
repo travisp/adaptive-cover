@@ -7,10 +7,10 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .entity import AdaptiveCoverEntity
+from .entity import SimpleAutoCoverEntity
 
 from .const import DOMAIN, FORCE_MODE, FORCE_NO_SUNNY_AREA
-from .coordinator import AdaptiveDataUpdateCoordinator
+from .coordinator import SimpleAutoCoverDataUpdateCoordinator
 
 OPTIONS = ["auto", "force_open", "force_close", FORCE_NO_SUNNY_AREA]
 
@@ -21,11 +21,11 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the select entity."""
-    coordinator: AdaptiveDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator: SimpleAutoCoverDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
     async_add_entities([SimpleAutoCoverSelect(entry, coordinator)])
 
 
-class SimpleAutoCoverSelect(AdaptiveCoverEntity, SelectEntity):
+class SimpleAutoCoverSelect(SimpleAutoCoverEntity, SelectEntity):
     """Select entity to force cover position."""
 
     _attr_options = OPTIONS
@@ -35,7 +35,7 @@ class SimpleAutoCoverSelect(AdaptiveCoverEntity, SelectEntity):
     def __init__(
         self,
         entry: ConfigEntry,
-        coordinator: AdaptiveDataUpdateCoordinator,
+        coordinator: SimpleAutoCoverDataUpdateCoordinator,
     ) -> None:
         """Initialize the select entity."""
         super().__init__(entry, entry.entry_id, coordinator)

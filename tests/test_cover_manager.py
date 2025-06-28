@@ -1,4 +1,4 @@
-"""Tests for AdaptiveCoverManager."""
+"""Tests for SimpleAutoCoverManager."""
 
 from __future__ import annotations
 
@@ -27,10 +27,10 @@ def state_data_class(coordinator):
 
 
 def make_manager(manager_module, seconds=30):
-    """Create an AdaptiveCoverManager instance for testing."""
+    """Create an SimpleAutoCoverManager instance for testing."""
 
     logger = types.SimpleNamespace(debug=lambda *a, **k: None)
-    return manager_module.AdaptiveCoverManager({"seconds": seconds}, logger)
+    return manager_module.SimpleAutoCoverManager({"seconds": seconds}, logger)
 
 
 def make_state(entity_id: str, position: int, cover_type: str | SensorType = "cover"):

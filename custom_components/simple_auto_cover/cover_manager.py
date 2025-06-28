@@ -8,11 +8,11 @@ from homeassistant.util import dt as dt_util
 from .const import SensorType
 
 
-class AdaptiveCoverManager:
+class SimpleAutoCoverManager:
     """Track position changes."""
 
     def __init__(self, reset_duration: dict[str, int], logger) -> None:
-        """Initialize the AdaptiveCoverManager."""
+        """Initialize the SimpleAutoCoverManager."""
         self.covers: set[str] = set()
 
         self.manual_control: dict[str, bool] = {}

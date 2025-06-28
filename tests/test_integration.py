@@ -109,7 +109,7 @@ async def test_initialize_and_lifecycle(monkeypatch):
     monkeypatch.setattr(
         sac, "async_track_state_change_event", dummy_track_state_change_event
     )
-    monkeypatch.setattr(sac, "AdaptiveDataUpdateCoordinator", DummyCoordinator)
+    monkeypatch.setattr(sac, "SimpleAutoCoverDataUpdateCoordinator", DummyCoordinator)
 
     assert await sac.async_initialize_integration(hass) is True
 
