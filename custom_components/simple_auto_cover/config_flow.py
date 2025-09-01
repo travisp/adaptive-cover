@@ -83,183 +83,223 @@ CONFIG_SCHEMA = vol.Schema(
 )
 
 
-OPTIONS = vol.Schema(
-    {
-        vol.Required(CONF_AZIMUTH, default=180): selector.NumberSelector(
-            selector.NumberSelectorConfig(
-                min=0, max=359, mode="slider", unit_of_measurement="°"
-            )
+def _get_options_schema(options: dict | None = None) -> vol.Schema:
+    """Return the base options schema."""
+    options = options or {}
+    schema: dict = {
+        vol.Required(CONF_AZIMUTH, default=options.get(CONF_AZIMUTH, 180)): selector.NumberSelector(
+            selector.NumberSelectorConfig(min=0, max=359, mode="slider", unit_of_measurement="°")
         ),
-        vol.Required(CONF_DEFAULT_HEIGHT, default=60): selector.NumberSelector(
-            selector.NumberSelectorConfig(
-                min=0, max=100, step=1, mode="slider", unit_of_measurement="%"
-            )
+        vol.Required(CONF_DEFAULT_HEIGHT, default=options.get(CONF_DEFAULT_HEIGHT, 60)): selector.NumberSelector(
+            selector.NumberSelectorConfig(min=0, max=100, step=1, mode="slider", unit_of_measurement="%")
         ),
-        # Use raw selectors for optional numbers so missing values skip validation
-        # rather than failing the Coerce step.
-        vol.Optional(CONF_MAX_POSITION): selector.NumberSelector(
+        vol.Optional(CONF_ENABLE_MAX_POSITION, default=options.get(CONF_ENABLE_MAX_POSITION, False)): bool,
+        vol.Optional(CONF_ENABLE_MIN_POSITION, default=options.get(CONF_ENABLE_MIN_POSITION, False)): bool,
+        vol.Required(CONF_FOV_LEFT, default=options.get(CONF_FOV_LEFT, 90)): selector.NumberSelector(
+            selector.NumberSelectorConfig(min=1, max=90, step=1, mode="slider", unit_of_measurement="°")
+        ),
+        vol.Required(CONF_FOV_RIGHT, default=options.get(CONF_FOV_RIGHT, 90)): selector.NumberSelector(
+            selector.NumberSelectorConfig(min=1, max=90, step=1, mode="slider", unit_of_measurement="°")
+        ),
+        vol.Required(CONF_SUNSET_POS, default=options.get(CONF_SUNSET_POS, 0)): selector.NumberSelector(
+            selector.NumberSelectorConfig(min=0, max=100, step=1, mode="slider", unit_of_measurement="%")
+        ),
+        vol.Required(CONF_SUNSET_OFFSET, default=options.get(CONF_SUNSET_OFFSET, 0)): selector.NumberSelector(
+            selector.NumberSelectorConfig(mode="box", unit_of_measurement="minutes")
+        ),
+        vol.Required(CONF_SUNRISE_OFFSET, default=options.get(CONF_SUNRISE_OFFSET, 0)): selector.NumberSelector(
+            selector.NumberSelectorConfig(mode="box", unit_of_measurement="minutes")
+        ),
+        vol.Required(CONF_INVERSE_STATE, default=options.get(CONF_INVERSE_STATE, False)): bool,
+        vol.Required(CONF_ENABLE_BLIND_SPOT, default=options.get(CONF_ENABLE_BLIND_SPOT, False)): bool,
+        vol.Required(CONF_INTERP, default=options.get(CONF_INTERP, False)): bool,
+    }
+    if (val := options.get(CONF_MAX_POSITION)) is not None:
+        schema[vol.Optional(CONF_MAX_POSITION, default=val)] = selector.NumberSelector(
             selector.NumberSelectorConfig(min=1, max=100, mode="slider")
-        ),
-        vol.Optional(CONF_ENABLE_MAX_POSITION, default=False): bool,
-        vol.Optional(CONF_MIN_POSITION): selector.NumberSelector(
+        )
+    else:
+        schema[vol.Optional(CONF_MAX_POSITION)] = selector.NumberSelector(
+            selector.NumberSelectorConfig(min=1, max=100, mode="slider")
+        )
+    if (val := options.get(CONF_MIN_POSITION)) is not None:
+        schema[vol.Optional(CONF_MIN_POSITION, default=val)] = selector.NumberSelector(
             selector.NumberSelectorConfig(min=0, max=99, mode="slider")
-        ),
-        vol.Optional(CONF_ENABLE_MIN_POSITION, default=False): bool,
-        vol.Optional(CONF_MIN_ELEVATION): selector.NumberSelector(
-            selector.NumberSelectorConfig(min=0, max=90, mode="slider")
-        ),
-        vol.Optional(CONF_MAX_ELEVATION): selector.NumberSelector(
-            selector.NumberSelectorConfig(min=0, max=90, mode="slider")
-        ),
-        vol.Required(CONF_FOV_LEFT, default=90): selector.NumberSelector(
-            selector.NumberSelectorConfig(
-                min=1, max=90, step=1, mode="slider", unit_of_measurement="°"
-            )
-        ),
-        vol.Required(CONF_FOV_RIGHT, default=90): selector.NumberSelector(
-            selector.NumberSelectorConfig(
-                min=1, max=90, step=1, mode="slider", unit_of_measurement="°"
-            )
-        ),
-        vol.Required(CONF_SUNSET_POS, default=0): selector.NumberSelector(
-            selector.NumberSelectorConfig(
-                min=0, max=100, step=1, mode="slider", unit_of_measurement="%"
-            )
-        ),
-        vol.Required(CONF_SUNSET_OFFSET, default=0): selector.NumberSelector(
-            selector.NumberSelectorConfig(mode="box", unit_of_measurement="minutes")
-        ),
-        vol.Required(CONF_SUNRISE_OFFSET, default=0): selector.NumberSelector(
-            selector.NumberSelectorConfig(mode="box", unit_of_measurement="minutes")
-        ),
-        vol.Required(CONF_INVERSE_STATE, default=False): bool,
-        vol.Required(CONF_ENABLE_BLIND_SPOT, default=False): bool,
-        vol.Required(CONF_INTERP, default=False): bool,
-    }
-)
-
-VERTICAL_OPTIONS = vol.Schema(
-    {
-        vol.Optional(CONF_ENTITIES, default=[]): selector.EntitySelector(
-            selector.EntitySelectorConfig(
-                multiple=True,
-                filter=selector.EntityFilterSelectorConfig(
-                    domain="cover",
-                    supported_features=["cover.CoverEntityFeature.SET_POSITION"],
-                ),
-            )
-        ),
-        vol.Required(CONF_HEIGHT_WIN, default=2.1): selector.NumberSelector(
-            selector.NumberSelectorConfig(
-                min=0.1, max=6, step=0.01, mode="slider", unit_of_measurement="m"
-            )
-        ),
-        vol.Required(CONF_DISTANCE, default=0.5): selector.NumberSelector(
-            selector.NumberSelectorConfig(
-                min=0.1, max=2, step=0.1, mode="slider", unit_of_measurement="m"
-            )
-        ),
-    }
-).extend(OPTIONS.schema)
-
-
-HORIZONTAL_OPTIONS = vol.Schema(
-    {
-        vol.Required(CONF_LENGTH_AWNING, default=2.1): selector.NumberSelector(
-            selector.NumberSelectorConfig(
-                min=0.3, max=6, step=0.01, mode="slider", unit_of_measurement="m"
-            )
-        ),
-        vol.Required(CONF_AWNING_ANGLE, default=0): selector.NumberSelector(
-            selector.NumberSelectorConfig(
-                min=0, max=45, mode="slider", unit_of_measurement="°"
-            )
-        ),
-    }
-).extend(VERTICAL_OPTIONS.schema)
-
-TILT_OPTIONS = vol.Schema(
-    {
-        vol.Optional(CONF_ENTITIES, default=[]): selector.EntitySelector(
-            selector.EntitySelectorConfig(
-                multiple=True,
-                filter=selector.EntityFilterSelectorConfig(
-                    domain="cover",
-                    supported_features=["cover.CoverEntityFeature.SET_TILT_POSITION"],
-                ),
-            )
-        ),
-        vol.Required(CONF_TILT_DEPTH, default=3): selector.NumberSelector(
-            selector.NumberSelectorConfig(
-                min=0.1, max=15, step=0.1, mode="slider", unit_of_measurement="cm"
-            )
-        ),
-        vol.Required(CONF_TILT_DISTANCE, default=2): selector.NumberSelector(
-            selector.NumberSelectorConfig(
-                min=0.1, max=15, step=0.1, mode="slider", unit_of_measurement="cm"
-            )
-        ),
-        vol.Required(CONF_TILT_MODE, default="mode2"): selector.SelectSelector(
-            selector.SelectSelectorConfig(
-                options=["mode1", "mode2"], translation_key="tilt_mode"
-            )
-        ),
-    }
-).extend(OPTIONS.schema)
-
-
-AUTOMATION_CONFIG = vol.Schema(
-    {
-        vol.Required(CONF_DELTA_POSITION, default=1): selector.NumberSelector(
-            selector.NumberSelectorConfig(
-                min=1, max=90, step=1, mode="slider", unit_of_measurement="%"
-            )
-        ),
-        vol.Optional(CONF_DELTA_TIME, default=2): selector.NumberSelector(
-            selector.NumberSelectorConfig(
-                min=2, mode="box", unit_of_measurement="minutes"
-            )
-        ),
-        vol.Optional(CONF_START_TIME, default="00:00:00"): selector.TimeSelector(),
-        vol.Optional(CONF_START_ENTITY): selector.EntitySelector(
-            selector.EntitySelectorConfig(domain=["sensor", "input_datetime"])
-        ),
-        vol.Required(
-            CONF_MANUAL_OVERRIDE_DURATION, default={"minutes": 15}
-        ): selector.DurationSelector(),
-        vol.Required(CONF_MANUAL_OVERRIDE_RESET, default=False): bool,
-        vol.Optional(CONF_MANUAL_THRESHOLD): selector.NumberSelector(
+        )
+    else:
+        schema[vol.Optional(CONF_MIN_POSITION)] = selector.NumberSelector(
             selector.NumberSelectorConfig(min=0, max=99, mode="slider")
-        ),
-        vol.Optional(CONF_MANUAL_IGNORE_INTERMEDIATE, default=False): bool,
-        vol.Optional(CONF_END_TIME, default="00:00:00"): selector.TimeSelector(),
-        vol.Optional(CONF_END_ENTITY): selector.EntitySelector(
-            selector.EntitySelectorConfig(domain=["sensor", "input_datetime"])
-        ),
-        vol.Optional(CONF_RETURN_SUNSET, default=False): bool,
-    }
-)
+        )
+    if (val := options.get(CONF_MIN_ELEVATION)) is not None:
+        schema[vol.Optional(CONF_MIN_ELEVATION, default=val)] = selector.NumberSelector(
+            selector.NumberSelectorConfig(min=0, max=90, mode="slider")
+        )
+    else:
+        schema[vol.Optional(CONF_MIN_ELEVATION)] = selector.NumberSelector(
+            selector.NumberSelectorConfig(min=0, max=90, mode="slider")
+        )
+    if (val := options.get(CONF_MAX_ELEVATION)) is not None:
+        schema[vol.Optional(CONF_MAX_ELEVATION, default=val)] = selector.NumberSelector(
+            selector.NumberSelectorConfig(min=0, max=90, mode="slider")
+        )
+    else:
+        schema[vol.Optional(CONF_MAX_ELEVATION)] = selector.NumberSelector(
+            selector.NumberSelectorConfig(min=0, max=90, mode="slider")
+        )
+    return vol.Schema(schema)
 
-INTERPOLATION_OPTIONS = vol.Schema(
-    {
-        vol.Optional(CONF_INTERP_START): selector.NumberSelector(
-            selector.NumberSelectorConfig(min=0, max=100, mode="slider")
-        ),
-        vol.Optional(CONF_INTERP_END): selector.NumberSelector(
-            selector.NumberSelectorConfig(min=0, max=100, mode="slider")
-        ),
-        vol.Optional(CONF_INTERP_LIST, default=[]): selector.SelectSelector(
-            selector.SelectSelectorConfig(
-                multiple=True, custom_value=True, options=["0", "50", "100"]
-            )
-        ),
-        vol.Optional(CONF_INTERP_LIST_NEW, default=[]): selector.SelectSelector(
-            selector.SelectSelectorConfig(
-                multiple=True, custom_value=True, options=["0", "50", "100"]
-            )
-        ),
-    }
-)
+OPTIONS = _get_options_schema()
+
+def _get_vertical_options_schema(options: dict | None = None) -> vol.Schema:
+    """Return the schema for vertical blinds."""
+    options = options or {}
+    vertical = vol.Schema(
+        {
+            vol.Optional(CONF_ENTITIES, default=options.get(CONF_ENTITIES, [])): selector.EntitySelector(
+                selector.EntitySelectorConfig(
+                    multiple=True,
+                    filter=selector.EntityFilterSelectorConfig(
+                        domain="cover",
+                        supported_features=["cover.CoverEntityFeature.SET_POSITION"],
+                    ),
+                )
+            ),
+            vol.Required(CONF_HEIGHT_WIN, default=options.get(CONF_HEIGHT_WIN, 2.1)): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0.1, max=6, step=0.01, mode="slider", unit_of_measurement="m"
+                )
+            ),
+            vol.Required(CONF_DISTANCE, default=options.get(CONF_DISTANCE, 0.5)): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0.1, max=2, step=0.1, mode="slider", unit_of_measurement="m"
+                )
+            ),
+        }
+    )
+    return vertical.extend(_get_options_schema(options).schema)
+
+VERTICAL_OPTIONS = _get_vertical_options_schema()
+
+
+def _get_horizontal_options_schema(options: dict | None = None) -> vol.Schema:
+    """Return the schema for awnings."""
+    options = options or {}
+    horizontal = vol.Schema(
+        {
+            vol.Required(CONF_LENGTH_AWNING, default=options.get(CONF_LENGTH_AWNING, 2.1)): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0.3, max=6, step=0.01, mode="slider", unit_of_measurement="m"
+                )
+            ),
+            vol.Required(CONF_AWNING_ANGLE, default=options.get(CONF_AWNING_ANGLE, 0)): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0, max=45, mode="slider", unit_of_measurement="°"
+                )
+            ),
+        }
+    )
+    return horizontal.extend(_get_vertical_options_schema(options).schema)
+
+HORIZONTAL_OPTIONS = _get_horizontal_options_schema()
+
+def _get_tilt_options_schema(options: dict | None = None) -> vol.Schema:
+    """Return the schema for tilt mode."""
+    options = options or {}
+    tilt = vol.Schema(
+        {
+            vol.Optional(CONF_ENTITIES, default=options.get(CONF_ENTITIES, [])): selector.EntitySelector(
+                selector.EntitySelectorConfig(
+                    multiple=True,
+                    filter=selector.EntityFilterSelectorConfig(
+                        domain="cover",
+                        supported_features=["cover.CoverEntityFeature.SET_TILT_POSITION"],
+                    ),
+                )
+            ),
+            vol.Required(CONF_TILT_DEPTH, default=options.get(CONF_TILT_DEPTH, 3)): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0.1, max=15, step=0.1, mode="slider", unit_of_measurement="cm"
+                )
+            ),
+            vol.Required(CONF_TILT_DISTANCE, default=options.get(CONF_TILT_DISTANCE, 2)): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0.1, max=15, step=0.1, mode="slider", unit_of_measurement="cm"
+                )
+            ),
+            vol.Required(CONF_TILT_MODE, default=options.get(CONF_TILT_MODE, "mode2")): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    options=["mode1", "mode2"], translation_key="tilt_mode"
+                )
+            ),
+        }
+    )
+    return tilt.extend(_get_options_schema(options).schema)
+
+TILT_OPTIONS = _get_tilt_options_schema()
+
+
+def _get_automation_config_schema(options: dict | None = None) -> vol.Schema:
+    """Return the automation configuration schema."""
+    options = options or {}
+    return vol.Schema(
+        {
+            vol.Required(CONF_DELTA_POSITION, default=options.get(CONF_DELTA_POSITION, 1)): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=1, max=90, step=1, mode="slider", unit_of_measurement="%"
+                )
+            ),
+            vol.Optional(CONF_DELTA_TIME, default=options.get(CONF_DELTA_TIME, 2)): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=2, mode="box", unit_of_measurement="minutes"
+                )
+            ),
+            vol.Optional(CONF_START_TIME, default=options.get(CONF_START_TIME, "00:00:00")): selector.TimeSelector(),
+            vol.Optional(CONF_START_ENTITY, default=options.get(CONF_START_ENTITY)): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain=["sensor", "input_datetime"])
+            ),
+            vol.Required(
+                CONF_MANUAL_OVERRIDE_DURATION, default=options.get(CONF_MANUAL_OVERRIDE_DURATION, {"minutes": 15})
+            ): selector.DurationSelector(),
+            vol.Required(CONF_MANUAL_OVERRIDE_RESET, default=options.get(CONF_MANUAL_OVERRIDE_RESET, False)): bool,
+            vol.Optional(CONF_MANUAL_THRESHOLD, default=options.get(CONF_MANUAL_THRESHOLD)): selector.NumberSelector(
+                selector.NumberSelectorConfig(min=0, max=99, mode="slider")
+            ),
+            vol.Optional(CONF_MANUAL_IGNORE_INTERMEDIATE, default=options.get(CONF_MANUAL_IGNORE_INTERMEDIATE, False)): bool,
+            vol.Optional(CONF_END_TIME, default=options.get(CONF_END_TIME, "00:00:00")): selector.TimeSelector(),
+            vol.Optional(CONF_END_ENTITY, default=options.get(CONF_END_ENTITY)): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain=["sensor", "input_datetime"])
+            ),
+            vol.Optional(CONF_RETURN_SUNSET, default=options.get(CONF_RETURN_SUNSET, False)): bool,
+        }
+    )
+
+AUTOMATION_CONFIG = _get_automation_config_schema()
+
+def _get_interpolation_options_schema(options: dict | None = None) -> vol.Schema:
+    """Return the interpolation options schema."""
+    options = options or {}
+    return vol.Schema(
+        {
+            vol.Optional(CONF_INTERP_START, default=options.get(CONF_INTERP_START)): selector.NumberSelector(
+                selector.NumberSelectorConfig(min=0, max=100, mode="slider")
+            ),
+            vol.Optional(CONF_INTERP_END, default=options.get(CONF_INTERP_END)): selector.NumberSelector(
+                selector.NumberSelectorConfig(min=0, max=100, mode="slider")
+            ),
+            vol.Optional(CONF_INTERP_LIST, default=options.get(CONF_INTERP_LIST, [])): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    multiple=True, custom_value=True, options=["0", "50", "100"]
+                )
+            ),
+            vol.Optional(CONF_INTERP_LIST_NEW, default=options.get(CONF_INTERP_LIST_NEW, [])): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    multiple=True, custom_value=True, options=["0", "50", "100"]
+                )
+            ),
+        }
+    )
+
+INTERPOLATION_OPTIONS = _get_interpolation_options_schema()
 
 
 def _get_azimuth_edges(data) -> tuple[int, int]:
@@ -339,7 +379,7 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
         """Show basic config for vertical blinds."""
         return await self._handle_blind_step(
             user_input,
-            VERTICAL_OPTIONS,
+            _get_vertical_options_schema(),
             SensorType.BLIND,
             "vertical",
         )
@@ -348,7 +388,7 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
         """Show basic config for horizontal blinds."""
         return await self._handle_blind_step(
             user_input,
-            HORIZONTAL_OPTIONS,
+            _get_horizontal_options_schema(),
             SensorType.AWNING,
             "horizontal",
         )
@@ -357,7 +397,7 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
         """Show basic config for tilted blinds."""
         return await self._handle_blind_step(
             user_input,
-            TILT_OPTIONS,
+            _get_tilt_options_schema(),
             SensorType.TILT,
             "tilt",
         )
@@ -512,9 +552,7 @@ class OptionsFlowHandler(OptionsFlow):
             return await self._update_options()
         return self.async_show_form(
             step_id="automation",
-            data_schema=self.add_suggested_values_to_schema(
-                AUTOMATION_CONFIG, user_input or self.options
-            ),
+            data_schema=_get_automation_config_schema(self.options),
         )
 
     async def async_step_blind(self, user_input: dict[str, Any] | None = None):
@@ -529,7 +567,7 @@ class OptionsFlowHandler(OptionsFlow):
     async def async_step_vertical(self, user_input: dict[str, Any] | None = None):
         """Show basic config for vertical blinds."""
         self.type_blind = SensorType.BLIND
-        schema = VERTICAL_OPTIONS
+        schema = _get_vertical_options_schema(self.options)
         if user_input is not None:
             keys = [
                 CONF_MIN_ELEVATION,
@@ -552,15 +590,13 @@ class OptionsFlowHandler(OptionsFlow):
             return await self._update_options()
         return self.async_show_form(
             step_id="vertical",
-            data_schema=self.add_suggested_values_to_schema(
-                schema, user_input or self.options
-            ),
+            data_schema=schema,
         )
 
     async def async_step_horizontal(self, user_input: dict[str, Any] | None = None):
         """Show basic config for horizontal blinds."""
         self.type_blind = SensorType.AWNING
-        schema = HORIZONTAL_OPTIONS
+        schema = _get_horizontal_options_schema(self.options)
         if user_input is not None:
             keys = [
                 CONF_MIN_ELEVATION,
@@ -579,15 +615,13 @@ class OptionsFlowHandler(OptionsFlow):
             return await self._update_options()
         return self.async_show_form(
             step_id="horizontal",
-            data_schema=self.add_suggested_values_to_schema(
-                schema, user_input or self.options
-            ),
+            data_schema=schema,
         )
 
     async def async_step_tilt(self, user_input: dict[str, Any] | None = None):
         """Show basic config for tilted blinds."""
         self.type_blind = SensorType.TILT
-        schema = TILT_OPTIONS
+        schema = _get_tilt_options_schema(self.options)
         if user_input is not None:
             keys = [
                 CONF_MIN_ELEVATION,
@@ -606,9 +640,7 @@ class OptionsFlowHandler(OptionsFlow):
             return await self._update_options()
         return self.async_show_form(
             step_id="tilt",
-            data_schema=self.add_suggested_values_to_schema(
-                schema, user_input or self.options
-            ),
+            data_schema=schema,
         )
 
     async def async_step_interp(self, user_input: dict[str, Any] | None = None):
@@ -628,9 +660,7 @@ class OptionsFlowHandler(OptionsFlow):
             return await self._update_options()
         return self.async_show_form(
             step_id="interp",
-            data_schema=self.add_suggested_values_to_schema(
-                INTERPOLATION_OPTIONS, user_input or self.options
-            ),
+            data_schema=_get_interpolation_options_schema(self.options),
         )
 
     async def async_step_blind_spot(self, user_input: dict[str, Any] | None = None):
