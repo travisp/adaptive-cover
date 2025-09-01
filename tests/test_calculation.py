@@ -69,11 +69,25 @@ class TestVerticalCover:
         return cover
 
 
-def test_vertical_cover_calculation(module):
+@pytest.mark.parametrize(
+    "sol_azi, sol_elev, win_azi, expected_pos, expected_pct",
+    [
+        (0, 45, 0, 1.0, 50),
+        (0, 60, 0, 1.7320508075688767, 87),
+        (0, 30, 0, 0.5773502691896257, 29),
+        (30, 45, 0, 1.1547005383792512, 58),
+        (-30, 45, 0, 1.1547005383792512, 58),
+    ],
+)
+def test_vertical_cover_calculation(
+    module, sol_azi, sol_elev, win_azi, expected_pos, expected_pct
+):
     """Test calculation of the adaptive vertical cover."""
-    cover = TestVerticalCover.make_cover(module)
-    assert cover.calculate_position() == pytest.approx(1)
-    assert cover.calculate_percentage() == 50
+    cover = TestVerticalCover.make_cover(
+        module, sol_azi=sol_azi, sol_elev=sol_elev, win_azi=win_azi
+    )
+    assert cover.calculate_position() == pytest.approx(expected_pos)
+    assert cover.calculate_percentage() == expected_pct
 
 
 def test_normal_cover_state_default(module):
