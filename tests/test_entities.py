@@ -1,6 +1,7 @@
 """Unit tests for the entity helpers."""
 
 import types
+
 import pytest
 
 from homeassistant.const import CONF_NAME
@@ -178,3 +179,42 @@ def test_switch_initial_state(entity_module, switch_module):
     assert isinstance(switch, entity_module.AdaptiveCoverEntity)
     assert switch.name == "Manual " + entry.data[CONF_NAME]
     assert switch.unique_id == "uid_Manual"
+
+
+@pytest.mark.asyncio
+async def test_switch_added_to_hass_calls_base(
+    entity_module, switch_module, monkeypatch
+):
+    """Ensure switch restore still registers coordinator listeners."""
+    base_calls = []
+
+    async def fake_added_to_hass(entity):
+        """Record the base entity hook being invoked."""
+        base_calls.append(entity)
+
+    async def no_last_state():
+        """Return no restored switch state."""
+        return None
+
+    entry = make_entry()
+    coord = DummyCoordinator()
+    switch = switch_module.AdaptiveCoverSwitch(
+        entry, "uid", "Manual", True, "manual_toggle", coord
+    )
+
+    monkeypatch.setattr(
+        entity_module.AdaptiveCoverEntity,
+        "async_added_to_hass",
+        fake_added_to_hass,
+    )
+    monkeypatch.setattr(switch, "async_get_last_state", no_last_state)
+    monkeypatch.setattr(
+        switch,
+        "schedule_update_ha_state",
+        lambda: None,
+    )
+
+    await switch.async_added_to_hass()
+
+    assert base_calls == [switch]
+    assert coord.manual_toggle is True

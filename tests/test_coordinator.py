@@ -66,6 +66,18 @@ def test_get_current_position(module):
     assert coord._get_current_position("cover.test") == 30
 
 
+def test_pos_sun_returns_state_attributes(module):
+    """Verify sun attributes are read from the native state API."""
+    coord, hass = make_coordinator(module)
+
+    assert coord.pos_sun == [None, None]
+
+    hass.states["sun.sun"] = module.State(
+        "sun.sun", "above_horizon", {"azimuth": 180, "elevation": 45}
+    )
+    assert coord.pos_sun == [180, 45]
+
+
 def test_check_position(module):
     """Ensure the coordinator detects position changes."""
     coord, hass = make_coordinator(module)
