@@ -400,7 +400,6 @@
       }
     },
     "force_mode": {
-      "name": "Forceermodus",
       "options": {
         "auto": "Auto",
         "force_open": "Openen afdwingen",

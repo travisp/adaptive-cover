@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.5
+    rev: v0.16.0
     hooks:
       - id: ruff
         types_or:
@@ -15,7 +15,7 @@ repos:
           - pyi
           - jupyter
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v6.0.0
     hooks:
       - id: check-added-large-files
       - id: trailing-whitespace
@@ -27,11 +27,11 @@ repos:
         args:
           - --unsafe
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.7.15
+    rev: 0.11.32
     hooks:
       - id: uv-lock
   - repo: https://github.com/rbubley/mirrors-prettier
-    rev: v3.6.1
+    rev: v3.9.6
     hooks:
       - id: prettier
         name: 🎨 Format using prettier

@@ -399,7 +399,6 @@
       }
     },
     "force_mode": {
-      "name": "Force mode",
       "options": {
         "auto": "Auto",
         "force_open": "Force open",
