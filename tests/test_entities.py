@@ -1,6 +1,7 @@
 """Unit tests for the entity helpers."""
 
 import types
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -179,6 +180,27 @@ def test_switch_initial_state(entity_module, switch_module):
     assert isinstance(switch, entity_module.AdaptiveCoverEntity)
     assert switch.name == "Manual " + entry.data[CONF_NAME]
     assert switch.unique_id == "uid_Manual"
+
+
+@pytest.mark.asyncio
+async def test_control_switch_applies_restored_external_target(switch_module):
+    """Apply a declarative external target when control is restored at startup."""
+    entry = make_entry()
+    coord = DummyCoordinator()
+    coord.external_override = types.SimpleNamespace(target=30)
+    coord.entities = ["cover.one"]
+    coord.async_apply_target = AsyncMock()
+    switch = switch_module.AdaptiveCoverSwitch(
+        entry, "uid", "Control", True, "control_toggle", coord
+    )
+    switch.schedule_update_ha_state = lambda: None
+
+    await switch.async_turn_on(added=True)
+
+    coord.async_apply_target.assert_awaited_once_with(
+        "cover.one",
+        immediate=True,
+    )
 
 
 @pytest.mark.asyncio

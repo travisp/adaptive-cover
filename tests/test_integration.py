@@ -98,7 +98,12 @@ async def test_initialize_and_lifecycle(monkeypatch):
     """Test setup and unload of the integration entry."""
 
     hass = DummyHass()
-    entry = DummyEntry(options={sac.CONF_ENTITIES: ["cover.test"]})
+    entry = DummyEntry(
+        options={
+            sac.CONF_ENTITIES: ["cover.test"],
+            sac.CONF_OVERRIDE_ENTITY: "sensor.cover_override",
+        }
+    )
 
     track_calls = []
 
@@ -118,7 +123,10 @@ async def test_initialize_and_lifecycle(monkeypatch):
     assert entry.entry_id in hass.data[sac.DOMAIN]
     coord = hass.data[sac.DOMAIN][entry.entry_id]
     assert isinstance(coord, DummyCoordinator) and coord.first_refresh
-    assert track_calls == [["sun.sun"], ["cover.test"]]
+    assert track_calls == [
+        ["sun.sun", "sensor.cover_override"],
+        ["cover.test"],
+    ]
     assert hass.config_entries.forwarded == [(entry, sac.PLATFORMS)]
 
     listener = entry.update_listeners[0]

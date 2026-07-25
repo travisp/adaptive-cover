@@ -14,6 +14,7 @@
           "delta_time": "Minimum interval between position changes",
           "start_time": "Starting time",
           "start_entity": "Entity indicating starting time",
+          "override_entity": "External override entity",
           "manual_override_duration": "Duration of manual override",
           "manual_override_reset": "Reset Manual override duration",
           "end_time": "End time",
@@ -27,6 +28,7 @@
           "delta_time": "Minimum time interval between position changes; minimum is 2 minutes",
           "start_time": "Starting time for each day; before this time, the cover will remain stationary",
           "start_entity": "Entity representing starting time state, overriding the fixed start time set above. Useful for automating the start time with an entity",
+          "override_entity": "Entity whose state is auto, hold, or a position from 0 to 100. Numeric positions override solar control but allow manual control to win. Set its force attribute to true to override manual control.",
           "manual_override_duration": "The duration of manual control before resetting to automatic control",
           "manual_override_reset": "Option to reset the manual override duration after each manual adjustment; if disabled, the duration only applies to the first manual adjustment",
           "end_time": "Ending time for each day; after this time, the cover will remain stationary",
@@ -208,6 +210,7 @@
           "delta_time": "Minimum interval between position changes",
           "start_time": "Starting time",
           "start_entity": "Entity indicating starting time",
+          "override_entity": "External override entity",
           "manual_override_duration": "Duration of manual override",
           "manual_override_reset": "Reset Manual override duration",
           "end_time": "End time",
@@ -221,6 +224,7 @@
           "delta_time": "Minimum time interval between position changes; minimum is 2 minutes",
           "start_time": "Starting time for each day; before this time, the cover will remain stationary",
           "start_entity": "Entity representing starting time state, overriding the fixed start time set above. Useful for automating the start time with an entity",
+          "override_entity": "Entity whose state is auto, hold, or a position from 0 to 100. Numeric positions override solar control but allow manual control to win. Set its force attribute to true to override manual control.",
           "manual_override_duration": "The duration of manual control before resetting to automatic control",
           "manual_override_reset": "Option to reset the manual override duration after each manual adjustment; if disabled, the duration only applies to the first manual adjustment",
           "end_time": "Ending time for each day; after this time, the cover will remain stationary",
@@ -396,13 +400,6 @@
       "options": {
         "mode1": "single direction (0% = closed / 100% = open)",
         "mode2": "bi-directional (0% = closed / 50% = open / 100% = closed)"
-      }
-    },
-    "force_mode": {
-      "options": {
-        "auto": "Auto",
-        "force_open": "Force open",
-        "force_close": "Force close"
       }
     }
   }

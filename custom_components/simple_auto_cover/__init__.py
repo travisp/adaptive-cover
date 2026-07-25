@@ -12,6 +12,7 @@ from homeassistant.helpers.event import (
 from .const import (
     CONF_END_ENTITY,
     CONF_ENTITIES,
+    CONF_OVERRIDE_ENTITY,
     DOMAIN,
     _LOGGER,
 )
@@ -22,7 +23,6 @@ PLATFORMS = [
     Platform.SWITCH,
     Platform.BINARY_SENSOR,
     Platform.BUTTON,
-    Platform.SELECT,
 ]
 CONF_SUN = ["sun.sun"]
 
@@ -44,9 +44,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     coordinator = AdaptiveDataUpdateCoordinator(hass)
     _cover_entities = entry.options.get(CONF_ENTITIES, [])
     _end_time_entity = entry.options.get(CONF_END_ENTITY)
+    _override_entity = entry.options.get(CONF_OVERRIDE_ENTITY)
     _entities = ["sun.sun"]
-    if _end_time_entity is not None:
-        _entities.append(_end_time_entity)
+    for tracked_entity in (_end_time_entity, _override_entity):
+        if tracked_entity is not None and tracked_entity not in _entities:
+            _entities.append(tracked_entity)
 
     _LOGGER.debug("Setting up entry %s", entry.data.get(CONF_NAME))
 

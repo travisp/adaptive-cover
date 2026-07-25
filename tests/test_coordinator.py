@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import datetime as dt
 import types
+from unittest.mock import AsyncMock
+
 import pytest
 
 from custom_components.simple_auto_cover.const import SensorType
@@ -126,6 +128,88 @@ def test_check_time_delta(module):
 def test_inverse_state(module):
     """Test inversion utility for tilt covers."""
     assert module.inverse_state(20) == 80
+
+
+def test_external_position_bypasses_solar_calibration(module):
+    """Use external targets as physical Home Assistant positions."""
+    coord, _ = make_coordinator(module)
+    coord.external_override = module.ExternalOverride(
+        mode=module.OverrideMode.POSITION,
+        target=25,
+    )
+
+    assert coord.state == 25
+
+
+@pytest.mark.asyncio
+async def test_normal_external_override_respects_manual_control(module):
+    """Allow a human manual position to override a normal external target."""
+    coord, _ = make_coordinator(module)
+    coord.external_override = module.ExternalOverride(
+        mode=module.OverrideMode.POSITION,
+        target=25,
+    )
+    coord.manager = types.SimpleNamespace(is_cover_manual=lambda entity: True)
+    coord.async_set_position = AsyncMock()
+
+    await coord.async_apply_target("cover.test")
+
+    coord.async_set_position.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_forced_external_override_bypasses_manual_control(module):
+    """Apply an explicitly forced target despite human manual control."""
+    coord, _ = make_coordinator(module)
+    coord.external_override = module.ExternalOverride(
+        mode=module.OverrideMode.POSITION,
+        target=25,
+        force=True,
+    )
+    coord.manager = types.SimpleNamespace(is_cover_manual=lambda entity: True)
+    coord.async_set_position = AsyncMock()
+
+    await coord.async_apply_target("cover.test")
+
+    coord.async_set_position.assert_awaited_once_with("cover.test", 25)
+
+
+def test_control_method_precedence(module):
+    """Report disabled, forced, manual, and normal override precedence."""
+    coord, _ = make_coordinator(module)
+    coord.manager = types.SimpleNamespace(binary_cover_manual=True)
+    coord.control_toggle = True
+    coord.external_override = module.ExternalOverride(
+        mode=module.OverrideMode.POSITION,
+        target=25,
+    )
+
+    coord._update_control_method()
+    assert coord.control_method == "manual"
+
+    coord.external_override = module.ExternalOverride(
+        mode=module.OverrideMode.POSITION,
+        target=25,
+        force=True,
+    )
+    coord._update_control_method()
+    assert coord.control_method == "forced_external_override"
+
+    coord.control_toggle = False
+    coord._update_control_method()
+    assert coord.control_method == "disabled"
+
+
+@pytest.mark.asyncio
+async def test_hold_override_suppresses_commands(module):
+    """Suppress commands while the external override requests a hold."""
+    coord, _ = make_coordinator(module)
+    coord.external_override = module.ExternalOverride(mode=module.OverrideMode.HOLD)
+    coord.async_set_position = AsyncMock()
+
+    await coord.async_apply_target("cover.test")
+
+    coord.async_set_position.assert_not_awaited()
 
 
 def test_async_timed_refresh_without_end_time(module):

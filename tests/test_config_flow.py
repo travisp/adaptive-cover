@@ -105,6 +105,13 @@ async def test_blind_step_validation():
     }
 
 
+def test_automation_schema_accepts_external_override_entity():
+    """Allow a sensor entity as the external override source."""
+    data = cf.AUTOMATION_CONFIG({cf.CONF_OVERRIDE_ENTITY: "sensor.cover_override"})
+
+    assert data[cf.CONF_OVERRIDE_ENTITY] == "sensor.cover_override"
+
+
 def test_validate_elevation_range():
     """Verify the helper correctly compares min and max elevation."""
     params = {

@@ -72,6 +72,7 @@ from .const import (
     CONF_MIN_POSITION,
     CONF_ENABLE_MAX_POSITION,
     CONF_ENABLE_MIN_POSITION,
+    CONF_OVERRIDE_ENTITY,
     CONF_RETURN_SUNSET,
     CONF_START_ENTITY,
     CONF_START_TIME,
@@ -88,6 +89,7 @@ from .const import (
 )
 from .helpers import get_datetime_from_str, get_last_updated, get_safe_state
 from .cover_manager import AdaptiveCoverManager
+from .override import ExternalOverride, OverrideMode, parse_external_override
 
 
 @dataclass
@@ -128,7 +130,8 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         self._sun_end_time = None
         self._sun_start_time = None
         self._end_time: dt.datetime | None = None
-        self.force_mode = "auto"
+        self.override_entity: str | None = None
+        self.external_override = ExternalOverride(mode=OverrideMode.AUTO)
         self.manual_reset = self.config_entry.options.get(
             CONF_MANUAL_OVERRIDE_RESET, False
         )
@@ -137,9 +140,8 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         )
         self.state_change = False
         self.cover_state_change = False
-        self.first_refresh = False
         self.timed_refresh = False
-        self.control_method = "intermediate"
+        self.control_method = "solar"
         self.state_change_data: StateChangedData | None = None
         self.manager = AdaptiveCoverManager(self.manual_duration, self.logger)
         self.wait_for_target = {}
@@ -149,14 +151,6 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         )
         self._update_listener = None
         self._scheduled_time = dt.datetime.now()
-
-        self._cached_options = None
-
-    async def async_config_entry_first_refresh(self) -> None:
-        """Config entry first refresh."""
-        self.first_refresh = True
-        await super().async_config_entry_first_refresh()
-        self.logger.debug("Config entry first refresh")
 
     async def async_timed_refresh(self, event) -> None:
         """Control state at end time."""
@@ -262,11 +256,9 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
 
     async def _async_update_data(self) -> AdaptiveCoverData:
         self.logger.debug("Updating data")
-        if self.first_refresh:
-            self._cached_options = self.config_entry.options
-
         options = self.config_entry.options
         self._update_options(options)
+        self._update_external_override()
         self._update_datetime_objects()
 
         # Get data for the blind
@@ -274,8 +266,6 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
 
         # Update manager with covers
         self._update_manager_and_covers()
-
-        self.logger.debug("Control method is %s", self.control_method)
 
         # calculate the state of the cover
         self.normal_cover_state = NormalCoverState(cover_data)
@@ -297,13 +287,13 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
             await self.async_timed_end_time()
 
         # Handle types of changes
-        await self.async_handle_changes(state, options)
+        await self.async_handle_changes()
+        self._update_control_method()
 
         normal_cover = self.normal_cover_state.cover
         # Run the solar_times method in a separate thread
         if (
-            self.first_refresh
-            or self._sun_start_time is None
+            self._sun_start_time is None
             or dt_util.utcnow().date() != self._sun_start_time.date()
         ):
             self.logger.debug("Calculating solar times")
@@ -321,7 +311,6 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
                 "start": start,
                 "end": end,
                 "control": self.control_method,
-                "force": self.force_mode,
                 "sun_motion": normal_cover.valid,
                 "manual_override": self.manager.binary_cover_manual,
                 "manual_list": self.manager.manual_controlled,
@@ -336,116 +325,118 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
                     options.get(CONF_FOV_RIGHT),
                 ],
                 "blind_spot": options.get(CONF_BLIND_SPOT_ELEVATION),
+                "solar_position": self.solar_state,
+                "override_entity": self.override_entity,
+                "override_state": self.external_override.raw_state,
+                "override_target": self.external_override.target,
+                "override_force": self.external_override.force,
+                "override_reason": self.external_override.reason,
             },
         )
 
-    async def async_handle_changes(self, state: int, options) -> None:
-        """Dispatch handling for the different update scenarios."""
+    async def async_handle_changes(self) -> None:
+        """Dispatch handling for pending update types."""
         if self.state_change:
-            await self.async_handle_state_change(state, options)
+            await self.async_handle_state_change()
         if self.cover_state_change:
-            await self.async_handle_cover_state_change(state)
-        if self.first_refresh:
-            await self.async_handle_first_refresh(state, options)
+            await self.async_handle_cover_state_change()
         if self.timed_refresh:
-            await self.async_handle_timed_refresh(options)
+            await self.async_handle_timed_refresh()
 
-    async def async_handle_state_change(self, state: int, options) -> None:
-        """Handle state change from tracked entities."""
+    async def async_handle_state_change(self) -> None:
+        """Apply the current target after a tracked entity changes."""
         if self.control_toggle:
             for cover in self.entities:
-                await self.async_handle_call_service(cover, state, options)
-        else:
-            self.logger.debug("State change but control toggle is off")
+                await self.async_apply_target(cover)
         self.state_change = False
-        self.logger.debug("State change handled")
 
-    async def async_handle_cover_state_change(self, state: int) -> None:
-        """Handle state change from assigned covers."""
+    async def async_handle_cover_state_change(self) -> None:
+        """Update manual control and reapply a forced target when needed."""
+        event = self.state_change_data
+        assert event is not None
+
         if self.manual_toggle and self.control_toggle:
             self.manager.handle_state_change(
-                self.state_change_data,
-                state,
+                event,
+                self.state,
                 self._cover_type,
                 self.manual_reset,
                 self.wait_for_target,
                 self.manual_threshold,
             )
-        self.cover_state_change = False
-        self.logger.debug("Cover state change handled")
 
-    async def async_handle_first_refresh(self, state: int, options) -> None:
-        """Handle first refresh."""
-        if self.control_toggle:
-            for cover in self.entities:
-                if (
-                    self.check_adaptive_time
-                    and not self.manager.is_cover_manual(cover)
-                    and self.check_position_delta(cover, state, options)
-                ):
-                    await self.async_set_position(cover, state)
-        else:
-            self.logger.debug("First refresh but control toggle is off")
-        self.first_refresh = False
-        self.logger.debug("First refresh handled")
-
-    async def async_handle_timed_refresh(self, options) -> None:
-        """Handle timed refresh."""
-        self.logger.debug(
-            "This is a timed refresh, using sunset position: %s",
-            options.get(CONF_SUNSET_POS),
-        )
-        if self.control_toggle:
-            for cover in self.entities:
-                await self.async_set_manual_position(
-                    cover,
-                    (
-                        inverse_state(options.get(CONF_SUNSET_POS))
-                        if self._inverse_state
-                        else options.get(CONF_SUNSET_POS)
-                    ),
-                )
-        else:
-            self.logger.debug("Timed refresh but control toggle is off")
-        self.timed_refresh = False
-        self.logger.debug("Timed refresh handled")
-
-    async def async_handle_call_service(self, entity, state: int, options) -> None:
-        """Call the appropriate service for state changes."""
         if (
-            self.check_adaptive_time
-            and self.check_position_delta(entity, state, options)
-            and self.check_time_delta(entity)
-            and not self.manager.is_cover_manual(entity)
+            self.control_toggle
+            and self.external_override.force
+            and not self.wait_for_target.get(event.entity_id)
         ):
-            await self.async_set_position(entity, state)
-
-    async def async_set_position(self, entity, state: int):
-        """Call service to set cover position."""
-        await self.async_set_manual_position(entity, state)
-
-    async def async_set_manual_position(self, entity, state):
-        """Call service to set cover position."""
-        if self.check_position(entity, state):
-            service = SERVICE_SET_COVER_POSITION
-            service_data = {}
-            service_data[ATTR_ENTITY_ID] = entity
-
-            if self._cover_type == SensorType.TILT:
-                service = SERVICE_SET_COVER_TILT_POSITION
-                service_data[ATTR_TILT_POSITION] = state
-            else:
-                service_data[ATTR_POSITION] = state
-
-            self.wait_for_target[entity] = True
-            self.target_call[entity] = state
-            self.logger.debug(
-                "Set wait for target %s and target call %s",
-                self.wait_for_target,
-                self.target_call,
+            await self.async_set_position(
+                event.entity_id, self.external_override.target
             )
-            self.logger.debug("Run %s with data %s", service, service_data)
-            await self.hass.services.async_call(COVER_DOMAIN, service, service_data)
+
+        self.cover_state_change = False
+
+    async def async_handle_timed_refresh(self) -> None:
+        """Apply the configured position at the end of the control period."""
+        self.timed_refresh = False
+        if not self.control_toggle:
+            return
+
+        if self.external_override.mode is not OverrideMode.AUTO:
+            for cover in self.entities:
+                await self.async_apply_target(cover, immediate=True)
+            return
+
+        target = self.config_entry.options.get(CONF_SUNSET_POS)
+        if self._inverse_state:
+            target = inverse_state(target)
+
+        for cover in self.entities:
+            if not self.manager.is_cover_manual(cover):
+                await self.async_set_position(cover, target)
+
+    async def async_apply_target(self, entity: str, *, immediate: bool = False) -> None:
+        """Apply the current external or solar target to one cover."""
+        override = self.external_override
+        if override.holds_commands:
+            return
+
+        if override.target is not None:
+            if override.force or not self.manager.is_cover_manual(entity):
+                await self.async_set_position(entity, override.target)
+            return
+
+        if self.manager.is_cover_manual(entity) or not self.check_adaptive_time:
+            return
+
+        target = self.solar_state
+        options = self.config_entry.options
+        if not self.check_position_delta(entity, target, options):
+            return
+        if not immediate and not self.check_time_delta(entity):
+            return
+
+        await self.async_set_position(entity, target)
+
+    async def async_set_position(self, entity: str, state: int) -> None:
+        """Call the cover service when the cover is not already at the target."""
+        if not self.check_position(entity, state):
+            return
+
+        service = SERVICE_SET_COVER_POSITION
+        position_attribute = ATTR_POSITION
+        if self._cover_type == SensorType.TILT:
+            service = SERVICE_SET_COVER_TILT_POSITION
+            position_attribute = ATTR_TILT_POSITION
+
+        service_data = {
+            ATTR_ENTITY_ID: entity,
+            position_attribute: state,
+        }
+        self.wait_for_target[entity] = True
+        self.target_call[entity] = state
+        self.logger.debug("Run %s with data %s", service, service_data)
+        await self.hass.services.async_call(COVER_DOMAIN, service, service_data)
 
     def _update_options(self, options):
         """Update options."""
@@ -454,6 +445,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         self.time_threshold = options.get(CONF_DELTA_TIME, 2)
         self.start_time = options.get(CONF_START_TIME)
         self.start_time_entity = options.get(CONF_START_ENTITY)
+        self.override_entity = options.get(CONF_OVERRIDE_ENTITY)
         self.end_time = options.get(CONF_END_TIME)
         self.end_time_entity = options.get(CONF_END_ENTITY)
         self.manual_reset = options.get(CONF_MANUAL_OVERRIDE_RESET, False)
@@ -465,6 +457,35 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         self.end_value = options.get(CONF_INTERP_END)
         self.normal_list = options.get(CONF_INTERP_LIST)
         self.new_list = options.get(CONF_INTERP_LIST_NEW)
+
+    def _update_external_override(self) -> None:
+        """Read and normalize the configured external override entity."""
+        if self.override_entity is None:
+            self.external_override = ExternalOverride(mode=OverrideMode.AUTO)
+            return
+        self.external_override = parse_external_override(
+            self.hass.states.get(self.override_entity)
+        )
+
+    def _update_control_method(self) -> None:
+        """Set the control method exposed by the coordinator."""
+        override = self.external_override
+        if not self.control_toggle:
+            self.control_method = "disabled"
+        elif override.force:
+            self.control_method = "forced_external_override"
+        elif self.manager.binary_cover_manual:
+            self.control_method = "manual"
+        elif override.target is not None:
+            self.control_method = "external_override"
+        elif override.mode == OverrideMode.HOLD:
+            self.control_method = "external_hold"
+        elif override.mode == OverrideMode.UNAVAILABLE:
+            self.control_method = "override_unavailable"
+        elif override.mode == OverrideMode.INVALID:
+            self.control_method = "override_invalid"
+        else:
+            self.control_method = "solar"
 
     def _update_manager_and_covers(self):
         self.manager.add_covers(self.entities)
@@ -677,16 +698,20 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
 
     @property
     def state(self) -> int:
-        """Return the calculated shade position."""
-        if self.force_mode == "force_open":
-            state = 100
-            self.logger.debug("Force open position: %s", state)
-        elif self.force_mode == "force_close":
-            state = 0
-            self.logger.debug("Force close position: %s", state)
-        else:
-            state = self.default_state
-            self.logger.debug("Starting with default mode position: %s", state)
+        """Return the external target or calculated solar position."""
+        if self.external_override.target is not None:
+            self.logger.debug(
+                "Using external override position: %s",
+                self.external_override.target,
+            )
+            return self.external_override.target
+        return self.solar_state
+
+    @property
+    def solar_state(self) -> int:
+        """Return the calibrated position calculated from the sun."""
+        state = self.default_state
+        self.logger.debug("Starting with solar position: %s", state)
 
         if self._use_interpolation:
             self.logger.debug("Interpolating position: %s", state)
@@ -701,8 +726,9 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
                 state = inverse_state(state)
                 self.logger.debug("Inversed position: %s", state)
 
-        self.logger.debug("Final position to use: %s", state)
-        return state
+        final_state = round(state)
+        self.logger.debug("Final solar position to use: %s", final_state)
+        return final_state
 
     def interpolate_states(self, state):
         """Interpolate states."""

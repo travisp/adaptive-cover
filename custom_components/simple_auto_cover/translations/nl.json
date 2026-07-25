@@ -14,6 +14,7 @@
           "delta_time": "Minimale interval tussen positieveranderingen",
           "start_time": "Starttijd",
           "start_entity": "Entiteit die starttijd aangeeft",
+          "override_entity": "Externe overschrijvingsentiteit",
           "manual_override_duration": "Duur van handmatige overschrijving",
           "manual_override_reset": "Reset handmatige overschrijvingsduur",
           "end_time": "Eindtijd",
@@ -27,6 +28,7 @@
           "delta_time": "Minimale tijdsinterval tussen positieveranderingen; minimum is 2 minuten",
           "start_time": "Starttijd voor elke dag; voor deze tijd blijft de bekleding stationair",
           "start_entity": "Entiteit die de status van de starttijd vertegenwoordigt, die de hierboven ingestelde statische starttijd overschrijft. Handig voor het automatiseren van de starttijd met een entiteit",
+          "override_entity": "Entiteit met de status auto, hold of een positie van 0 tot 100. Numerieke posities overschrijven de zonnebesturing, maar handmatige bediening heeft voorrang. Stel het attribuut force in op true om handmatige bediening te overschrijven.",
           "manual_override_duration": "De duur van handmatige bediening voordat wordt teruggekeerd naar automatische bediening",
           "manual_override_reset": "Optie om de duur van handmatige overschrijving na elke handmatige aanpassing te resetten; als dit is uitgeschakeld, geldt de duur alleen voor de eerste handmatige aanpassing",
           "end_time": "Eindtijd voor elke dag; na deze tijd blijft de bekleding stationair",
@@ -207,6 +209,7 @@
           "delta_time": "Minimale interval tussen positieveranderingen",
           "start_time": "Starttijd",
           "start_entity": "Entiteit die starttijd aangeeft",
+          "override_entity": "Externe overschrijvingsentiteit",
           "end_time": "Eindtijd",
           "end_entity": "Entiteit die eindtijd aangeeft",
           "manual_override_duration": "Duur van handmatige overschrijving",
@@ -220,6 +223,7 @@
           "delta_time": "Minimale tijdsinterval tussen positieveranderingen; minimum is 2 minuten",
           "start_time": "Starttijd voor elke dag; voor deze tijd blijft de bekleding stationair",
           "start_entity": "Entiteit die de status van de starttijd vertegenwoordigt, die de hierboven ingestelde statische starttijd overschrijft. Handig voor het automatiseren van de starttijd met een entiteit",
+          "override_entity": "Entiteit met de status auto, hold of een positie van 0 tot 100. Numerieke posities overschrijven de zonnebesturing, maar handmatige bediening heeft voorrang. Stel het attribuut force in op true om handmatige bediening te overschrijven.",
           "manual_override_duration": "De duur van handmatige bediening voordat wordt teruggekeerd naar automatische bediening",
           "manual_override_reset": "Optie om de duur van handmatige overschrijving na elke handmatige aanpassing te resetten; als dit is uitgeschakeld, geldt de duur alleen voor de eerste handmatige aanpassing",
           "end_time": "Eindtijd voor elke dag; na deze tijd blijft de bekleding stationair",
@@ -397,13 +401,6 @@
       "options": {
         "mode1": "eenrichting (0% = dicht / 100% = open)",
         "mode2": "twee-richtings (0% = dicht / 50% = open / 100% = dicht)"
-      }
-    },
-    "force_mode": {
-      "options": {
-        "auto": "Auto",
-        "force_open": "Openen afdwingen",
-        "force_close": "Sluiten afdwingen"
       }
     }
   }

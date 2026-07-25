@@ -100,12 +100,9 @@ This component provides a simple `basic` strategy for positioning shades based s
       BI --> |No| BC
       BI --> |Yes| BJ{{"Calculated Position"}}
 
-      BE --> BM{"Force mode"}
-      BF --> BM
-      BJ --> BM
-      BM --> |"force_open"| BN["Return fully open"]
-      BM --> |"force_close"| BO["Return fully closed"]
-      BM --> |auto| BP["Return computed position"]
+      BE --> BP["Return solar position"]
+      BF --> BP
+      BJ --> BP
   end
 ```
 
@@ -165,6 +162,7 @@ This mode uses the calculated position only when the sun is in front of the wind
 | Minimum Delta Time                         | 2            |       | Minimum time gap between position change                                                       |
 | Start Time                                 | `"00:00:00"` |       | Earliest time a cover can be adjusted after midnight                                           |
 | Start Time Entity                          | None         |       | The earliest moment a cover may be changed after midnight. _Overrides the `start_time` value_  |
+| External Override Entity                   | None         |       | Entity providing `auto`, `hold`, or a physical cover position from 0 through 100               |
 | Manual Override Duration                   | `15 min`     |       | Minimum duration for manual control status to remain active                                    |
 | Manual Override reset Timer                | False        |       | Resets duration timer each time the position changes while the manual control status is active |
 | Manual Override Threshold                  | None         | 1-99  | Minimal position change to be recognized as manual change                                      |
@@ -172,6 +170,14 @@ This mode uses the calculated position only when the sun is in front of the wind
 | End Time                                   | `"00:00:00"` |       | Latest time a cover can be adjusted each day                                                   |
 | End Time Entity                            | None         |       | The latest moment a cover may be changed . _Overrides the `end_time` value_                    |
 | Adjust at end time                         | `False`      |       | Make sure to always update the position to the default setting at the end time.                |
+
+The external override entity supports these states:
+
+- `auto`: use the position calculated from the sun.
+- `hold`: do not issue cover commands.
+- `0` through `100`: use that physical cover or tilt position. Human manual control has priority.
+
+Numeric targets bypass the solar schedule and movement interval so that external automations take effect immediately. Set the entity's `force` attribute to the boolean value `true` when its numeric position must have priority over manual control. An optional `reason` attribute is included in the cover-position sensor's diagnostic attributes. When an override entity is configured, missing, unavailable, or invalid states hold the cover rather than unexpectedly resuming solar control.
 
 ### Blindspot
 
@@ -187,18 +193,17 @@ The integration dynamically adds multiple entities based on the used features.
 
 These entities are always available:
 
-| Entities                                      | Default        | Description                                                                                                                                                   |
-| --------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sensor.{type}_cover_position_{name}`         |                | Reflects the calculated cover position based on the configured geometry and sun position                                                                      |
-| `sensor.{type}_control_method_{name}`         | `intermediate` | Indicates the active control strategy                                                                                                                         |
-| `sensor.{type}_start_sun_{name}`              |                | Shows the starting time when the sun enters the window's view, with an interval of every 5 minutes.                                                           |
-| `sensor.{type}_end_sun_{name}`                |                | Indicates the ending time when the sun exits the window's view, with an interval of every 5 minutes.                                                          |
-| `binary_sensor.{type}_manual_override_{name}` | `off`          | Indicates if manual override is engaged for any blinds.                                                                                                       |
-| `binary_sensor.{type}_sun_infront_{name}`     | `off`          | Indicates whether the sun is in front of the window within the designated field of view.                                                                      |
-| `switch.{type}_toggle_control_{name}`         | `on`           | Activates the adaptive control feature. When enabled, blinds adjust based on calculated position, unless manually overridden.                                 |
-| `switch.{type}_manual_override_{name}`        | `on`           | Enables detection of manual overrides. A cover is marked if its position differs from the calculated one, resetting to adaptive control after a set duration. |
-| `button.{type}_reset_manual_override_{name}`  | `on`           | Resets manual override tags for all covers; if `switch.{type}_toggle_control_{name}` is on, it also restores blinds to their correct positions.               |
-| `select.{type}_force_mode_{name}`             | `auto`         | Forces the covers to be fully open or closed regardless of normal calculations. Options are `auto`, `force_open`, and `force_close`.                          |
+| Entities                                      | Default | Description                                                                                                                                                   |
+| --------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sensor.{type}_cover_position_{name}`         |         | Reflects the resolved solar or external cover position and exposes override details as attributes                                                             |
+| `sensor.{type}_control_method_{name}`         | `solar` | Indicates whether solar, manual, normal external, forced external, or hold control is active                                                                  |
+| `sensor.{type}_start_sun_{name}`              |         | Shows the starting time when the sun enters the window's view, with an interval of every 5 minutes.                                                           |
+| `sensor.{type}_end_sun_{name}`                |         | Indicates the ending time when the sun exits the window's view, with an interval of every 5 minutes.                                                          |
+| `binary_sensor.{type}_manual_override_{name}` | `off`   | Indicates if manual override is engaged for any blinds.                                                                                                       |
+| `binary_sensor.{type}_sun_infront_{name}`     | `off`   | Indicates whether the sun is in front of the window within the designated field of view.                                                                      |
+| `switch.{type}_toggle_control_{name}`         | `on`    | Activates the adaptive control feature. When enabled, blinds adjust based on calculated position, unless manually overridden.                                 |
+| `switch.{type}_manual_override_{name}`        | `on`    | Enables detection of manual overrides. A cover is marked if its position differs from the calculated one, resetting to adaptive control after a set duration. |
+| `button.{type}_reset_manual_override_{name}`  | `on`    | Resets manual override tags for all covers; if `switch.{type}_toggle_control_{name}` is on, it also restores blinds to their correct positions.               |
 
 ## Features Planned
 

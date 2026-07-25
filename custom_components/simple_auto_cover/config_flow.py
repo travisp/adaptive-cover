@@ -47,6 +47,7 @@ from .const import (
     CONF_MAX_POSITION,
     CONF_MIN_ELEVATION,
     CONF_MODE,
+    CONF_OVERRIDE_ENTITY,
     CONF_RETURN_SUNSET,
     CONF_SENSOR_TYPE,
     CONF_START_ENTITY,
@@ -223,6 +224,9 @@ AUTOMATION_CONFIG = vol.Schema(
         vol.Optional(CONF_START_TIME, default="00:00:00"): selector.TimeSelector(),
         vol.Optional(CONF_START_ENTITY): selector.EntitySelector(
             selector.EntitySelectorConfig(domain=["sensor", "input_datetime"])
+        ),
+        vol.Optional(CONF_OVERRIDE_ENTITY): selector.EntitySelector(
+            selector.EntitySelectorConfig(domain="sensor")
         ),
         vol.Required(
             CONF_MANUAL_OVERRIDE_DURATION, default={"minutes": 15}
@@ -454,6 +458,7 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
                 CONF_DELTA_TIME: self.config.get(CONF_DELTA_TIME),
                 CONF_START_TIME: self.config.get(CONF_START_TIME),
                 CONF_START_ENTITY: self.config.get(CONF_START_ENTITY),
+                CONF_OVERRIDE_ENTITY: self.config.get(CONF_OVERRIDE_ENTITY),
                 CONF_MANUAL_OVERRIDE_DURATION: self.config.get(
                     CONF_MANUAL_OVERRIDE_DURATION
                 ),
@@ -505,7 +510,12 @@ class OptionsFlowHandler(OptionsFlow):
     async def async_step_automation(self, user_input: dict[str, Any] | None = None):
         """Manage automation options."""
         if user_input is not None:
-            entities = [CONF_START_ENTITY, CONF_END_ENTITY, CONF_MANUAL_THRESHOLD]
+            entities = [
+                CONF_START_ENTITY,
+                CONF_END_ENTITY,
+                CONF_OVERRIDE_ENTITY,
+                CONF_MANUAL_THRESHOLD,
+            ]
             self.optional_entities(entities, user_input)
             self.options.update(user_input)
             return await self._update_options()
