@@ -159,6 +159,7 @@ This mode uses the calculated position only when the sun is in front of the wind
 | Variables                                  | Default      | Range | Description                                                                                    |
 | ------------------------------------------ | ------------ | ----- | ---------------------------------------------------------------------------------------------- |
 | Minimum Delta Position                     | 1            | 1-90  | Minimum position change required before another change can occur                               |
+| Position Match Tolerance                   | 0            | 0-20  | Allowed difference between a commanded and reported position before considering it reached     |
 | Minimum Delta Time                         | 2            |       | Minimum time gap between position change                                                       |
 | Start Time                                 | `"00:00:00"` |       | Earliest time a cover can be adjusted after midnight                                           |
 | Start Time Entity                          | None         |       | The earliest moment a cover may be changed after midnight. _Overrides the `start_time` value_  |
@@ -178,6 +179,21 @@ The external override entity supports these states:
 - `0` through `100`: use that physical cover or tilt position. Human manual control has priority.
 
 Numeric targets bypass the solar schedule and movement interval so that external automations take effect immediately. Set the entity's `force` attribute to the boolean value `true` when its numeric position must have priority over manual control. An optional `reason` attribute is included in the cover-position sensor's diagnostic attributes. When an override entity is configured, missing, unavailable, or invalid states hold the cover rather than unexpectedly resuming solar control.
+
+SAC distinguishes its own cover commands from manual control by tracking movement toward each commanded target. Forward progress extends the command's 45-second no-progress timeout, while movement away from the target is treated as manual control. Direct Home Assistant cover service calls targeting a managed cover are also treated as manual unless SAC issued them. Automations that should remain automatic should use the external override entity instead of calling the cover directly.
+
+Manual control is tracked independently for each managed cover and persists across Home Assistant restarts and integration reloads. The Manual Override binary sensor attributes show each cover's held position, start time, expiry, and remaining duration. When one cover's override expires or is reset, only that cover resumes the currently active external or solar target.
+
+### Service
+
+`simple_auto_cover.reset_manual_override` resets manual control for selected physical cover entities and immediately resumes their current external or solar target when automatic control is enabled.
+
+```yaml
+service: simple_auto_cover.reset_manual_override
+data:
+  entity_id:
+    - cover.living_room_left
+```
 
 ### Blindspot
 
@@ -199,7 +215,7 @@ These entities are always available:
 | `sensor.{type}_control_method_{name}`         | `solar` | Indicates whether solar, manual, normal external, forced external, or hold control is active                                                                  |
 | `sensor.{type}_start_sun_{name}`              |         | Shows the starting time when the sun enters the window's view, with an interval of every 5 minutes.                                                           |
 | `sensor.{type}_end_sun_{name}`                |         | Indicates the ending time when the sun exits the window's view, with an interval of every 5 minutes.                                                          |
-| `binary_sensor.{type}_manual_override_{name}` | `off`   | Indicates if manual override is engaged for any blinds.                                                                                                       |
+| `binary_sensor.{type}_manual_override_{name}` | `off`   | Indicates if any cover is manually controlled and exposes per-cover position and expiry details.                                                              |
 | `binary_sensor.{type}_sun_infront_{name}`     | `off`   | Indicates whether the sun is in front of the window within the designated field of view.                                                                      |
 | `switch.{type}_toggle_control_{name}`         | `on`    | Activates the adaptive control feature. When enabled, blinds adjust based on calculated position, unless manually overridden.                                 |
 | `switch.{type}_manual_override_{name}`        | `on`    | Enables detection of manual overrides. A cover is marked if its position differs from the calculated one, resetting to adaptive control after a set duration. |

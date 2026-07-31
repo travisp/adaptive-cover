@@ -48,6 +48,7 @@ from .const import (
     CONF_MIN_ELEVATION,
     CONF_MODE,
     CONF_OVERRIDE_ENTITY,
+    CONF_POSITION_TOLERANCE,
     CONF_RETURN_SUNSET,
     CONF_SENSOR_TYPE,
     CONF_START_ENTITY,
@@ -214,6 +215,11 @@ AUTOMATION_CONFIG = vol.Schema(
         vol.Required(CONF_DELTA_POSITION, default=1): selector.NumberSelector(
             selector.NumberSelectorConfig(
                 min=1, max=90, step=1, mode="slider", unit_of_measurement="%"
+            )
+        ),
+        vol.Optional(CONF_POSITION_TOLERANCE, default=0): selector.NumberSelector(
+            selector.NumberSelectorConfig(
+                min=0, max=20, step=1, mode="slider", unit_of_measurement="%"
             )
         ),
         vol.Optional(CONF_DELTA_TIME, default=2): selector.NumberSelector(
@@ -455,6 +461,7 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
                 CONF_TILT_DEPTH: self.config.get(CONF_TILT_DEPTH),
                 CONF_TILT_MODE: self.config.get(CONF_TILT_MODE),
                 CONF_DELTA_POSITION: self.config.get(CONF_DELTA_POSITION),
+                CONF_POSITION_TOLERANCE: self.config.get(CONF_POSITION_TOLERANCE),
                 CONF_DELTA_TIME: self.config.get(CONF_DELTA_TIME),
                 CONF_START_TIME: self.config.get(CONF_START_TIME),
                 CONF_START_ENTITY: self.config.get(CONF_START_ENTITY),

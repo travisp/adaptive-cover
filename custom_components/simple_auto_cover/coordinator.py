@@ -5,25 +5,38 @@ from __future__ import annotations
 import asyncio
 import datetime as dt
 from dataclasses import dataclass
+from enum import StrEnum
 
 import numpy as np
 from homeassistant.util import dt as dt_util
 from homeassistant.components.cover import DOMAIN as COVER_DOMAIN
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
+    ATTR_DOMAIN,
     ATTR_ENTITY_ID,
+    ATTR_SERVICE,
+    ATTR_SERVICE_DATA,
     CONF_NAME,
+    SERVICE_CLOSE_COVER,
+    SERVICE_CLOSE_COVER_TILT,
+    SERVICE_OPEN_COVER,
+    SERVICE_OPEN_COVER_TILT,
     SERVICE_SET_COVER_POSITION,
     SERVICE_SET_COVER_TILT_POSITION,
+    SERVICE_STOP_COVER,
+    SERVICE_STOP_COVER_TILT,
 )
 from homeassistant.core import (
+    Context,
     Event,
     EventStateChangedData,
     HomeAssistant,
     State,
     callback,
 )
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.event import async_track_point_in_time
+from homeassistant.helpers.storage import Store
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .config_context_adapter import ConfigContextAdapter
@@ -73,6 +86,7 @@ from .const import (
     CONF_ENABLE_MAX_POSITION,
     CONF_ENABLE_MIN_POSITION,
     CONF_OVERRIDE_ENTITY,
+    CONF_POSITION_TOLERANCE,
     CONF_RETURN_SUNSET,
     CONF_START_ENTITY,
     CONF_START_TIME,
@@ -88,24 +102,63 @@ from .const import (
     SensorType,
 )
 from .helpers import get_datetime_from_str, get_last_updated, get_safe_state
-from .cover_manager import AdaptiveCoverManager
+from .cover_manager import ManualOverrideManager
 from .override import ExternalOverride, OverrideMode, parse_external_override
+
+
+COMMAND_TRANSIT_TIMEOUT = dt.timedelta(seconds=45)
+MANUAL_OVERRIDE_STORAGE_VERSION = 1
+MANUAL_COVER_SERVICES = {
+    SERVICE_CLOSE_COVER,
+    SERVICE_CLOSE_COVER_TILT,
+    SERVICE_OPEN_COVER,
+    SERVICE_OPEN_COVER_TILT,
+    SERVICE_SET_COVER_POSITION,
+    SERVICE_SET_COVER_TILT_POSITION,
+    SERVICE_STOP_COVER,
+    SERVICE_STOP_COVER_TILT,
+}
+
+
+class CommandSource(StrEnum):
+    """Reasons Simple Auto Cover sends a cover command."""
+
+    SOLAR = "solar"
+    EXTERNAL_OVERRIDE = "external_override"
+    FORCED_EXTERNAL_OVERRIDE = "forced_external_override"
+    TIMED_END = "timed_end"
+
+
+@dataclass
+class CoverCommand:
+    """A command and the latest progress reported by its cover."""
+
+    target: int
+    source: CommandSource
+    issued_at: dt.datetime
+    last_progress_at: dt.datetime
+    last_position: int
+    context_id: str
+
+    @property
+    def expires_at(self) -> dt.datetime:
+        """Return when command ownership expires without more progress."""
+        return self.last_progress_at + COMMAND_TRANSIT_TIMEOUT
 
 
 @dataclass
 class StateChangedData:
-    """StateChangedData class."""
+    """States before and after a managed cover update."""
 
     entity_id: str
-    old_state: State | None
-    new_state: State | None
+    old_state: State
+    new_state: State
 
 
 @dataclass
 class AdaptiveCoverData:
-    """AdaptiveCoverData class."""
+    """State and attributes exposed by Simple Auto Cover entities."""
 
-    climate_mode_toggle: bool
     states: dict
     attributes: dict
 
@@ -135,24 +188,63 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         self.manual_reset = self.config_entry.options.get(
             CONF_MANUAL_OVERRIDE_RESET, False
         )
-        self.manual_duration = self.config_entry.options.get(
+        manual_duration = self.config_entry.options.get(
             CONF_MANUAL_OVERRIDE_DURATION, {"minutes": 15}
         )
         self.state_change = False
-        self.cover_state_change = False
         self.timed_refresh = False
         self.control_method = "solar"
-        self.state_change_data: StateChangedData | None = None
-        self.manager = AdaptiveCoverManager(self.manual_duration, self.logger)
-        self.wait_for_target = {}
-        self.target_call = {}
+        self.manager = ManualOverrideManager(
+            manual_duration,
+            self.logger,
+            self._manual_control_changed,
+        )
+        self.pending_commands: dict[str, CoverCommand] = {}
+        self.last_commands: dict[str, CoverCommand] = {}
+        self._manual_store = Store(
+            hass,
+            MANUAL_OVERRIDE_STORAGE_VERSION,
+            f"{DOMAIN}.manual_override.{self.config_entry.entry_id}",
+        )
         self.ignore_intermediate_states = self.config_entry.options.get(
             CONF_MANUAL_IGNORE_INTERMEDIATE, False
         )
         self._update_listener = None
         self._scheduled_time = dt.datetime.now()
 
-    async def async_timed_refresh(self, event) -> None:
+    @callback
+    def _manual_control_changed(self, entity_id: str) -> None:
+        """Persist manual state and discard stale command ownership."""
+        if self.manager.is_cover_manual(entity_id):
+            self.pending_commands.pop(entity_id, None)
+            self.last_commands.pop(entity_id, None)
+        self._manual_store.async_delay_save(self._manual_storage_data)
+
+    def _manual_storage_data(self) -> dict[str, str]:
+        """Return persisted manual expiry data."""
+        return {
+            entity_id: self.manager.expires_at(entity_id).isoformat()
+            for entity_id in self.manager.manual_controlled
+        }
+
+    async def async_save_manual_control(self) -> None:
+        """Persist the absolute expiry of each manual cover."""
+        await self._manual_store.async_save(self._manual_storage_data())
+
+    async def async_restore_manual_control(self) -> None:
+        """Restore unexpired manual ownership before the first refresh."""
+        managed_covers = set(self.config_entry.options.get(CONF_ENTITIES, []))
+        stored = await self._manual_store.async_load() or {}
+        now = dt_util.utcnow()
+        for entity_id, expires_at_value in stored.items():
+            expires_at = dt.datetime.fromisoformat(expires_at_value)
+            if entity_id in managed_covers and expires_at > now:
+                self.manager.restore(entity_id, expires_at)
+
+        if stored != self._manual_storage_data():
+            await self.async_save_manual_control()
+
+    async def async_timed_refresh(self, _event) -> None:
         """Control state at end time."""
 
         now = dt.datetime.now()
@@ -176,12 +268,42 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
             self.logger.debug("Timed refresh, but: not equal to end time")
 
     async def async_check_entity_state_change(
-        self, event: Event[EventStateChangedData]
+        self, _event: Event[EventStateChangedData]
     ) -> None:
         """Fetch and process state change event."""
         self.logger.debug("Entity state change")
         self.state_change = True
         await self.async_refresh()
+
+    @callback
+    def handle_cover_service_call(self, event: Event) -> None:
+        """Treat direct cover service calls not sent by SAC as manual control."""
+        if (
+            event.data.get(ATTR_DOMAIN) != COVER_DOMAIN
+            or event.data.get(ATTR_SERVICE) not in MANUAL_COVER_SERVICES
+        ):
+            return
+
+        context_id = event.context.id
+        if any(
+            command.context_id == context_id
+            for command in self.pending_commands.values()
+        ) or any(
+            command.context_id == context_id for command in self.last_commands.values()
+        ):
+            return
+        if not self.manual_toggle or not self.control_toggle:
+            return
+
+        targeted_entities = event.data[ATTR_SERVICE_DATA].get(ATTR_ENTITY_ID)
+        if targeted_entities is None:
+            return
+        if isinstance(targeted_entities, str):
+            targeted_entities = [targeted_entities]
+
+        for entity_id in set(targeted_entities).intersection(self.entities):
+            self.manager.mark_manual_control(entity_id, self.manual_reset)
+            self.logger.debug("Manual cover service call detected for %s", entity_id)
 
     async def async_check_cover_state_change(
         self, event: Event[EventStateChangedData]
@@ -189,47 +311,154 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         """Fetch and process state change event."""
         self.logger.debug("Cover state change")
         data = event.data
-        if data["old_state"] is None:
-            self.logger.debug("Old state is None")
+        old_state = data["old_state"]
+        new_state = data["new_state"]
+        if old_state is None or new_state is None:
             return
-        if data["new_state"] is None:
-            self.logger.debug("New state is None")
+        if old_state.state in ["unknown", "unavailable"] or new_state.state in [
+            "unknown",
+            "unavailable",
+        ]:
             return
-        self.state_change_data = StateChangedData(
-            data["entity_id"], data["old_state"], data["new_state"]
-        )
-        if self.state_change_data.old_state.state in ["unknown", "unavailable"]:
-            self.logger.debug("Old state is unknown, not processing")
-        elif self.state_change_data.new_state.state in ["unknown", "unavailable"]:
-            self.logger.debug("New state is unknown, not processing")
-        else:
-            self.cover_state_change = True
-            self.process_entity_state_change()
-            await self.async_refresh()
 
-    def process_entity_state_change(self):
-        """Process state change event."""
-        event = self.state_change_data
+        state_change = StateChangedData(data["entity_id"], old_state, new_state)
+        expected_update = self._is_sac_update(state_change)
+
+        if self.manual_toggle and self.control_toggle and not expected_update:
+            self.manager.handle_state_change(
+                state_change,
+                self.state,
+                self._cover_type,
+                self.manual_reset,
+                self.manual_threshold,
+            )
+
+        if self.control_toggle and self.external_override.force and not expected_update:
+            await self.async_set_position(
+                state_change.entity_id,
+                self.external_override.target,
+                CommandSource.FORCED_EXTERNAL_OVERRIDE,
+            )
+
+        await self.async_refresh()
+
+    def _is_sac_update(self, event: StateChangedData) -> bool:
+        """Return whether a state change belongs to an active SAC command."""
         self.logger.debug("Processing state change event: %s", event)
         entity_id = event.entity_id
-        if self.ignore_intermediate_states and event.new_state.state in [
-            "opening",
-            "closing",
-        ]:
-            self.logger.debug("Ignoring intermediate state change for %s", entity_id)
-            return
-        if self.wait_for_target.get(entity_id):
-            position = event.new_state.attributes.get(
-                "current_position"
-                if self._cover_type != SensorType.TILT
-                else "current_tilt_position"
+        position_attribute = (
+            "current_tilt_position"
+            if self._cover_type == SensorType.TILT
+            else "current_position"
+        )
+        position = event.new_state.attributes.get(position_attribute)
+        command = self._get_pending_command(entity_id)
+        if command is None:
+            last_command = self.last_commands.get(entity_id)
+            if (
+                position is not None
+                and last_command is not None
+                and abs(position - last_command.target) <= self.position_tolerance
+            ):
+                return True
+            if self.ignore_intermediate_states and event.new_state.state in [
+                "opening",
+                "closing",
+            ]:
+                self.logger.debug(
+                    "Ignoring intermediate state change for %s", entity_id
+                )
+                return True
+            return False
+        if position is None:
+            return True
+
+        distance = abs(position - command.target)
+        if distance <= self.position_tolerance:
+            self.pending_commands.pop(entity_id, None)
+            self.logger.debug(
+                "Command target %s reached by %s at position %s",
+                command.target,
+                entity_id,
+                position,
             )
-            if position == self.target_call.get(entity_id):
-                self.wait_for_target[entity_id] = False
-                self.logger.debug("Position %s reached for %s", position, entity_id)
-            self.logger.debug("Wait for target: %s", self.wait_for_target)
-        else:
-            self.logger.debug("No wait for target call for %s", entity_id)
+            return True
+
+        if event.old_state.state in ["opening", "closing"] and (
+            event.new_state.state not in ["opening", "closing"]
+        ):
+            self.pending_commands.pop(entity_id, None)
+            self.logger.debug(
+                "Cover %s stopped at %s before reaching SAC target %s",
+                entity_id,
+                position,
+                command.target,
+            )
+            return False
+
+        previous_position = command.last_position
+        previous_distance = abs(previous_position - command.target)
+        if distance < previous_distance:
+            command.last_position = position
+            command.last_progress_at = dt_util.utcnow()
+            self.logger.debug(
+                "Cover %s progressed toward %s from %s to %s",
+                entity_id,
+                command.target,
+                previous_position,
+                position,
+            )
+            return True
+        if distance == previous_distance:
+            return True
+
+        self.pending_commands.pop(entity_id, None)
+        self.logger.debug(
+            "Cover %s moved away from SAC target %s from %s to %s",
+            entity_id,
+            command.target,
+            previous_position,
+            position,
+        )
+        return False
+
+    def _get_pending_command(self, entity_id: str) -> CoverCommand | None:
+        """Return a command that has reported progress within the timeout."""
+        command = self.pending_commands.get(entity_id)
+        if command is None:
+            return None
+        if dt_util.utcnow() < command.expires_at:
+            return command
+
+        self.pending_commands.pop(entity_id, None)
+        self.logger.debug(
+            "Command to move %s to %s expired after no forward progress",
+            entity_id,
+            command.target,
+        )
+        return None
+
+    def _serialize_pending_commands(self) -> dict[str, dict[str, str | int]]:
+        """Remove expired commands and serialize those still in transit."""
+        for entity_id in tuple(self.pending_commands):
+            self._get_pending_command(entity_id)
+        return self._serialize_commands(self.pending_commands)
+
+    @staticmethod
+    def _serialize_commands(
+        commands: dict[str, CoverCommand],
+    ) -> dict[str, dict[str, str | int]]:
+        """Convert command records into Home Assistant state attributes."""
+        return {
+            entity_id: {
+                "target": command.target,
+                "source": command.source.value,
+                "issued_at": command.issued_at.isoformat(),
+                "last_progress_at": command.last_progress_at.isoformat(),
+                "expires_at": command.expires_at.isoformat(),
+            }
+            for entity_id, command in commands.items()
+        }
 
     @callback
     def _async_cancel_update_listener(self) -> None:
@@ -264,8 +493,9 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         # Get data for the blind
         cover_data = self.get_blind_data(options=options)
 
-        # Update manager with covers
-        self._update_manager_and_covers()
+        if not self.manual_toggle:
+            for entity_id in self.manager.manual_controlled:
+                self.manager.reset(entity_id)
 
         # calculate the state of the cover
         self.normal_cover_state = NormalCoverState(cover_data)
@@ -277,7 +507,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         self.logger.debug("Determined default state to be %s", self.default_state)
         state = self.state
 
-        await self.manager.reset_if_needed()
+        expired_manual_covers = self.manager.reset_if_needed()
 
         if (
             self._end_time
@@ -286,8 +516,14 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         ):
             await self.async_timed_end_time()
 
-        # Handle types of changes
-        await self.async_handle_changes()
+        if self.state_change:
+            await self.async_handle_state_change()
+        if self.timed_refresh:
+            await self.async_handle_timed_refresh()
+
+        if self.control_toggle:
+            for entity in expired_manual_covers:
+                await self.async_apply_target(entity, immediate=True)
         self._update_control_method()
 
         normal_cover = self.normal_cover_state.cover
@@ -305,7 +541,6 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         else:
             start, end = self._sun_start_time, self._sun_end_time
         return AdaptiveCoverData(
-            climate_mode_toggle=False,
             states={
                 "state": state,
                 "start": start,
@@ -313,7 +548,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
                 "control": self.control_method,
                 "sun_motion": normal_cover.valid,
                 "manual_override": self.manager.binary_cover_manual,
-                "manual_list": self.manager.manual_controlled,
+                "manual_overrides": self.manual_override_details,
             },
             attributes={
                 "default": options.get(CONF_DEFAULT_HEIGHT),
@@ -326,22 +561,16 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
                 ],
                 "blind_spot": options.get(CONF_BLIND_SPOT_ELEVATION),
                 "solar_position": self.solar_state,
+                "position_tolerance": self.position_tolerance,
                 "override_entity": self.override_entity,
                 "override_state": self.external_override.raw_state,
                 "override_target": self.external_override.target,
                 "override_force": self.external_override.force,
                 "override_reason": self.external_override.reason,
+                "pending_commands": self._serialize_pending_commands(),
+                "last_commands": self._serialize_commands(self.last_commands),
             },
         )
-
-    async def async_handle_changes(self) -> None:
-        """Dispatch handling for pending update types."""
-        if self.state_change:
-            await self.async_handle_state_change()
-        if self.cover_state_change:
-            await self.async_handle_cover_state_change()
-        if self.timed_refresh:
-            await self.async_handle_timed_refresh()
 
     async def async_handle_state_change(self) -> None:
         """Apply the current target after a tracked entity changes."""
@@ -350,31 +579,17 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
                 await self.async_apply_target(cover)
         self.state_change = False
 
-    async def async_handle_cover_state_change(self) -> None:
-        """Update manual control and reapply a forced target when needed."""
-        event = self.state_change_data
-        assert event is not None
+    async def async_reset_manual_overrides(self, entities: set[str]) -> None:
+        """Reset manual ownership and resume the affected covers."""
+        reset_entities = entities.intersection(self.manager.manual_controlled)
+        if not reset_entities:
+            return
 
-        if self.manual_toggle and self.control_toggle:
-            self.manager.handle_state_change(
-                event,
-                self.state,
-                self._cover_type,
-                self.manual_reset,
-                self.wait_for_target,
-                self.manual_threshold,
-            )
-
-        if (
-            self.control_toggle
-            and self.external_override.force
-            and not self.wait_for_target.get(event.entity_id)
-        ):
-            await self.async_set_position(
-                event.entity_id, self.external_override.target
-            )
-
-        self.cover_state_change = False
+        for entity in reset_entities:
+            self.manager.reset(entity)
+            if self.control_toggle:
+                await self.async_apply_target(entity, immediate=True)
+        await self.async_refresh()
 
     async def async_handle_timed_refresh(self) -> None:
         """Apply the configured position at the end of the control period."""
@@ -393,7 +608,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
 
         for cover in self.entities:
             if not self.manager.is_cover_manual(cover):
-                await self.async_set_position(cover, target)
+                await self.async_set_position(cover, target, CommandSource.TIMED_END)
 
     async def async_apply_target(self, entity: str, *, immediate: bool = False) -> None:
         """Apply the current external or solar target to one cover."""
@@ -402,8 +617,14 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
             return
 
         if override.target is not None:
-            if override.force or not self.manager.is_cover_manual(entity):
-                await self.async_set_position(entity, override.target)
+            if self.manager.is_cover_manual(entity) and not override.force:
+                return
+            source = (
+                CommandSource.FORCED_EXTERNAL_OVERRIDE
+                if override.force
+                else CommandSource.EXTERNAL_OVERRIDE
+            )
+            await self.async_set_position(entity, override.target, source)
             return
 
         if self.manager.is_cover_manual(entity) or not self.check_adaptive_time:
@@ -416,11 +637,21 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         if not immediate and not self.check_time_delta(entity):
             return
 
-        await self.async_set_position(entity, target)
+        await self.async_set_position(entity, target, CommandSource.SOLAR)
 
-    async def async_set_position(self, entity: str, state: int) -> None:
-        """Call the cover service when the cover is not already at the target."""
-        if not self.check_position(entity, state):
+    async def async_set_position(
+        self,
+        entity: str,
+        state: int,
+        source: CommandSource,
+    ) -> None:
+        """Call a cover service and record the expected resulting movement."""
+        pending_command = self._get_pending_command(entity)
+        if pending_command is not None and pending_command.target == state:
+            return
+
+        current_position = self._get_current_position(entity)
+        if current_position is None or current_position == state:
             return
 
         service = SERVICE_SET_COVER_POSITION
@@ -433,15 +664,54 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
             ATTR_ENTITY_ID: entity,
             position_attribute: state,
         }
-        self.wait_for_target[entity] = True
-        self.target_call[entity] = state
+        issued_at = dt_util.utcnow()
+        context = Context()
+        command = CoverCommand(
+            target=state,
+            source=source,
+            issued_at=issued_at,
+            last_progress_at=issued_at,
+            last_position=current_position,
+            context_id=context.id,
+        )
+        self.pending_commands[entity] = command
         self.logger.debug("Run %s with data %s", service, service_data)
-        await self.hass.services.async_call(COVER_DOMAIN, service, service_data)
+        try:
+            await self.hass.services.async_call(
+                COVER_DOMAIN,
+                service,
+                service_data,
+                blocking=True,
+                context=context,
+            )
+        except HomeAssistantError:
+            self.pending_commands.pop(entity, None)
+            self.logger.exception("Failed to send cover command to %s", entity)
+            return
+
+        self.last_commands[entity] = command
+
+    @property
+    def manual_override_details(self) -> dict[str, dict[str, str | int | None]]:
+        """Return per-cover manual expiry and physical position details."""
+        now = dt_util.utcnow()
+        details = {}
+        for entity_id in self.manager.manual_controlled:
+            started_at = self.manager.manual_control_time[entity_id]
+            expires_at = self.manager.expires_at(entity_id)
+            details[entity_id] = {
+                "held_position": self._get_current_position(entity_id),
+                "started_at": started_at.isoformat(),
+                "expires_at": expires_at.isoformat(),
+                "remaining_seconds": max(0, int((expires_at - now).total_seconds())),
+            }
+        return details
 
     def _update_options(self, options):
         """Update options."""
         self.entities = options.get(CONF_ENTITIES, [])
         self.min_change = options.get(CONF_DELTA_POSITION, 1)
+        self.position_tolerance = options.get(CONF_POSITION_TOLERANCE, 0)
         self.time_threshold = options.get(CONF_DELTA_TIME, 2)
         self.start_time = options.get(CONF_START_TIME)
         self.start_time_entity = options.get(CONF_START_ENTITY)
@@ -449,9 +719,6 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         self.end_time = options.get(CONF_END_TIME)
         self.end_time_entity = options.get(CONF_END_ENTITY)
         self.manual_reset = options.get(CONF_MANUAL_OVERRIDE_RESET, False)
-        self.manual_duration = options.get(
-            CONF_MANUAL_OVERRIDE_DURATION, {"minutes": 15}
-        )
         self.manual_threshold = options.get(CONF_MANUAL_THRESHOLD)
         self.start_value = options.get(CONF_INTERP_START)
         self.end_value = options.get(CONF_INTERP_END)
@@ -486,12 +753,6 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
             self.control_method = "override_invalid"
         else:
             self.control_method = "solar"
-
-    def _update_manager_and_covers(self):
-        self.manager.add_covers(self.entities)
-        if not self._manual_toggle:
-            for entity in self.manager.manual_controlled:
-                self.manager.reset(entity)
 
     def _update_datetime_objects(self) -> None:
         """Calculate and store start and end time datetimes."""
@@ -596,14 +857,6 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
             else "current_position"
         )
         return state.attributes.get(attribute)
-
-    def check_position(self, entity, state):
-        """Check if position is different as state."""
-        position = self._get_current_position(entity)
-        if position is not None:
-            return position != state
-        self.logger.debug("Cover is already at position %s", state)
-        return False
 
     def check_position_delta(self, entity, state: int, options):
         """Check cover positions to reduce calls."""

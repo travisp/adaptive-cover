@@ -11,6 +11,7 @@
       "automation": {
         "data": {
           "delta_position": "Minimale positieaanpassing",
+          "position_tolerance": "Positietolerantie",
           "delta_time": "Minimale interval tussen positieveranderingen",
           "start_time": "Starttijd",
           "start_entity": "Entiteit die starttijd aangeeft",
@@ -25,6 +26,7 @@
         },
         "data_description": {
           "delta_position": "Minimale verandering in positie vereist voordat de positie van de bekleding wordt aangepast",
+          "position_tolerance": "Toegestane afwijking tussen de aangestuurde en gemelde positie voordat de opdracht als voltooid wordt beschouwd. De standaardwaarde 0 vereist een exacte overeenkomst.",
           "delta_time": "Minimale tijdsinterval tussen positieveranderingen; minimum is 2 minuten",
           "start_time": "Starttijd voor elke dag; voor deze tijd blijft de bekleding stationair",
           "start_entity": "Entiteit die de status van de starttijd vertegenwoordigt, die de hierboven ingestelde statische starttijd overschrijft. Handig voor het automatiseren van de starttijd met een entiteit",
@@ -206,6 +208,7 @@
       "automation": {
         "data": {
           "delta_position": "Minimale positieaanpassing",
+          "position_tolerance": "Positietolerantie",
           "delta_time": "Minimale interval tussen positieveranderingen",
           "start_time": "Starttijd",
           "start_entity": "Entiteit die starttijd aangeeft",
@@ -220,6 +223,7 @@
         },
         "data_description": {
           "delta_position": "Minimale verandering in positie vereist voordat de positie van de bekleding wordt aangepast",
+          "position_tolerance": "Toegestane afwijking tussen de aangestuurde en gemelde positie voordat de opdracht als voltooid wordt beschouwd. De standaardwaarde 0 vereist een exacte overeenkomst.",
           "delta_time": "Minimale tijdsinterval tussen positieveranderingen; minimum is 2 minuten",
           "start_time": "Starttijd voor elke dag; voor deze tijd blijft de bekleding stationair",
           "start_entity": "Entiteit die de status van de starttijd vertegenwoordigt, die de hierboven ingestelde statische starttijd overschrijft. Handig voor het automatiseren van de starttijd met een entiteit",
@@ -386,6 +390,18 @@
         },
         "title": "Bereik Aanpassing",
         "description": "Pas de waarden aan waarbij jouw Cover effectief opent of sluit. Ideaal voor Covers die niet volledig openen bij 0% of sluiten bij 100%."
+      }
+    }
+  },
+  "services": {
+    "reset_manual_override": {
+      "name": "Handmatige bediening resetten",
+      "description": "Hervat de automatische bediening voor geselecteerde covers die handmatig worden bediend.",
+      "fields": {
+        "entity_id": {
+          "name": "Covers",
+          "description": "Fysieke coverentiteiten waarvan de handmatige bediening moet worden gereset."
+        }
       }
     }
   },

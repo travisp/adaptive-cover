@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+import types
 from pathlib import Path
 import pytest
 
@@ -42,12 +43,39 @@ class DummyConfigEntries:
         self.reloaded = entry_id
 
 
+class DummyServices:
+    """Record integration service registration."""
+
+    def __init__(self):
+        """Initialize service storage."""
+        self.registered = {}
+
+    def async_register(self, domain, service, handler, **kwargs):
+        """Record a registered service."""
+        self.registered[(domain, service)] = (handler, kwargs)
+
+
+class DummyBus:
+    """Record event listeners registered by the integration."""
+
+    def __init__(self):
+        """Initialize listener storage."""
+        self.listeners = []
+
+    def async_listen(self, event_type, callback):
+        """Record an event listener and return its unsubscribe callback."""
+        self.listeners.append((event_type, callback))
+        return lambda: None
+
+
 class DummyHass:
     """Very small subset of :class:`homeassistant.core.HomeAssistant`."""
 
     def __init__(self):
         """Initialize the dummy Home Assistant object."""
         self.config_entries = DummyConfigEntries()
+        self.bus = DummyBus()
+        self.services = DummyServices()
         self.data = {}
 
 
@@ -79,6 +107,17 @@ class DummyCoordinator:
         """Initialize the dummy coordinator."""
         self.hass = hass
         self.first_refresh = False
+        self.restored = False
+        self.saved = False
+        self.reset_requests = []
+
+    async def async_restore_manual_control(self):
+        """Record manual state restoration."""
+        self.restored = True
+
+    async def async_save_manual_control(self):
+        """Record a persistence request."""
+        self.saved = True
 
     async def async_config_entry_first_refresh(self):
         """Simulate the first refresh logic."""
@@ -91,6 +130,14 @@ class DummyCoordinator:
     async def async_check_cover_state_change(self, *args, **kwargs):
         """Mock handler for cover state changes."""
         pass
+
+    def handle_cover_service_call(self, *args, **kwargs):
+        """Mock handler for cover service calls."""
+        pass
+
+    async def async_reset_manual_overrides(self, entities):
+        """Record a targeted reset request."""
+        self.reset_requests.append(entities)
 
 
 @pytest.mark.asyncio
@@ -116,23 +163,36 @@ async def test_initialize_and_lifecycle(monkeypatch):
     )
     monkeypatch.setattr(sac, "AdaptiveDataUpdateCoordinator", DummyCoordinator)
 
-    assert await sac.async_initialize_integration(hass) is True
-
+    assert await sac.async_setup(hass, {}) is True
     assert await sac.async_setup_entry(hass, entry) is True
     assert sac.DOMAIN in hass.data
     assert entry.entry_id in hass.data[sac.DOMAIN]
     coord = hass.data[sac.DOMAIN][entry.entry_id]
     assert isinstance(coord, DummyCoordinator) and coord.first_refresh
+    assert coord.restored is True
+    assert (sac.DOMAIN, sac.SERVICE_RESET_MANUAL_OVERRIDE) in hass.services.registered
     assert track_calls == [
         ["sun.sun", "sensor.cover_override"],
         ["cover.test"],
     ]
+    assert hass.bus.listeners == [
+        (sac.EVENT_CALL_SERVICE, coord.handle_cover_service_call)
+    ]
     assert hass.config_entries.forwarded == [(entry, sac.PLATFORMS)]
+
+    service_handler = hass.services.registered[
+        (sac.DOMAIN, sac.SERVICE_RESET_MANUAL_OVERRIDE)
+    ][0]
+    await service_handler(
+        types.SimpleNamespace(data={sac.ATTR_ENTITY_ID: ["cover.test"]})
+    )
+    assert coord.reset_requests == [{"cover.test"}]
 
     listener = entry.update_listeners[0]
     await listener(hass, entry)
     assert hass.config_entries.reloaded == entry.entry_id
 
     assert await sac.async_unload_entry(hass, entry) is True
+    assert coord.saved is True
     assert hass.config_entries.unloaded == [(entry, sac.PLATFORMS)]
     assert entry.entry_id not in hass.data[sac.DOMAIN]

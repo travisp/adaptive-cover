@@ -2,18 +2,12 @@
 
 from __future__ import annotations
 
-import asyncio
-
 from homeassistant.components.button import ButtonEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import (
-    _LOGGER,
-    CONF_ENTITIES,
-    DOMAIN,
-)
+from .const import CONF_ENTITIES, DOMAIN
 from .coordinator import AdaptiveDataUpdateCoordinator
 from .entity import AdaptiveCoverEntity
 
@@ -67,20 +61,5 @@ class AdaptiveCoverButton(AdaptiveCoverEntity, ButtonEntity):
         return f"{self._button_name} {self._name}"
 
     async def async_press(self) -> None:
-        """Handle the button press."""
-        for entity in self._entities:
-            if self.coordinator.manager.is_cover_manual(entity):
-                _LOGGER.debug("Resetting manual override for: %s", entity)
-                if not self.coordinator.external_override.holds_commands:
-                    await self.coordinator.async_set_position(
-                        entity, self.coordinator.state
-                    )
-                    while self.coordinator.wait_for_target.get(entity):
-                        await asyncio.sleep(1)
-                self.coordinator.manager.reset(entity)
-            else:
-                _LOGGER.debug(
-                    "Resetting manual override for %s is not needed since it is already auto-controlled",
-                    entity,
-                )
-        await self.coordinator.async_refresh()
+        """Reset manual ownership for every cover in this configuration."""
+        await self.coordinator.async_reset_manual_overrides(set(self._entities))

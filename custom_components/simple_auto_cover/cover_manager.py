@@ -3,129 +3,123 @@
 from __future__ import annotations
 
 import datetime as dt
+from collections.abc import Callable
+
 from homeassistant.util import dt as dt_util
 
 from .const import SensorType
 
 
-class AdaptiveCoverManager:
-    """Track position changes."""
+class ManualOverrideManager:
+    """Track per-cover manual control state."""
 
-    def __init__(self, reset_duration: dict[str, int], logger) -> None:
-        """Initialize the AdaptiveCoverManager."""
-        self.covers: set[str] = set()
-
-        self.manual_control: dict[str, bool] = {}
+    def __init__(
+        self,
+        reset_duration: dict[str, int],
+        logger,
+        on_change: Callable[[str], None],
+    ) -> None:
+        """Initialize the manual control manager."""
         self.manual_control_time: dict[str, dt.datetime] = {}
         self.reset_duration = dt.timedelta(**reset_duration)
         self.logger = logger
-
-    def add_covers(self, entity) -> None:
-        """Update set with entities."""
-        self.covers.update(entity)
+        self._on_change = on_change
 
     def handle_state_change(
         self,
-        states_data,
-        our_state,
-        blind_type,
-        allow_reset,
-        wait_target_call,
+        event,
+        expected_position,
+        cover_type,
+        reset_timer,
         manual_threshold,
     ) -> None:
-        """Process state change event."""
-        event = states_data
-        if event is None:
+        """Mark a cover as manual when its reported movement was not expected."""
+        position_attribute = (
+            "current_tilt_position"
+            if cover_type == SensorType.TILT
+            else "current_position"
+        )
+        old_position = event.old_state.attributes.get(position_attribute)
+        new_position = event.new_state.attributes.get(position_attribute)
+        finished_moving = event.old_state.state in ["opening", "closing"] and (
+            event.new_state.state not in ["opening", "closing"]
+        )
+        if old_position == new_position and not finished_moving:
             return
-        entity_id = event.entity_id
-        if entity_id not in self.covers:
+        if new_position == expected_position:
             return
-        if wait_target_call.get(entity_id):
+        if (
+            manual_threshold is not None
+            and abs(expected_position - new_position) < manual_threshold
+        ):
+            self.logger.debug(
+                "Position change is less than threshold %s for %s",
+                manual_threshold,
+                event.entity_id,
+            )
             return
 
-        new_state = event.new_state
+        self.logger.debug(
+            "Manual change detected for %s. Our state: %s, new state: %s",
+            event.entity_id,
+            expected_position,
+            new_position,
+        )
+        self.mark_manual_control(event.entity_id, reset_timer)
 
-        if blind_type == SensorType.TILT:
-            new_position = new_state.attributes.get("current_tilt_position")
-        else:
-            new_position = new_state.attributes.get("current_position")
+    def mark_manual_control(self, entity_id: str, reset_timer: bool) -> None:
+        """Mark a cover as manual and start or refresh its reset timer."""
+        if entity_id in self.manual_control_time and not reset_timer:
+            return
 
-        if new_position != our_state:
-            if (
-                manual_threshold is not None
-                and abs(our_state - new_position) < manual_threshold
-            ):
-                self.logger.debug(
-                    "Position change is less than threshold %s for %s",
-                    manual_threshold,
-                    entity_id,
-                )
-                return
+        self.manual_control_time[entity_id] = dt_util.utcnow()
+        self.logger.debug(
+            "Manual control for %s expires after %s seconds",
+            entity_id,
+            self.reset_duration.total_seconds(),
+        )
+        self._on_change(entity_id)
+
+    def restore(self, entity_id: str, expires_at: dt.datetime) -> None:
+        """Restore manual control with its original absolute expiry."""
+        self.manual_control_time[entity_id] = expires_at - self.reset_duration
+
+    def reset_if_needed(self) -> list[str]:
+        """Reset and return covers whose manual control has expired."""
+        now = dt_util.utcnow()
+        expired = [
+            entity_id
+            for entity_id, started_at in self.manual_control_time.items()
+            if now >= started_at + self.reset_duration
+        ]
+        for entity_id in expired:
             self.logger.debug(
-                "Manual change detected for %s. Our state: %s, new state: %s",
+                "Resetting manual override for %s, because duration has elapsed",
                 entity_id,
-                our_state,
-                new_position,
             )
-            self.logger.debug(
-                "Set manual control for %s, for at least %s seconds, reset_allowed: %s",
-                entity_id,
-                self.reset_duration.total_seconds(),
-                allow_reset,
-            )
-            self.mark_manual_control(entity_id)
-            self.set_last_updated(entity_id, new_state, allow_reset)
+            self.reset(entity_id)
+        return expired
 
-    def set_last_updated(self, entity_id, new_state, allow_reset) -> None:
-        """Set last updated time for manual control."""
-        if entity_id not in self.manual_control_time or allow_reset:
-            last_updated = new_state.last_updated
-            self.manual_control_time[entity_id] = last_updated
-            self.logger.debug(
-                "Updating last updated for manual control to %s for %s. Allow reset:%s",
-                last_updated,
-                entity_id,
-                allow_reset,
-            )
-        elif not allow_reset:
-            self.logger.debug(
-                "Already manual control time specified for %s, reset is not allowed by user setting:%s",
-                entity_id,
-                allow_reset,
-            )
-
-    def mark_manual_control(self, cover: str) -> None:
-        """Mark cover as under manual control."""
-        self.manual_control[cover] = True
-
-    async def reset_if_needed(self) -> None:
-        """Reset manual control state of the covers."""
-        current_time = dt_util.utcnow()
-        manual_control_time_copy = dict(self.manual_control_time)
-        for entity_id, last_updated in manual_control_time_copy.items():
-            if current_time - last_updated > self.reset_duration:
-                self.logger.debug(
-                    "Resetting manual override for %s, because duration has elapsed",
-                    entity_id,
-                )
-                self.reset(entity_id)
-
-    def reset(self, entity_id) -> None:
+    def reset(self, entity_id: str) -> None:
         """Reset manual control for a cover."""
-        self.manual_control[entity_id] = False
-        self.manual_control_time.pop(entity_id, None)
+        del self.manual_control_time[entity_id]
         self.logger.debug("Reset manual override for %s", entity_id)
+        self._on_change(entity_id)
 
-    def is_cover_manual(self, entity_id):
+    def is_cover_manual(self, entity_id: str) -> bool:
         """Check if a cover is under manual control."""
-        return self.manual_control.get(entity_id, False)
+        return entity_id in self.manual_control_time
+
+    def expires_at(self, entity_id: str) -> dt.datetime:
+        """Return when manual control expires for a cover."""
+        return self.manual_control_time[entity_id] + self.reset_duration
 
     @property
     def binary_cover_manual(self) -> bool:
         """Check if any cover is under manual control."""
-        return any(value for value in self.manual_control.values())
+        return bool(self.manual_control_time)
 
     @property
     def manual_controlled(self) -> list[str]:
         """Get the list of covers under manual control."""
-        return [k for k, v in self.manual_control.items() if v]
+        return sorted(self.manual_control_time)

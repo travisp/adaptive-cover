@@ -11,6 +11,7 @@
       "automation": {
         "data": {
           "delta_position": "Minimum position adjustment",
+          "position_tolerance": "Position match tolerance",
           "delta_time": "Minimum interval between position changes",
           "start_time": "Starting time",
           "start_entity": "Entity indicating starting time",
@@ -25,6 +26,7 @@
         },
         "data_description": {
           "delta_position": "Minimum change in position required before adjusting the cover's position",
+          "position_tolerance": "Allowed difference between a commanded position and the position reported by the cover before the command is considered complete. The default of 0 requires an exact match.",
           "delta_time": "Minimum time interval between position changes; minimum is 2 minutes",
           "start_time": "Starting time for each day; before this time, the cover will remain stationary",
           "start_entity": "Entity representing starting time state, overriding the fixed start time set above. Useful for automating the start time with an entity",
@@ -207,6 +209,7 @@
       "automation": {
         "data": {
           "delta_position": "Minimum position adjustment",
+          "position_tolerance": "Position match tolerance",
           "delta_time": "Minimum interval between position changes",
           "start_time": "Starting time",
           "start_entity": "Entity indicating starting time",
@@ -221,6 +224,7 @@
         },
         "data_description": {
           "delta_position": "Minimum change in position required before adjusting the cover's position",
+          "position_tolerance": "Allowed difference between a commanded position and the position reported by the cover before the command is considered complete. The default of 0 requires an exact match.",
           "delta_time": "Minimum time interval between position changes; minimum is 2 minutes",
           "start_time": "Starting time for each day; before this time, the cover will remain stationary",
           "start_entity": "Entity representing starting time state, overriding the fixed start time set above. Useful for automating the start time with an entity",
@@ -385,6 +389,18 @@
         },
         "title": "Range Adjustment",
         "description": "Adjust the values at which your Cover effectively opens or closes. Ideal for Covers that don't fully open at 0% or close at 100%. \n The first two sliders are for a 2 point adjustment, the list options are for a multiple point adjustment"
+      }
+    }
+  },
+  "services": {
+    "reset_manual_override": {
+      "name": "Reset manual override",
+      "description": "Resume automatic control for selected covers that are manually controlled.",
+      "fields": {
+        "entity_id": {
+          "name": "Covers",
+          "description": "Physical cover entities whose manual override should be reset."
+        }
       }
     }
   },

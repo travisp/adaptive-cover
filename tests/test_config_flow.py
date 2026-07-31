@@ -110,6 +110,7 @@ def test_automation_schema_accepts_external_override_entity():
     data = cf.AUTOMATION_CONFIG({cf.CONF_OVERRIDE_ENTITY: "sensor.cover_override"})
 
     assert data[cf.CONF_OVERRIDE_ENTITY] == "sensor.cover_override"
+    assert data[cf.CONF_POSITION_TOLERANCE] == 0
 
 
 def test_validate_elevation_range():

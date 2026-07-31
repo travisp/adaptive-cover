@@ -112,10 +112,22 @@ def test_button_inherits_base(entity_module, button_module):
     assert button.unique_id == "uid_Reset"
 
 
+@pytest.mark.asyncio
+async def test_reset_button_delegates_all_configured_covers(button_module):
+    """Reset all covers through the coordinator's targeted reset path."""
+    coord = DummyCoordinator()
+    coord.async_reset_manual_overrides = AsyncMock()
+    button = button_module.AdaptiveCoverButton(make_entry(), "uid", "Reset", coord)
+
+    await button.async_press()
+
+    coord.async_reset_manual_overrides.assert_awaited_once_with({"cover.one"})
+
+
 def test_binary_sensor_is_on(entity_module, binary_sensor_module):
     """Confirm binary sensor reports its state correctly."""
     entry = make_entry()
-    coord = DummyCoordinator(states={"sun": True, "manual_list": []})
+    coord = DummyCoordinator(states={"sun": True})
     sensor = binary_sensor_module.AdaptiveCoverBinarySensor(
         entry,
         "uid",
@@ -130,6 +142,36 @@ def test_binary_sensor_is_on(entity_module, binary_sensor_module):
     assert sensor.is_on is True
     assert sensor.name == "Sun " + entry.data[CONF_NAME]
     assert sensor.unique_id == "uid_Sun"
+
+
+def test_manual_binary_sensor_exposes_per_cover_details(binary_sensor_module):
+    """Expose aggregate and per-cover manual ownership attributes."""
+    details = {
+        "cover.one": {
+            "held_position": 65,
+            "expires_at": "2026-01-01T12:00:00+00:00",
+        }
+    }
+    coord = DummyCoordinator(
+        states={
+            "manual_override": True,
+            "manual_overrides": details,
+        }
+    )
+    sensor = binary_sensor_module.AdaptiveCoverBinarySensor(
+        make_entry(),
+        "uid",
+        "Manual Override",
+        False,
+        "manual_override",
+        binary_sensor_module.BinarySensorDeviceClass.RUNNING,
+        coord,
+    )
+
+    assert sensor.extra_state_attributes == {
+        "manual_controlled": ["cover.one"],
+        "manual_overrides": details,
+    }
 
 
 def test_sensor_native_value(entity_module, sensor_module):

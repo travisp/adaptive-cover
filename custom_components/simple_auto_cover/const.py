@@ -46,6 +46,7 @@ CONF_INTERP = "interp"
 
 
 CONF_DELTA_POSITION = "delta_position"
+CONF_POSITION_TOLERANCE = "position_tolerance"
 CONF_DELTA_TIME = "delta_time"
 CONF_START_TIME = "start_time"
 CONF_START_ENTITY = "start_entity"
@@ -57,6 +58,8 @@ CONF_MANUAL_OVERRIDE_RESET = "manual_override_reset"
 CONF_MANUAL_THRESHOLD = "manual_threshold"
 CONF_MANUAL_IGNORE_INTERMEDIATE = "manual_ignore_intermediate"
 CONF_OVERRIDE_ENTITY = "override_entity"
+
+SERVICE_RESET_MANUAL_OVERRIDE = "reset_manual_override"
 
 STRATEGY_MODE_BASIC = "basic"
 STRATEGY_MODES = [STRATEGY_MODE_BASIC]
