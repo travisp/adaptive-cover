@@ -156,15 +156,15 @@ class StateChangedData:
 
 
 @dataclass
-class AdaptiveCoverData:
+class SimpleAutoCoverData:
     """State and attributes exposed by Simple Auto Cover entities."""
 
     states: dict
     attributes: dict
 
 
-class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
-    """Adaptive cover data update coordinator."""
+class SimpleAutoCoverDataUpdateCoordinator(DataUpdateCoordinator[SimpleAutoCoverData]):
+    """Coordinate data updates for Simple Auto Cover."""
 
     config_entry: ConfigEntry
 
@@ -483,7 +483,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         )
         self._scheduled_time = self._end_time
 
-    async def _async_update_data(self) -> AdaptiveCoverData:
+    async def _async_update_data(self) -> SimpleAutoCoverData:
         self.logger.debug("Updating data")
         options = self.config_entry.options
         self._update_options(options)
@@ -540,7 +540,7 @@ class AdaptiveDataUpdateCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
             self.logger.debug("Sun start time: %s, Sun end time: %s", start, end)
         else:
             start, end = self._sun_start_time, self._sun_end_time
-        return AdaptiveCoverData(
+        return SimpleAutoCoverData(
             states={
                 "state": state,
                 "start": start,

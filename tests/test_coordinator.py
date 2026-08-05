@@ -58,8 +58,8 @@ class FakeStore:
 def make_coordinator(module, cover_type: SensorType = SensorType.BLIND):
     """Instantiate a coordinator and its surrounding fixtures."""
     hass = HomeAssistant()
-    coord = module.AdaptiveDataUpdateCoordinator.__new__(
-        module.AdaptiveDataUpdateCoordinator
+    coord = module.SimpleAutoCoverDataUpdateCoordinator.__new__(
+        module.SimpleAutoCoverDataUpdateCoordinator
     )
     coord.hass = hass
     coord.config_entry = types.SimpleNamespace(data={}, options={})

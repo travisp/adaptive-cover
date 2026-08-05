@@ -8,8 +8,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import CONF_ENTITIES, DOMAIN
-from .coordinator import AdaptiveDataUpdateCoordinator
-from .entity import AdaptiveCoverEntity
+from .coordinator import SimpleAutoCoverDataUpdateCoordinator
+from .entity import SimpleAutoCoverEntity
 
 
 async def async_setup_entry(
@@ -18,11 +18,11 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the button platform."""
-    coordinator: AdaptiveDataUpdateCoordinator = hass.data[DOMAIN][
+    coordinator: SimpleAutoCoverDataUpdateCoordinator = hass.data[DOMAIN][
         config_entry.entry_id
     ]
 
-    reset_manual = AdaptiveCoverButton(
+    reset_manual = SimpleAutoCoverButton(
         config_entry, config_entry.entry_id, "Reset Manual Override", coordinator
     )
 
@@ -35,7 +35,7 @@ async def async_setup_entry(
     async_add_entities(buttons)
 
 
-class AdaptiveCoverButton(AdaptiveCoverEntity, ButtonEntity):
+class SimpleAutoCoverButton(SimpleAutoCoverEntity, ButtonEntity):
     """Representation of a simple auto cover button."""
 
     _attr_has_entity_name = True
@@ -47,7 +47,7 @@ class AdaptiveCoverButton(AdaptiveCoverEntity, ButtonEntity):
         config_entry,
         unique_id: str,
         button_name: str,
-        coordinator: AdaptiveDataUpdateCoordinator,
+        coordinator: SimpleAutoCoverDataUpdateCoordinator,
     ) -> None:
         """Initialize the button."""
         super().__init__(config_entry, unique_id, coordinator)

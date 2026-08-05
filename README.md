@@ -44,7 +44,6 @@ Blinds](https://community.home-assistant.io/t/automatic-blinds-sunscreen-control
 - Binary sensor tracking when the sun is in front of the window
 - Sensors for `start` and `end` time
 - Auto manual override detection
-- Simple select entity to force shades open or closed
 
 ## Installation
 
@@ -209,17 +208,17 @@ The integration dynamically adds multiple entities based on the used features.
 
 These entities are always available:
 
-| Entities                                      | Default | Description                                                                                                                                                   |
-| --------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sensor.{type}_cover_position_{name}`         |         | Reflects the resolved solar or external cover position and exposes override details as attributes                                                             |
-| `sensor.{type}_control_method_{name}`         | `solar` | Indicates whether solar, manual, normal external, forced external, or hold control is active                                                                  |
-| `sensor.{type}_start_sun_{name}`              |         | Shows the starting time when the sun enters the window's view, with an interval of every 5 minutes.                                                           |
-| `sensor.{type}_end_sun_{name}`                |         | Indicates the ending time when the sun exits the window's view, with an interval of every 5 minutes.                                                          |
-| `binary_sensor.{type}_manual_override_{name}` | `off`   | Indicates if any cover is manually controlled and exposes per-cover position and expiry details.                                                              |
-| `binary_sensor.{type}_sun_infront_{name}`     | `off`   | Indicates whether the sun is in front of the window within the designated field of view.                                                                      |
-| `switch.{type}_toggle_control_{name}`         | `on`    | Activates the adaptive control feature. When enabled, blinds adjust based on calculated position, unless manually overridden.                                 |
-| `switch.{type}_manual_override_{name}`        | `on`    | Enables detection of manual overrides. A cover is marked if its position differs from the calculated one, resetting to adaptive control after a set duration. |
-| `button.{type}_reset_manual_override_{name}`  | `on`    | Resets manual override tags for all covers; if `switch.{type}_toggle_control_{name}` is on, it also restores blinds to their correct positions.               |
+| Entities                                      | Default | Description                                                                                                                                                  |
+| --------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `sensor.{type}_cover_position_{name}`         |         | Reflects the resolved solar or external cover position and exposes override details as attributes                                                            |
+| `sensor.{type}_control_method_{name}`         | `solar` | Indicates whether solar, manual, normal external, forced external, or hold control is active                                                                 |
+| `sensor.{type}_start_sun_{name}`              |         | Shows the starting time when the sun enters the window's view, with an interval of every 5 minutes.                                                          |
+| `sensor.{type}_end_sun_{name}`                |         | Indicates the ending time when the sun exits the window's view, with an interval of every 5 minutes.                                                         |
+| `binary_sensor.{type}_manual_override_{name}` | `off`   | Indicates if any cover is manually controlled and exposes per-cover position and expiry details.                                                             |
+| `binary_sensor.{type}_sun_infront_{name}`     | `off`   | Indicates whether the sun is in front of the window within the designated field of view.                                                                     |
+| `switch.{type}_toggle_control_{name}`         | `on`    | Activates the adaptive control feature. When enabled, blinds adjust based on calculated position, unless manually overridden.                                |
+| `switch.{type}_manual_override_{name}`        | `on`    | Allows detection of manual overrides. A cover is marked if its position differs from the calculated one, resetting to adaptive control after a set duration. |
+| `button.{type}_reset_manual_override_{name}`  | `on`    | Resets manual override tags for all covers; if `switch.{type}_toggle_control_{name}` is on, it also restores blinds to their correct positions.              |
 
 ## Features Planned
 

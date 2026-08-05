@@ -90,7 +90,7 @@ def test_base_entity_initialization(entity_module):
     """Ensure base entity is initialized with the correct attributes."""
     entry = make_entry()
     coord = DummyCoordinator()
-    entity = entity_module.AdaptiveCoverEntity(entry, "uid", coord)
+    entity = entity_module.SimpleAutoCoverEntity(entry, "uid", coord)
 
     assert entity._device_id == "uid"
     assert entity._name == entry.data[CONF_NAME]
@@ -102,9 +102,9 @@ def test_button_inherits_base(entity_module, button_module):
     """Verify button inherits from the base entity class."""
     entry = make_entry()
     coord = DummyCoordinator()
-    button = button_module.AdaptiveCoverButton(entry, "uid", "Reset", coord)
+    button = button_module.SimpleAutoCoverButton(entry, "uid", "Reset", coord)
 
-    assert isinstance(button, entity_module.AdaptiveCoverEntity)
+    assert isinstance(button, entity_module.SimpleAutoCoverEntity)
     assert button.name == "Reset " + entry.data[CONF_NAME]
     assert (
         button.device_info["name"] == COVER_TYPE_DISPLAY[entry.data[CONF_SENSOR_TYPE]]
@@ -117,7 +117,7 @@ async def test_reset_button_delegates_all_configured_covers(button_module):
     """Reset all covers through the coordinator's targeted reset path."""
     coord = DummyCoordinator()
     coord.async_reset_manual_overrides = AsyncMock()
-    button = button_module.AdaptiveCoverButton(make_entry(), "uid", "Reset", coord)
+    button = button_module.SimpleAutoCoverButton(make_entry(), "uid", "Reset", coord)
 
     await button.async_press()
 
@@ -128,7 +128,7 @@ def test_binary_sensor_is_on(entity_module, binary_sensor_module):
     """Confirm binary sensor reports its state correctly."""
     entry = make_entry()
     coord = DummyCoordinator(states={"sun": True})
-    sensor = binary_sensor_module.AdaptiveCoverBinarySensor(
+    sensor = binary_sensor_module.SimpleAutoCoverBinarySensor(
         entry,
         "uid",
         "Sun",
@@ -138,7 +138,7 @@ def test_binary_sensor_is_on(entity_module, binary_sensor_module):
         coord,
     )
 
-    assert isinstance(sensor, entity_module.AdaptiveCoverEntity)
+    assert isinstance(sensor, entity_module.SimpleAutoCoverEntity)
     assert sensor.is_on is True
     assert sensor.name == "Sun " + entry.data[CONF_NAME]
     assert sensor.unique_id == "uid_Sun"
@@ -158,7 +158,7 @@ def test_manual_binary_sensor_exposes_per_cover_details(binary_sensor_module):
             "manual_overrides": details,
         }
     )
-    sensor = binary_sensor_module.AdaptiveCoverBinarySensor(
+    sensor = binary_sensor_module.SimpleAutoCoverBinarySensor(
         make_entry(),
         "uid",
         "Manual Override",
@@ -185,14 +185,14 @@ def test_sensor_native_value(entity_module, sensor_module):
     }
     coord = DummyCoordinator(states=states, attrs={"foo": "bar"})
 
-    sensor = sensor_module.AdaptiveCoverSensorEntity(
+    sensor = sensor_module.SimpleAutoCoverSensorEntity(
         "uid", None, entry, entry.data[CONF_NAME], coord
     )
 
     assert sensor.native_value == 55
     assert sensor.extra_state_attributes == {"foo": "bar"}
 
-    time_sensor = sensor_module.AdaptiveCoverTimeSensorEntity(
+    time_sensor = sensor_module.SimpleAutoCoverTimeSensorEntity(
         "uid",
         None,
         entry,
@@ -204,7 +204,7 @@ def test_sensor_native_value(entity_module, sensor_module):
     )
     assert time_sensor.native_value == states["start"]
 
-    control_sensor = sensor_module.AdaptiveCoverControlSensorEntity(
+    control_sensor = sensor_module.SimpleAutoCoverControlSensorEntity(
         "uid", None, entry, entry.data[CONF_NAME], coord
     )
 
@@ -215,13 +215,37 @@ def test_switch_initial_state(entity_module, switch_module):
     """Check initial attributes of the manual override switch."""
     entry = make_entry()
     coord = DummyCoordinator()
-    switch = switch_module.AdaptiveCoverSwitch(
-        entry, "uid", "Manual", True, "manual_toggle", coord
+    switch = switch_module.SimpleAutoCoverSwitch(
+        entry,
+        "uid",
+        "Allow Manual Override",
+        True,
+        "manual_toggle",
+        coord,
     )
 
-    assert isinstance(switch, entity_module.AdaptiveCoverEntity)
-    assert switch.name == "Manual " + entry.data[CONF_NAME]
-    assert switch.unique_id == "uid_Manual"
+    assert isinstance(switch, entity_module.SimpleAutoCoverEntity)
+    assert switch.name == "Allow Manual Override " + entry.data[CONF_NAME]
+    assert switch.unique_id == "uid_manual_toggle"
+
+
+@pytest.mark.asyncio
+async def test_switch_async_setup_entry(switch_module):
+    """Set up switches with clear names and key-based unique IDs."""
+    entry = make_entry()
+    hass = types.SimpleNamespace(data={DOMAIN: {entry.entry_id: DummyCoordinator()}})
+    added = []
+
+    await switch_module.async_setup_entry(hass, entry, added.extend)
+
+    assert [entity.name for entity in added] == [
+        f"Toggle Control {entry.data[CONF_NAME]}",
+        f"Allow Manual Override {entry.data[CONF_NAME]}",
+    ]
+    assert [entity.unique_id for entity in added] == [
+        f"{entry.entry_id}_control_toggle",
+        f"{entry.entry_id}_manual_toggle",
+    ]
 
 
 @pytest.mark.asyncio
@@ -232,7 +256,7 @@ async def test_control_switch_applies_restored_external_target(switch_module):
     coord.external_override = types.SimpleNamespace(target=30)
     coord.entities = ["cover.one"]
     coord.async_apply_target = AsyncMock()
-    switch = switch_module.AdaptiveCoverSwitch(
+    switch = switch_module.SimpleAutoCoverSwitch(
         entry, "uid", "Control", True, "control_toggle", coord
     )
     switch.schedule_update_ha_state = lambda: None
@@ -262,12 +286,12 @@ async def test_switch_added_to_hass_calls_base(
 
     entry = make_entry()
     coord = DummyCoordinator()
-    switch = switch_module.AdaptiveCoverSwitch(
+    switch = switch_module.SimpleAutoCoverSwitch(
         entry, "uid", "Manual", True, "manual_toggle", coord
     )
 
     monkeypatch.setattr(
-        entity_module.AdaptiveCoverEntity,
+        entity_module.SimpleAutoCoverEntity,
         "async_added_to_hass",
         fake_added_to_hass,
     )

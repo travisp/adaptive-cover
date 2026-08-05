@@ -21,7 +21,7 @@ from .const import (
     SERVICE_RESET_MANUAL_OVERRIDE,
     _LOGGER,
 )
-from .coordinator import AdaptiveDataUpdateCoordinator
+from .coordinator import SimpleAutoCoverDataUpdateCoordinator
 
 PLATFORMS = [
     Platform.SENSOR,
@@ -47,7 +47,7 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Simple Auto Cover from a config entry."""
 
-    coordinator = AdaptiveDataUpdateCoordinator(hass)
+    coordinator = SimpleAutoCoverDataUpdateCoordinator(hass)
     cover_entities = entry.options.get(CONF_ENTITIES, [])
     end_time_entity = entry.options.get(CONF_END_ENTITY)
     override_entity = entry.options.get(CONF_OVERRIDE_ENTITY)
@@ -92,7 +92,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    coordinator: AdaptiveDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator: SimpleAutoCoverDataUpdateCoordinator = hass.data[DOMAIN][
+        entry.entry_id
+    ]
     await coordinator.async_save_manual_control()
     if unload_ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
         hass.data[DOMAIN].pop(entry.entry_id)

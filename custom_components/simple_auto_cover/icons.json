@@ -18,8 +18,13 @@
       "control": {
         "default": "mdi:white-balance-sunny",
         "state": {
-          "winter": "mdi:snowflake",
-          "summer": "mdi:heat-wave"
+          "disabled": "mdi:power-off",
+          "external_hold": "mdi:pause-circle-outline",
+          "external_override": "mdi:home-automation",
+          "forced_external_override": "mdi:hand-back-right",
+          "manual": "mdi:account-wrench",
+          "override_invalid": "mdi:alert-circle-outline",
+          "override_unavailable": "mdi:cloud-alert"
         }
       }
     },
