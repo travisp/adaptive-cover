@@ -1,7 +1,7 @@
 {
-  "name": "Adaptive Cover",
-  "filename": "adaptive_cover.zip",
-  "homeassistant": "2024.5.0b1",
+  "name": "Simple Auto Cover",
+  "filename": "simple_auto_cover.zip",
+  "homeassistant": "2026.2.3",
   "render_readme": true,
   "zip_release": true
 }

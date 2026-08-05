@@ -1,15 +1,24 @@
-![Version](https://img.shields.io/github/v/release/basbruss/adaptive-cover?style=for-the-badge)
+![Version](https://img.shields.io/github/v/release/travisp/adaptive-cover?style=for-the-badge)
 
-![logo](https://github.com/basbruss/adaptive-cover/blob/main/images/logo.png#gh-light-mode-only)
-![logo](https://github.com/basbruss/adaptive-cover/blob/main/images/dark_logo.png#gh-dark-mode-only)
+![logo](https://github.com/travisp/adaptive-cover/blob/main/images/logo.png#gh-light-mode-only)
+![logo](https://github.com/travisp/adaptive-cover/blob/main/images/dark_logo.png#gh-dark-mode-only)
 
-# Adaptive Cover
+# Simple Auto Cover
 
-This Custom-Integration provides sensors for vertical and horizontal blinds based on the sun's position by calculating the position to filter out direct sunlight.
+Simple Auto Cover exposes sensors that calculate the optimal blind position to reduce glare based on the sun's position.
 
-This integration builds upon the template sensor from this forum post [Automatic Blinds](https://community.home-assistant.io/t/automatic-blinds-sunscreen-control-based-on-sun-platform/)
+This project began as a fork of [Adaptive
+Cover](https://github.com/basbruss/adaptive-cover) by [Bas
+Brussee](https://github.com/basbruss). This fork is intended to be a simpler
+implementation of the same idea, but with climate and other functionality pushed
+out of the project and into user's custom automations. The original project is
+still maintained at the time of this writing and recommended for those who want
+a more complete all-in-one solution.
 
-- [Adaptive Cover](#adaptive-cover)
+That integration originally built upon the template sensor from this forum post [Automatic
+Blinds](https://community.home-assistant.io/t/automatic-blinds-sunscreen-control-based-on-sun-platform/)
+
+- [Simple Auto Cover](#simple-auto-cover)
   - [Features](#features)
   - [Installation](#installation)
     - [HACS (Recommended)](#hacs-recommended)
@@ -18,63 +27,43 @@ This integration builds upon the template sensor from this forum post [Automatic
   - [Cover Types](#cover-types)
   - [Modes](#modes)
     - [Basic mode](#basic-mode)
-    - [Climate mode](#climate-mode)
-      - [Climate strategies](#climate-strategies)
   - [Variables](#variables)
     - [Common](#common)
     - [Vertical](#vertical)
     - [Horizontal](#horizontal)
     - [Tilt](#tilt)
     - [Automation](#automation)
-    - [Climate](#climate)
     - [Blindspot](#blindspot)
   - [Entities](#entities)
   - [Features Planned](#features-planned)
     - [Simulation](#simulation)
-    - [Blueprint (deprecated since v1.0.0)](#blueprint-deprecated-since-v100)
 
 ## Features
 
 - Individual service devices for `vertical`, `horizontal` and `tilted` covers
-- Two mode approach with multiple strategies [Modes(`basic`,`climate`)](https://github.com/basbruss/adaptive-cover?tab=readme-ov-file#modes)
-- Binary Sensor to track when the sun is in front of the window
+- Binary sensor tracking when the sun is in front of the window
 - Sensors for `start` and `end` time
 - Auto manual override detection
-
-- **Climate Mode**
-
-  - Weather condition based operation
-  - Presence based operation
-  - Switch to toggle climate mode
-  - Sensor for displaying the operation modus (`winter`,`intermediate`,`summer`)
-
-- **Adaptive Control**
-
-  - Turn control on/off
-  - Control multiple covers
-  - Set start time to prevent opening blinds while you are asleep
-  - Set minimum interval time between position changes
-  - set minimum percentage change
 
 ## Installation
 
 ### HACS (Recommended)
 
-Add <https://github.com/basbruss/adaptive-cover> as custom repository to HACS.
-Search and download Adaptive Cover within HACS.
+Add <https://github.com/travisp/adaptive-cover> as custom repository to HACS.
+Search and download Simple Auto Cover within HACS.
 
 Restart Home-Assistant and add the integration.
 
 ### Manual
 
-Download the `adaptive_cover` folder from this github.
+Download the `simple_auto_cover` folder from this repository.
 Add the folder to `config/custom_components/`.
 
 Restart Home-Assistant and add the integration.
 
 ## Setup
 
-Adaptive Cover supports (for now) three types of covers/blinds; `Vertical` and `Horizontal` and `Venetian (Tilted)` blinds.
+Simple Auto Cover supports vertical, horizontal and venetian (tilted) blinds.
 Each type has its own specific parameters to setup a sensor. To setup the sensor you first need to find out the azimuth of the window(s). This can be done by finding your location on [Open Street Map Compass](https://osmcompass.com/).
 
 ## Cover Types
@@ -87,84 +76,38 @@ Each type has its own specific parameters to setup a sensor. To setup the sensor
 
 ## Modes
 
-This component supports two strategy modes: A `basic` mode and a `climate comfort/energy saving` mode that works with presence and temperature detection.
+This component provides a simple `basic` strategy for positioning shades based solely on the sun's location.
 
 ```mermaid
   graph TD
 
   A[("fa:fa-sun Sundata")]
   A --> B["Basic Mode"]
-  A --> C["Climate Mode"]
-
   subgraph "Basic Mode"
-      B --> BA("Sun within field of view")
+      B --> BA("Sun within field of view?")
 
       BA --> |No| BC{{Default}}
-      BC --> BE("Time between sunset and sunrise?")
-      BE --> |Yes| BF["Return default"]
-      BE --> |No| BG["Return Sunset default"]
+      BC --> BD("Within sunrise+offset and sunset+offset?")
+      BD --> |Yes| BE["Return default"]
+      BD --> |No| BF["Return Sunset default"]
 
-      BA --> |Yes| BD("Elevation above 0?")
-      BD --> |Yes| BH{{"Calculated Position"}}
-      BD --> |No| BC
-  end
+      BA --> |Yes| BG("Elevation above 0?")
+      BG --> |No| BC
+      BG --> |Yes| BH("Within sunrise+offset and sunset+offset?")
+      BH --> |No| BC
+      BH --> |Yes| BI("Within start and end times?")
+      BI --> |No| BC
+      BI --> |Yes| BJ{{"Calculated Position"}}
 
-  subgraph "Climate Mode"
-      C --> CA("Check Presence")
-  end
-
-  subgraph "Occupants"
-      CA --> |True| CB("Temperature above maximum comfort (summer)?")
-
-      CB --> |Yes| CD("Transparent blind?")
-      CB --> |No| CE("Lux/Irradiance below threshold or Weather is not sunny?")
-
-      CD --> |Yes| CF["Return fully closed (0%)"]
-      CD --> |No| B
-
-      CE --> |Yes| CG("Temperature below minimum comfort (winter) and sun infront of window and elevation > 0?")
-      CE --> |No| B
-
-      CG --> |Yes| CH["Return fully open (100%)"]
-      CG --> |No| BC
-  end
-
-  subgraph "No Occupants"
-      CA --> |False| CC("Sun infront of window and elevation > 0?")
-      CC --> |No| BC
-      CC --> |Yes| CI("Temperature above maximum comfort (summer)?")
-      CI --> |Yes| CF
-      CI --> |No| CJ("Temperature below minimum comfort (winter)")
-      CJ --> |Yes| CH
-      CJ --> |No| BC
+      BE --> BP["Return solar position"]
+      BF --> BP
+      BJ --> BP
   end
 ```
 
 ### Basic mode
 
-This mode uses the calculated position when the sun is within the specified azimuth range of the window. Else it defaults to the default value or after sunset value depending on the time of day.
-
-### Climate mode
-
-This mode calculates the position based on extra parameters for presence, indoor temperature, minimal comfort temperature, maximum comfort temperature and weather (optional).
-This mode is split up in two types of strategies; [Presence](https://github.com/basbruss/adaptive-cover?tab=readme-ov-file#presence) and [No Presence](https://github.com/basbruss/adaptive-cover?tab=readme-ov-file#no-presence).
-
-#### Climate strategies
-
-- **No Presence**:
-  Providing daylight to the room is no objective if there is no presence.
-
-  - **Below minimal comfort temperature**:
-    If the sun is above the horizon and the indoor temperature is below the minimal comfort temperature it opens the blind fully or tilt the slats to be parallel with the sun rays to allow for maximum solar radiation to heat up the room.
-
-  - **Above maximum comfort temperature**:
-    The objective is to not heat up the room any further by blocking out all possible radiation. All blinds close fully to block out light. <br> <br>
-    If the indoor temperature is between both thresholds the position defaults to the set default value based on the time of day.
-
-- **Presence** (or no Presence Entity set):
-  The objective is to reduce glare while providing daylight to the room. All calculation is done by the basic model for Horizontal and Vertical blinds. <br> <br>
-  If you added a weather entity, it will only use the above calculations if the weather state corresponds with the existence of direct sun rays. These states are `sunny`,`windy`, `partlycloudy`, and `cloudy` by default, but you can change the list of states in the weather options. If not equal to these states the position will default to the default value to allow more sunlight entering the room with minimizing the glare due to the weather condition. <br><br>
-  Tilted blinds will only deviate from the above approach if the inside temperature is above the maximum comfort temperature. In that case, the slats will be positioned at 45 degrees as this is [found optimal](https://www.mdpi.com/1996-1073/13/7/1731).
+This mode uses the calculated position only when the sun is in front of the window, above the horizon, the current time lies between sunrise plus offset and sunset plus offset, and it is within the configured start and end times. Otherwise the integration falls back to the default position (or the sunset default outside the daylight period).
 
 ## Variables
 
@@ -215,9 +158,11 @@ This mode is split up in two types of strategies; [Presence](https://github.com/
 | Variables                                  | Default      | Range | Description                                                                                    |
 | ------------------------------------------ | ------------ | ----- | ---------------------------------------------------------------------------------------------- |
 | Minimum Delta Position                     | 1            | 1-90  | Minimum position change required before another change can occur                               |
+| Position Match Tolerance                   | 0            | 0-20  | Allowed difference between a commanded and reported position before considering it reached     |
 | Minimum Delta Time                         | 2            |       | Minimum time gap between position change                                                       |
 | Start Time                                 | `"00:00:00"` |       | Earliest time a cover can be adjusted after midnight                                           |
 | Start Time Entity                          | None         |       | The earliest moment a cover may be changed after midnight. _Overrides the `start_time` value_  |
+| External Override Entity                   | None         |       | Entity providing `auto`, `hold`, or a physical cover position from 0 through 100               |
 | Manual Override Duration                   | `15 min`     |       | Minimum duration for manual control status to remain active                                    |
 | Manual Override reset Timer                | False        |       | Resets duration timer each time the position changes while the manual control status is active |
 | Manual Override Threshold                  | None         | 1-99  | Minimal position change to be recognized as manual change                                      |
@@ -226,21 +171,28 @@ This mode is split up in two types of strategies; [Presence](https://github.com/
 | End Time Entity                            | None         |       | The latest moment a cover may be changed . _Overrides the `end_time` value_                    |
 | Adjust at end time                         | `False`      |       | Make sure to always update the position to the default setting at the end time.                |
 
-### Climate
+The external override entity supports these states:
 
-| Variables                     | Default | Range | Example                                       | Description                                                                                                                                          |
-| ----------------------------- | ------- | ----- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Indoor Temperature Entity     | `None`  |       | `climate.living_room` \| `sensor.indoor_temp` |                                                                                                                                                      |
-| Minimum Comfort Temperature   | 21      | 0-86  |                                               |                                                                                                                                                      |
-| Maximum Comfort Temperature   | 25      | 0-86  |                                               |                                                                                                                                                      |
-| Outdoor Temperature Entity    | `None`  |       | `sensor.outdoor_temp`                         |                                                                                                                                                      |
-| Outdoor Temperature Threshold | `None`  |       |                                               | If the minimum outside temperature for summer mode is set and the outside temperature falls below this threshold, summer mode will not be activated. |
-| Presence Entity               | `None`  |       |                                               |                                                                                                                                                      |
-| Weather Entity                | `None`  |       | `weather.home`                                | Can also serve as outdoor temperature sensor                                                                                                         |
-| Lux Entity                    | `None`  |       | `sensor.lux`                                  | Returns measured lux                                                                                                                                 |
-| Lux Threshold                 | `1000`  |       |                                               | "In non-summer, above threshold, use optimal position. Otherwise, default position or fully open in winter."                                         |
-| Irradiance Entity             | `None`  |       | `sensor.irradiance`                           | Returns measured irradiance                                                                                                                          |
-| Irradiance Threshold          | `300`   |       |                                               | "In non-summer, above threshold, use optimal position. Otherwise, default position or fully open in winter."                                         |
+- `auto`: use the position calculated from the sun.
+- `hold`: do not issue cover commands.
+- `0` through `100`: use that physical cover or tilt position. Human manual control has priority.
+
+Numeric targets bypass the solar schedule and movement interval so that external automations take effect immediately. Set the entity's `force` attribute to the boolean value `true` when its numeric position must have priority over manual control. An optional `reason` attribute is included in the cover-position sensor's diagnostic attributes. When an override entity is configured, missing, unavailable, or invalid states hold the cover rather than unexpectedly resuming solar control.
+
+SAC distinguishes its own cover commands from manual control by tracking movement toward each commanded target. Forward progress extends the command's 45-second no-progress timeout, while movement away from the target is treated as manual control. Direct Home Assistant cover service calls targeting a managed cover are also treated as manual unless SAC issued them. Automations that should remain automatic should use the external override entity instead of calling the cover directly.
+
+Manual control is tracked independently for each managed cover and persists across Home Assistant restarts and integration reloads. The Manual Override binary sensor attributes show each cover's held position, start time, expiry, and remaining duration. When one cover's override expires or is reset, only that cover resumes the currently active external or solar target.
+
+### Service
+
+`simple_auto_cover.reset_manual_override` resets manual control for selected physical cover entities and immediately resumes their current external or solar target when automatic control is enabled.
+
+```yaml
+service: simple_auto_cover.reset_manual_override
+data:
+  entity_id:
+    - cover.living_room_left
+```
 
 ### Blindspot
 
@@ -255,31 +207,22 @@ This mode is split up in two types of strategies; [Presence](https://github.com/
 The integration dynamically adds multiple entities based on the used features.
 
 These entities are always available:
-| Entities | Default | Description |
-| --------------------------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `sensor.{type}_cover_position_{name}` | | Reflects the current state determined by predefined settings and factors such as sun position, weather, and temperature |
-| `sensor.{type}_control_method_{name}` | `intermediate` | Indicates the active control strategy based on weather conditions. Options include `winter`, `summer`, and `intermediate` |
-| `sensor.{type}_start_sun_{name}` | | Shows the starting time when the sun enters the window's view, with an interval of every 5 minutes. |
-| `sensor.{type}_end_sun_{name}` | | Indicates the ending time when the sun exits the window's view, with an interval of every 5 minutes. |
-| `binary_sensor.{type}_manual_override_{name}` | `off` | Indicates if manual override is engaged for any blinds. |
-| `binary_sensor.{type}_sun_infront_{name}` | `off` | Indicates whether the sun is in front of the window within the designated field of view. |
-| `switch.{type}_toggle_control_{name}` | `on` | Activates the adaptive control feature. When enabled, blinds adjust based on calculated position, unless manually overridden. |
-| `switch.{type}_manual_override_{name}` | `on` | Enables detection of manual overrides. A cover is marked if its position differs from the calculated one, resetting to adaptive control after a set duration. |
-| `button.{type}_reset_manual_override_{name}` | `on` | Resets manual override tags for all covers; if `switch.{type}_toggle_control_{name}` is on, it also restores blinds to their correct positions. |
 
-When climate mode is setup you will also get these entities:
-
-| Entities                                   | Default | Description                                                                                                 |
-| ------------------------------------------ | ------- | ----------------------------------------------------------------------------------------------------------- |
-| `switch.{type}_climate_mode_{name}`        | `on`    | Enables climate mode strategy; otherwise, defaults to the standard strategy.                                |
-| `switch.{type}_outside_temperature_{name}` | `on`    | Switches between inside and outside temperatures as the basis for determining the climate control strategy. |
-
-![entities](https://github.com/basbruss/adaptive-cover/blob/main/images/entities.png)
+| Entities                                      | Default | Description                                                                                                                                                  |
+| --------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `sensor.{type}_cover_position_{name}`         |         | Reflects the resolved solar or external cover position and exposes override details as attributes                                                            |
+| `sensor.{type}_control_method_{name}`         | `solar` | Indicates whether solar, manual, normal external, forced external, or hold control is active                                                                 |
+| `sensor.{type}_start_sun_{name}`              |         | Shows the starting time when the sun enters the window's view, with an interval of every 5 minutes.                                                          |
+| `sensor.{type}_end_sun_{name}`                |         | Indicates the ending time when the sun exits the window's view, with an interval of every 5 minutes.                                                         |
+| `binary_sensor.{type}_manual_override_{name}` | `off`   | Indicates if any cover is manually controlled and exposes per-cover position and expiry details.                                                             |
+| `binary_sensor.{type}_sun_infront_{name}`     | `off`   | Indicates whether the sun is in front of the window within the designated field of view.                                                                     |
+| `switch.{type}_toggle_control_{name}`         | `on`    | Activates the adaptive control feature. When enabled, blinds adjust based on calculated position, unless manually overridden.                                |
+| `switch.{type}_manual_override_{name}`        | `on`    | Allows detection of manual overrides. A cover is marked if its position differs from the calculated one, resetting to adaptive control after a set duration. |
+| `button.{type}_reset_manual_override_{name}`  | `on`    | Resets manual override tags for all covers; if `switch.{type}_toggle_control_{name}` is on, it also restores blinds to their correct positions.              |
 
 ## Features Planned
 
 - Manual override controls
-
   - ~~Time to revert back to adaptive control~~
   - ~~Reset button~~
   - Wait until next manual/none adaptive change
@@ -288,9 +231,4 @@ When climate mode is setup you will also get these entities:
 
 ### Simulation
 
-![combined_simulation](custom_components/adaptive_cover/simulation/sim_plot.png)
-
-### Blueprint (deprecated since v1.0.0)
-
-This integration provides the option to download a blueprint to control the covers automatically by the provide sensor.
-By selecting the option the blueprints will be added to your local blueprints folder.
+![combined_simulation](custom_components/simple_auto_cover/simulation/sim_plot.png)

@@ -47,18 +47,17 @@ version-resolver:
       - "dependencies"
       - "📚 documentation"
       - "enhancement"
-      - "blueprint"
       - "📈 performance"
       - "refactor"
   default: patch
 
 prereleas-identifier: "beta"
 
-exlude-contributors:
+exclude-contributors:
   - "dependabot"
 
 template: |
-  # Adaptive Cover ⛅ v$RESOLVED_VERSION
+  # Simple Auto Cover ⛅ v$RESOLVED_VERSION
   ## Changes
 
   $CHANGES

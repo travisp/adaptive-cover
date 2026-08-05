@@ -1,0 +1,423 @@
+{
+  "title": "Simple Auto Cover",
+  "config": {
+    "step": {
+      "user": {
+        "data": {
+          "name": "Naam",
+          "mode": "Type zonwering"
+        }
+      },
+      "automation": {
+        "data": {
+          "delta_position": "Minimale positieaanpassing",
+          "position_tolerance": "Positietolerantie",
+          "delta_time": "Minimale interval tussen positieveranderingen",
+          "start_time": "Starttijd",
+          "start_entity": "Entiteit die starttijd aangeeft",
+          "override_entity": "Externe overschrijvingsentiteit",
+          "manual_override_duration": "Duur van handmatige overschrijving",
+          "manual_override_reset": "Reset handmatige overschrijvingsduur",
+          "end_time": "Eindtijd",
+          "end_entity": "Entiteit die eindtijd aangeeft",
+          "manual_threshold": "Minimale handmatige overschrijfdrempel",
+          "manual_ignore_intermediate": "Negeer tussenliggende posities tijdens handmatige overschrijving (openen en sluiten)",
+          "return_sunset": "Zorg ervoor dat de positie altijd wordt aangepast naar de standaard zonsonderganginstelling tegen het eindtijdstip. Dit is vooral handig wanneer het eindtijdstip voor de daadwerkelijke zonsondergang valt."
+        },
+        "data_description": {
+          "delta_position": "Minimale verandering in positie vereist voordat de positie van de bekleding wordt aangepast",
+          "position_tolerance": "Toegestane afwijking tussen de aangestuurde en gemelde positie voordat de opdracht als voltooid wordt beschouwd. De standaardwaarde 0 vereist een exacte overeenkomst.",
+          "delta_time": "Minimale tijdsinterval tussen positieveranderingen; minimum is 2 minuten",
+          "start_time": "Starttijd voor elke dag; voor deze tijd blijft de bekleding stationair",
+          "start_entity": "Entiteit die de status van de starttijd vertegenwoordigt, die de hierboven ingestelde statische starttijd overschrijft. Handig voor het automatiseren van de starttijd met een entiteit",
+          "override_entity": "Entiteit met de status auto, hold of een positie van 0 tot 100. Numerieke posities overschrijven de zonnebesturing, maar handmatige bediening heeft voorrang. Stel het attribuut force in op true om handmatige bediening te overschrijven.",
+          "manual_override_duration": "De duur van handmatige bediening voordat wordt teruggekeerd naar automatische bediening",
+          "manual_override_reset": "Optie om de duur van handmatige overschrijving na elke handmatige aanpassing te resetten; als dit is uitgeschakeld, geldt de duur alleen voor de eerste handmatige aanpassing",
+          "end_time": "Eindtijd voor elke dag; na deze tijd blijft de bekleding stationair",
+          "end_entity": "Entiteit die de status van de eindtijd vertegenwoordigt, die de hierboven ingestelde statische eindtijd overschrijft. Handig voor het automatiseren van de eindtijd met een entiteit"
+        }
+      },
+      "vertical": {
+        "data": {
+          "set_azimuth": "Raam Azimuth",
+          "window_height": "Raamhoogte",
+          "distance_shaded_area": "Beschaduwde gebied",
+          "default_percentage": "Standaard positie",
+          "min_position": "Minimale positie",
+          "max_position": "Maximale positie",
+          "enable_min_position": "Forceer alleen de minimale positie wanneer de zon voor het raam staat",
+          "enable_max_position": "Forceer alleen de maximale positie wanneer de zon voor het raam staat",
+          "fov_left": "Links gezichtsveld",
+          "fov_right": "Rechts gezichtsveld",
+          "group": "Cover Entiteiten",
+          "inverse_state": "Draai de status om (nodig voor sommige covers die omgekeerde percentages hanteren)",
+          "sunset_position": "Zonsondergang Posistie",
+          "sunset_offset": "Afwijking Zonsondergang",
+          "blind_spot": "Configureer schaduwzone",
+          "min_elevation": "Minimale zonhoogte",
+          "max_elevation": "Maximale zonhoogte",
+          "interp": "Stel aangepaste open/sluit posities in voor jouw Cover, als deze niet volledig functioneert bij 0-100%",
+          "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten"
+        },
+        "data_description": {
+          "set_azimuth": "Stel Azimuth in",
+          "window_height": "Specificeer raamhoogte in meters",
+          "distance_shaded_area": "Afstand van bekleding tot beschaduwd gebied in meters",
+          "default_percentage": "Standaard bekledingspositie als percentage",
+          "min_position": "Minimale verstelbare bekledingspositie als percentage",
+          "max_position": "Maximale verstelbare bekledingspositie als percentage",
+          "enable_min_position": "Forceer alleen de minimale positie wanneer de zon voor het raam staat",
+          "enable_max_position": "Forceer alleen de maximale positie wanneer de zon voor het raam staat",
+          "fov_left": "Gezichtshoek naar links van het raamcentrum",
+          "fov_right": "Gezichtshoek naar rechts van het raamcentrum",
+          "group": "Selecteer entiteiten om te besturen via integratie",
+          "sunset_position": "Positie om naar over te schakelen na zonsondergang",
+          "sunset_offset": "Verschil (±) vanaf zonsondergang in minuten",
+          "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten"
+        },
+        "description": "Voeg configuratie variabelen toe",
+        "title": "Verticaal scherm"
+      },
+      "horizontal": {
+        "data": {
+          "set_azimuth": "Raam Azimuth",
+          "length_awning": "Zonneschermspanlengte",
+          "window_height": "Zonneschermhoogte",
+          "angle": "Zonneschermhoek",
+          "distance_shaded_area": "Beschaduwde gebied",
+          "default_percentage": "Standaard positie",
+          "min_position": "Minimale positie",
+          "max_position": "Maximale positie",
+          "enable_min_position": "Forceer alleen de minimale positie wanneer de zon voor het raam staat",
+          "enable_max_position": "Forceer alleen de maximale positie wanneer de zon voor het raam staat",
+          "fov_left": "Links gezichtsveld",
+          "fov_right": "Rechts gezichtsveld",
+          "group": "Cover Entities",
+          "inverse_state": "Draai de status om (nodig voor sommige covers die omgekeerde percentages hanteren)",
+          "sunset_position": "Zonsondergang Posistie",
+          "sunset_offset": "Afwijking Zonsondergang",
+          "blind_spot": "Configureer schaduwzone",
+          "min_elevation": "Minimale zonhoogte",
+          "max_elevation": "Maximale zonhoogte",
+          "interp": "Stel aangepaste open/sluit posities in voor jouw Cover, als deze niet volledig functioneert bij 0-100%",
+          "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten"
+        },
+        "data_description": {
+          "set_azimuth": "Stel Azimuth in",
+          "window_height": "Pas de hoogte van het zonnescherm aan vanaf de hoogte van het werkgebied",
+          "length_awning": "Totale spanwijdte van het zonnescherm in meters",
+          "angle": "Hoek van het bevestigde zonnescherm gemeten loodrecht vanaf de muur naar de grond",
+          "distance_shaded_area": "Afstand van bekleding tot beschaduwd gebied in meters",
+          "default_percentage": "Standaard bekledingspositie als percentage",
+          "min_position": "Minimale verstelbare bekledingspositie als percentage",
+          "max_position": "Maximale verstelbare bekledingspositie als percentage",
+          "enable_min_position": "Forceer alleen de minimale positie wanneer de zon voor het raam staat",
+          "enable_max_position": "Forceer alleen de maximale positie wanneer de zon voor het raam staat",
+          "fov_left": "Gezichtshoek naar links van het raamcentrum",
+          "fov_right": "Gezichtshoek naar rechts van het raamcentrum",
+          "group": "Selecteer entiteiten om te besturen via integratie",
+          "sunset_position": "Positie om naar over te schakelen na zonsondergang",
+          "sunset_offset": "Verschil (±) vanaf zonsondergang in minuten",
+          "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten"
+        },
+        "description": "Voeg configuratie variabelen toe",
+        "title": "Horizontaal scherm"
+      },
+      "tilt": {
+        "data": {
+          "set_azimuth": "Raam Azimuth",
+          "slat_depth": "Lameldiepte",
+          "slat_distance": "Lamelafstand",
+          "default_percentage": "Standaard positie",
+          "min_position": "Minimale positie",
+          "max_position": "Maximale positie",
+          "enable_min_position": "Forceer alleen de minimale positie wanneer de zon voor het raam staat",
+          "enable_max_position": "Forceer alleen de maximale positie wanneer de zon voor het raam staat",
+          "fov_left": "Links gezichtsveld",
+          "fov_right": "Rechts gezichtsveld",
+          "group": "Cover Entities",
+          "inverse_state": "Draai de status om (nodig voor sommige covers die omgekeerde percentages hanteren)",
+          "sunset_position": "Zonsondergang Posistie",
+          "sunset_offset": "Afwijking Zonsondergang",
+          "tilt_mode": "Type beweging",
+          "blind_spot": "Configureer schaduwzone",
+          "min_elevation": "Minimale zonhoogte",
+          "max_elevation": "Maximale zonhoogte",
+          "interp": "Stel aangepaste open/sluit posities in voor jouw Cover, als deze niet volledig functioneert bij 0-100%",
+          "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten"
+        },
+        "data_description": {
+          "set_azimuth": "Stel Azimuth in",
+          "slat_depth": "Diepte van elke individuele lamel in centimeters",
+          "slat_distance": "Verticale afstand tussen twee lamellen in centimeters",
+          "default_percentage": "Standaard bekledingspositie als percentage",
+          "min_position": "Minimale verstelbare bekledingspositie als percentage",
+          "max_position": "Maximale verstelbare bekledingspositie als percentage",
+          "enable_min_position": "Forceer alleen de minimale positie wanneer de zon voor het raam staat",
+          "enable_max_position": "Forceer alleen de maximale positie wanneer de zon voor het raam staat",
+          "fov_left": "Gradaties om te overwegen vanaf de linkerkant van het raamcentrum",
+          "fov_right": "Gradaties om te overwegen vanaf de rechterkant van het raamcentrum",
+          "group": "Selecteer entiteiten om te besturen via integratie",
+          "sunset_position": "Positie om naar over te schakelen na zonsondergang",
+          "sunset_offset": "Verschil (±) vanaf zonsondergang in minuten",
+          "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten",
+          "tilt_mode": "Kies het type beweging"
+        },
+        "description": "Voeg configuratie variabelen toe",
+        "title": "Kantelbare Cover"
+      },
+      "blind_spot": {
+        "data": {
+          "blind_spot_left": "Start schaduwzone links",
+          "blind_spot_right": "Einde schaduwzone rechts",
+          "blind_spot_elevation": "Hoogte schaduwzone"
+        },
+        "data_description": {
+          "blind_spot_left": "Linker rand van de schaduwzone",
+          "blind_spot_right": "Rechter rand van de schaduwzone",
+          "blind_spot_elevation": "Elke waarde gelijk aan of minder wordt beschouwd binnen de schaduwzone. Handig als de zon over het object in de schaduwzone kan schijnen"
+        },
+        "title": "Schaduwzone",
+        "description": "Stel de schaduwzone in voor de afdekking. Deze waarden zijn relatieve graden tot de breedte van het gezichtsveld. Waar 0 de meest linkse positie is, genomen van de linkse parameter van het gezichtsveld."
+      },
+      "interp": {
+        "data": {
+          "interp_start": "Waarde waar opening begint",
+          "interp_end": "Waarde waar sluiting begint",
+          "interp_list": "Lijst van interpolatie",
+          "interp_list_new": "Aangepaste interpolatielijst"
+        },
+        "data_description": {
+          "interp_list": "Lijst van interpolatiewaarden, waarbij 0 volledig gesloten is en 100 volledig open",
+          "interp_list_new": "Aangepast bereik van interpolatiewaarden, waarbij het begin gesloten moet vertegenwoordigen en het einde open"
+        },
+        "title": "Bereik Aanpassing",
+        "description": "Pas de waarden aan waarbij jouw Cover effectief opent of sluit. Ideaal voor Covers die niet volledig openen bij 0% of sluiten bij 100%."
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "menu_options": {
+          "automation": "Wijzig Automatiseringsinstellingen",
+          "blind": "Pas parameters van de zonwering aan",
+          "interp": "Pas bereik aan"
+        }
+      },
+      "automation": {
+        "data": {
+          "delta_position": "Minimale positieaanpassing",
+          "position_tolerance": "Positietolerantie",
+          "delta_time": "Minimale interval tussen positieveranderingen",
+          "start_time": "Starttijd",
+          "start_entity": "Entiteit die starttijd aangeeft",
+          "override_entity": "Externe overschrijvingsentiteit",
+          "end_time": "Eindtijd",
+          "end_entity": "Entiteit die eindtijd aangeeft",
+          "manual_override_duration": "Duur van handmatige overschrijving",
+          "manual_override_reset": "Reset handmatige overschrijvingsduur",
+          "manual_threshold": "Minimale handmatige overschrijfdrempel",
+          "manual_ignore_intermediate": "Negeer tussenliggende posities tijdens handmatige overschrijving (openen en sluiten)",
+          "return_sunset": "Zorg ervoor dat de positie altijd wordt aangepast naar de standaard zonsonderganginstelling tegen het eindtijdstip. Dit is vooral handig wanneer het eindtijdstip voor de daadwerkelijke zonsondergang valt."
+        },
+        "data_description": {
+          "delta_position": "Minimale verandering in positie vereist voordat de positie van de bekleding wordt aangepast",
+          "position_tolerance": "Toegestane afwijking tussen de aangestuurde en gemelde positie voordat de opdracht als voltooid wordt beschouwd. De standaardwaarde 0 vereist een exacte overeenkomst.",
+          "delta_time": "Minimale tijdsinterval tussen positieveranderingen; minimum is 2 minuten",
+          "start_time": "Starttijd voor elke dag; voor deze tijd blijft de bekleding stationair",
+          "start_entity": "Entiteit die de status van de starttijd vertegenwoordigt, die de hierboven ingestelde statische starttijd overschrijft. Handig voor het automatiseren van de starttijd met een entiteit",
+          "override_entity": "Entiteit met de status auto, hold of een positie van 0 tot 100. Numerieke posities overschrijven de zonnebesturing, maar handmatige bediening heeft voorrang. Stel het attribuut force in op true om handmatige bediening te overschrijven.",
+          "manual_override_duration": "De duur van handmatige bediening voordat wordt teruggekeerd naar automatische bediening",
+          "manual_override_reset": "Optie om de duur van handmatige overschrijving na elke handmatige aanpassing te resetten; als dit is uitgeschakeld, geldt de duur alleen voor de eerste handmatige aanpassing",
+          "end_time": "Eindtijd voor elke dag; na deze tijd blijft de bekleding stationair",
+          "end_entity": "Entiteit die de status van de eindtijd vertegenwoordigt, die de hierboven ingestelde statische eindtijd overschrijft. Handig voor het automatiseren van de eindtijd met een entiteit"
+        }
+      },
+      "vertical": {
+        "data": {
+          "set_azimuth": "Raam Azimuth",
+          "window_height": "Raamhoogte",
+          "distance_shaded_area": "Beschaduwde gebied",
+          "default_percentage": "Standaard positie",
+          "min_position": "Minimale positie",
+          "max_position": "Maximale positie",
+          "enable_min_position": "Forceer alleen de minimale positie wanneer de zon voor het raam staat",
+          "enable_max_position": "Forceer alleen de maximale positie wanneer de zon voor het raam staat",
+          "fov_left": "Links gezichtsveld",
+          "fov_right": "Rechts gezichtsveld",
+          "group": "Cover Entiteiten",
+          "inverse_state": "Draai de status om (nodig voor sommige covers die omgekeerde percentages hanteren)",
+          "sunset_position": "Zonsondergang Posistie",
+          "sunset_offset": "Afwijking Zonsondergang",
+          "blind_spot": "Configureer schaduwzone",
+          "min_elevation": "Minimale zonhoogte",
+          "max_elevation": "Maximale zonhoogte",
+          "interp": "Stel aangepaste open/sluit posities in voor jouw Cover, als deze niet volledig functioneert bij 0-100%",
+          "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten"
+        },
+        "data_description": {
+          "set_azimuth": "Stel Azimuth in",
+          "window_height": "Specificeer raamhoogte in meters",
+          "distance_shaded_area": "Afstand van bekleding tot beschaduwd gebied in meters",
+          "default_percentage": "Standaard bekledingspositie als percentage",
+          "min_position": "Minimale verstelbare bekledingspositie als percentage",
+          "max_position": "Maximale verstelbare bekledingspositie als percentage",
+          "enable_min_position": "Forceer alleen de minimale positie wanneer de zon voor het raam staat",
+          "enable_max_position": "Forceer alleen de maximale positie wanneer de zon voor het raam staat",
+          "fov_left": "Gezichtshoek naar links van het raamcentrum",
+          "fov_right": "Gezichtshoek naar rechts van het raamcentrum",
+          "group": "Selecteer entiteiten om te besturen via integratie",
+          "sunset_position": "Positie om naar over te schakelen na zonsondergang",
+          "sunset_offset": "Verschil (±) vanaf zonsondergang in minuten",
+          "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten"
+        },
+        "description": "Voeg configuratie variabelen toe",
+        "title": "Verticaal scherm"
+      },
+      "horizontal": {
+        "data": {
+          "set_azimuth": "Raam Azimuth",
+          "length_awning": "Zonneschermspanlengte",
+          "window_height": "Zonneschermhoogte",
+          "angle": "Zonneschermhoek",
+          "distance_shaded_area": "Beschaduwde gebied",
+          "default_percentage": "Standaard positie",
+          "min_position": "Minimale positie",
+          "max_position": "Maximale positie",
+          "enable_min_position": "Forceer alleen de minimale positie wanneer de zon voor het raam staat",
+          "enable_max_position": "Forceer alleen de maximale positie wanneer de zon voor het raam staat",
+          "fov_left": "Links gezichtsveld",
+          "fov_right": "Rechts gezichtsveld",
+          "group": "Cover Entities",
+          "inverse_state": "Draai de status om (nodig voor sommige covers die omgekeerde percentages hanteren)",
+          "sunset_position": "Zonsondergang Posistie",
+          "sunset_offset": "Afwijking Zonsondergang",
+          "blind_spot": "Configureer schaduwzone",
+          "min_elevation": "Minimale zonhoogte",
+          "max_elevation": "Maximale zonhoogte",
+          "interp": "Stel aangepaste open/sluit posities in voor jouw Cover, als deze niet volledig functioneert bij 0-100%",
+          "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten"
+        },
+        "data_description": {
+          "set_azimuth": "Stel Azimuth in",
+          "window_height": "Pas de hoogte van het zonnescherm aan vanaf de hoogte van het werkgebied",
+          "length_awning": "Totale spanwijdte van het zonnescherm in meters",
+          "angle": "Hoek van het bevestigde zonnescherm gemeten loodrecht vanaf de muur naar de grond",
+          "distance_shaded_area": "Afstand van bekleding tot beschaduwd gebied in meters",
+          "default_percentage": "Standaard bekledingspositie als percentage",
+          "min_position": "Minimale verstelbare bekledingspositie als percentage",
+          "max_position": "Maximale verstelbare bekledingspositie als percentage",
+          "enable_min_position": "Forceer alleen de minimale positie wanneer de zon voor het raam staat",
+          "enable_max_position": "Forceer alleen de maximale positie wanneer de zon voor het raam staat",
+          "fov_left": "Gezichtshoek naar links van het raamcentrum",
+          "fov_right": "Gezichtshoek naar rechts van het raamcentrum",
+          "group": "Selecteer entiteiten om te besturen via integratie",
+          "sunset_position": "Positie om naar over te schakelen na zonsondergang",
+          "sunset_offset": "Verschil (±) vanaf zonsondergang in minuten",
+          "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten"
+        },
+        "description": "Voeg configuratie variabelen toe",
+        "title": "Horizontaal scherm"
+      },
+      "tilt": {
+        "data": {
+          "set_azimuth": "Raam Azimuth",
+          "slat_depth": "Lameldiepte",
+          "slat_distance": "Lamelafstand",
+          "default_percentage": "Standaard positie",
+          "min_position": "Minimale positie",
+          "max_position": "Maximale positie",
+          "enable_min_position": "Forceer alleen de minimale positie wanneer de zon voor het raam staat",
+          "enable_max_position": "Forceer alleen de maximale positie wanneer de zon voor het raam staat",
+          "fov_left": "Links gezichtsveld",
+          "fov_right": "Rechts gezichtsveld",
+          "group": "Cover Entities",
+          "inverse_state": "Draai de status om (nodig voor sommige covers die omgekeerde percentages hanteren)",
+          "sunset_position": "Zonsondergang Posistie",
+          "sunset_offset": "Afwijking Zonsondergang",
+          "tilt_mode": "Type beweging",
+          "blind_spot": "Configureer schaduwzone",
+          "min_elevation": "Minimale zonhoogte",
+          "max_elevation": "Maximale zonhoogte",
+          "interp": "Stel aangepaste open/sluit posities in voor jouw Cover, als deze niet volledig functioneert bij 0-100%",
+          "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten"
+        },
+        "data_description": {
+          "set_azimuth": "Stel Azimuth in",
+          "slat_depth": "Diepte van elke individuele lamel in centimeters",
+          "slat_distance": "Verticale afstand tussen twee lamellen in centimeters",
+          "default_percentage": "Standaard bekledingspositie als percentage",
+          "min_position": "Minimale verstelbare bekledingspositie als percentage",
+          "max_position": "Maximale verstelbare bekledingspositie als percentage",
+          "enable_min_position": "Forceer alleen de minimale positie wanneer de zon voor het raam staat",
+          "enable_max_position": "Forceer alleen de maximale positie wanneer de zon voor het raam staat",
+          "fov_left": "Gradaties om te overwegen vanaf de linkerkant van het raamcentrum",
+          "fov_right": "Gradaties om te overwegen vanaf de rechterkant van het raamcentrum",
+          "group": "Selecteer entiteiten om te besturen via integratie",
+          "sunset_position": "Positie om naar over te schakelen na zonsondergang",
+          "sunset_offset": "Verschil (±) vanaf zonsondergang in minuten",
+          "sunrise_offset": "Verschil (±) vanaf zonsopkomst in minuten",
+          "tilt_mode": "Kies het type beweging"
+        },
+        "description": "Voeg configuratie variabelen toe",
+        "title": "Kantelbare Cover"
+      },
+      "blind_spot": {
+        "data": {
+          "blind_spot_left": "Start schaduwzone links",
+          "blind_spot_right": "Einde schaduwzone rechts",
+          "blind_spot_elevation": "Hoogte schaduwzone"
+        },
+        "data_description": {
+          "blind_spot_left": "Linker rand van de schaduwzone",
+          "blind_spot_right": "Rechter rand van de schaduwzone",
+          "blind_spot_elevation": "Elke waarde gelijk aan of minder wordt beschouwd binnen de schaduwzone. Handig als de zon over het object in de schaduwzone kan schijnen"
+        },
+        "title": "Schaduwzone",
+        "description": "Stel de schaduwzone in voor de afdekking. Deze waarden zijn relatieve graden tot de breedte van het gezichtsveld. Waar 0 de meest linkse positie is, genomen van de linkse parameter van het gezichtsveld."
+      },
+      "interp": {
+        "data": {
+          "interp_start": "Waarde waar opening begint",
+          "interp_end": "Waarde waar sluiting begint",
+          "interp_list": "Lijst van interpolatie",
+          "interp_list_new": "Aangepaste interpolatielijst"
+        },
+        "data_description": {
+          "interp_list": "Lijst van interpolatiewaarden, waarbij 0 volledig gesloten is en 100 volledig open",
+          "interp_list_new": "Aangepast bereik van interpolatiewaarden, waarbij het begin gesloten moet vertegenwoordigen en het einde open"
+        },
+        "title": "Bereik Aanpassing",
+        "description": "Pas de waarden aan waarbij jouw Cover effectief opent of sluit. Ideaal voor Covers die niet volledig openen bij 0% of sluiten bij 100%."
+      }
+    }
+  },
+  "services": {
+    "reset_manual_override": {
+      "name": "Handmatige bediening resetten",
+      "description": "Hervat de automatische bediening voor geselecteerde covers die handmatig worden bediend.",
+      "fields": {
+        "entity_id": {
+          "name": "Covers",
+          "description": "Fysieke coverentiteiten waarvan de handmatige bediening moet worden gereset."
+        }
+      }
+    }
+  },
+  "selector": {
+    "mode": {
+      "options": {
+        "cover_blind": "Verticaal scherm",
+        "cover_awning": "Horizontaal scherm",
+        "cover_tilt": "Kantelbaar scherm"
+      }
+    },
+    "tilt_mode": {
+      "options": {
+        "mode1": "eenrichting (0% = dicht / 100% = open)",
+        "mode2": "twee-richtings (0% = dicht / 50% = open / 100% = dicht)"
+      }
+    }
+  }
+}

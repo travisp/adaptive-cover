@@ -1,0 +1,65 @@
+"""Button platform for the Simple Auto Cover integration."""
+
+from __future__ import annotations
+
+from homeassistant.components.button import ButtonEntity
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
+from .const import CONF_ENTITIES, DOMAIN
+from .coordinator import SimpleAutoCoverDataUpdateCoordinator
+from .entity import SimpleAutoCoverEntity
+
+
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
+    """Set up the button platform."""
+    coordinator: SimpleAutoCoverDataUpdateCoordinator = hass.data[DOMAIN][
+        config_entry.entry_id
+    ]
+
+    reset_manual = SimpleAutoCoverButton(
+        config_entry, config_entry.entry_id, "Reset Manual Override", coordinator
+    )
+
+    buttons = []
+
+    entities = config_entry.options.get(CONF_ENTITIES, [])
+    if len(entities) >= 1:
+        buttons = [reset_manual]
+
+    async_add_entities(buttons)
+
+
+class SimpleAutoCoverButton(SimpleAutoCoverEntity, ButtonEntity):
+    """Representation of a simple auto cover button."""
+
+    _attr_has_entity_name = True
+    _attr_should_poll = False
+    _attr_icon = "mdi:cog-refresh-outline"
+
+    def __init__(
+        self,
+        config_entry,
+        unique_id: str,
+        button_name: str,
+        coordinator: SimpleAutoCoverDataUpdateCoordinator,
+    ) -> None:
+        """Initialize the button."""
+        super().__init__(config_entry, unique_id, coordinator)
+        self._attr_unique_id = f"{unique_id}_{button_name}"
+        self._button_name = button_name
+        self._entities = config_entry.options.get(CONF_ENTITIES, [])
+
+    @property
+    def name(self):
+        """Name of the entity."""
+        return f"{self._button_name} {self._name}"
+
+    async def async_press(self) -> None:
+        """Reset manual ownership for every cover in this configuration."""
+        await self.coordinator.async_reset_manual_overrides(set(self._entities))

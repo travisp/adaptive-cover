@@ -39,8 +39,8 @@
     "ghcr.io/devcontainers/features/rust:1": {}
   },
   "forwardPorts": [8123],
-  "image": "mcr.microsoft.com/devcontainers/python:3.12",
-  "name": "Adaptive Cover Dev-env",
+  "image": "mcr.microsoft.com/devcontainers/python:3.13",
+  "name": "Simple Auto Cover Dev-env",
   "postCreateCommand": "scripts/setup",
   "remoteUser": "vscode"
 }

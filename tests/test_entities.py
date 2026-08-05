@@ -1,0 +1,308 @@
+"""Unit tests for the entity helpers."""
+
+import types
+from unittest.mock import AsyncMock
+
+import pytest
+
+from homeassistant.const import CONF_NAME
+from custom_components.simple_auto_cover.const import (
+    CONF_ENTITIES,
+    CONF_SENSOR_TYPE,
+    COVER_TYPE_DISPLAY,
+    DOMAIN,
+    SensorType,
+)
+
+
+@pytest.fixture
+def entity_module():
+    """Return the entity module for import testing."""
+    import custom_components.simple_auto_cover.entity as entity
+
+    return entity
+
+
+@pytest.fixture
+def button_module():
+    """Return the button module for import testing."""
+    import custom_components.simple_auto_cover.button as button
+
+    return button
+
+
+@pytest.fixture
+def binary_sensor_module():
+    """Return the binary sensor module for import testing."""
+    import custom_components.simple_auto_cover.binary_sensor as binary_sensor
+
+    return binary_sensor
+
+
+@pytest.fixture
+def sensor_module():
+    """Return the sensor module for import testing."""
+    import custom_components.simple_auto_cover.sensor as sensor
+
+    return sensor
+
+
+@pytest.fixture
+def switch_module():
+    """Return the switch module for import testing."""
+    import custom_components.simple_auto_cover.switch as switch
+
+    return switch
+
+
+class DummyCoordinator:
+    """Simplified coordinator for entity tests."""
+
+    def __init__(self, states=None, attrs=None):
+        """Initialize with optional state and attribute dictionaries."""
+        self.data = types.SimpleNamespace(states=states or {}, attributes=attrs or {})
+        self.last_update_success = True
+        self.logger = types.SimpleNamespace(debug=lambda *a, **k: None)
+
+    async def async_request_refresh(self):
+        """Mock request of a data refresh."""
+        pass
+
+    async def async_refresh(self):
+        """Mock refresh callback."""
+        pass
+
+    def async_add_listener(self, *_):
+        """Return a dummy remove callback for listeners."""
+        return lambda: None
+
+
+def make_entry(*, name="Test", sensor_type=None):
+    """Create a simple config entry namespace for tests."""
+    return types.SimpleNamespace(
+        data={CONF_NAME: name, CONF_SENSOR_TYPE: sensor_type or SensorType.BLIND},
+        options={CONF_ENTITIES: ["cover.one"]},
+        entry_id="1",
+    )
+
+
+def test_base_entity_initialization(entity_module):
+    """Ensure base entity is initialized with the correct attributes."""
+    entry = make_entry()
+    coord = DummyCoordinator()
+    entity = entity_module.SimpleAutoCoverEntity(entry, "uid", coord)
+
+    assert entity._device_id == "uid"
+    assert entity._name == entry.data[CONF_NAME]
+    assert entity._device_name == COVER_TYPE_DISPLAY[entry.data[CONF_SENSOR_TYPE]]
+    assert entity.device_info["identifiers"] == {(DOMAIN, "uid")}
+
+
+def test_button_inherits_base(entity_module, button_module):
+    """Verify button inherits from the base entity class."""
+    entry = make_entry()
+    coord = DummyCoordinator()
+    button = button_module.SimpleAutoCoverButton(entry, "uid", "Reset", coord)
+
+    assert isinstance(button, entity_module.SimpleAutoCoverEntity)
+    assert button.name == "Reset " + entry.data[CONF_NAME]
+    assert (
+        button.device_info["name"] == COVER_TYPE_DISPLAY[entry.data[CONF_SENSOR_TYPE]]
+    )
+    assert button.unique_id == "uid_Reset"
+
+
+@pytest.mark.asyncio
+async def test_reset_button_delegates_all_configured_covers(button_module):
+    """Reset all covers through the coordinator's targeted reset path."""
+    coord = DummyCoordinator()
+    coord.async_reset_manual_overrides = AsyncMock()
+    button = button_module.SimpleAutoCoverButton(make_entry(), "uid", "Reset", coord)
+
+    await button.async_press()
+
+    coord.async_reset_manual_overrides.assert_awaited_once_with({"cover.one"})
+
+
+def test_binary_sensor_is_on(entity_module, binary_sensor_module):
+    """Confirm binary sensor reports its state correctly."""
+    entry = make_entry()
+    coord = DummyCoordinator(states={"sun": True})
+    sensor = binary_sensor_module.SimpleAutoCoverBinarySensor(
+        entry,
+        "uid",
+        "Sun",
+        False,
+        "sun",
+        binary_sensor_module.BinarySensorDeviceClass.MOTION,
+        coord,
+    )
+
+    assert isinstance(sensor, entity_module.SimpleAutoCoverEntity)
+    assert sensor.is_on is True
+    assert sensor.name == "Sun " + entry.data[CONF_NAME]
+    assert sensor.unique_id == "uid_Sun"
+
+
+def test_manual_binary_sensor_exposes_per_cover_details(binary_sensor_module):
+    """Expose aggregate and per-cover manual ownership attributes."""
+    details = {
+        "cover.one": {
+            "held_position": 65,
+            "expires_at": "2026-01-01T12:00:00+00:00",
+        }
+    }
+    coord = DummyCoordinator(
+        states={
+            "manual_override": True,
+            "manual_overrides": details,
+        }
+    )
+    sensor = binary_sensor_module.SimpleAutoCoverBinarySensor(
+        make_entry(),
+        "uid",
+        "Manual Override",
+        False,
+        "manual_override",
+        binary_sensor_module.BinarySensorDeviceClass.RUNNING,
+        coord,
+    )
+
+    assert sensor.extra_state_attributes == {
+        "manual_controlled": ["cover.one"],
+        "manual_overrides": details,
+    }
+
+
+def test_sensor_native_value(entity_module, sensor_module):
+    """Validate sensor entities expose the expected values."""
+    entry = make_entry()
+    states = {
+        "state": 55,
+        "start": "2025-01-01",
+        "end": "2025-01-02",
+        "control": "auto",
+    }
+    coord = DummyCoordinator(states=states, attrs={"foo": "bar"})
+
+    sensor = sensor_module.SimpleAutoCoverSensorEntity(
+        "uid", None, entry, entry.data[CONF_NAME], coord
+    )
+
+    assert sensor.native_value == 55
+    assert sensor.extra_state_attributes == {"foo": "bar"}
+
+    time_sensor = sensor_module.SimpleAutoCoverTimeSensorEntity(
+        "uid",
+        None,
+        entry,
+        entry.data[CONF_NAME],
+        "Start Sun",
+        "start",
+        "icon",
+        coord,
+    )
+    assert time_sensor.native_value == states["start"]
+
+    control_sensor = sensor_module.SimpleAutoCoverControlSensorEntity(
+        "uid", None, entry, entry.data[CONF_NAME], coord
+    )
+
+    assert control_sensor.native_value == "auto"
+
+
+def test_switch_initial_state(entity_module, switch_module):
+    """Check initial attributes of the manual override switch."""
+    entry = make_entry()
+    coord = DummyCoordinator()
+    switch = switch_module.SimpleAutoCoverSwitch(
+        entry,
+        "uid",
+        "Allow Manual Override",
+        True,
+        "manual_toggle",
+        coord,
+    )
+
+    assert isinstance(switch, entity_module.SimpleAutoCoverEntity)
+    assert switch.name == "Allow Manual Override " + entry.data[CONF_NAME]
+    assert switch.unique_id == "uid_manual_toggle"
+
+
+@pytest.mark.asyncio
+async def test_switch_async_setup_entry(switch_module):
+    """Set up switches with clear names and key-based unique IDs."""
+    entry = make_entry()
+    hass = types.SimpleNamespace(data={DOMAIN: {entry.entry_id: DummyCoordinator()}})
+    added = []
+
+    await switch_module.async_setup_entry(hass, entry, added.extend)
+
+    assert [entity.name for entity in added] == [
+        f"Toggle Control {entry.data[CONF_NAME]}",
+        f"Allow Manual Override {entry.data[CONF_NAME]}",
+    ]
+    assert [entity.unique_id for entity in added] == [
+        f"{entry.entry_id}_control_toggle",
+        f"{entry.entry_id}_manual_toggle",
+    ]
+
+
+@pytest.mark.asyncio
+async def test_control_switch_applies_restored_external_target(switch_module):
+    """Apply a declarative external target when control is restored at startup."""
+    entry = make_entry()
+    coord = DummyCoordinator()
+    coord.external_override = types.SimpleNamespace(target=30)
+    coord.entities = ["cover.one"]
+    coord.async_apply_target = AsyncMock()
+    switch = switch_module.SimpleAutoCoverSwitch(
+        entry, "uid", "Control", True, "control_toggle", coord
+    )
+    switch.schedule_update_ha_state = lambda: None
+
+    await switch.async_turn_on(added=True)
+
+    coord.async_apply_target.assert_awaited_once_with(
+        "cover.one",
+        immediate=True,
+    )
+
+
+@pytest.mark.asyncio
+async def test_switch_added_to_hass_calls_base(
+    entity_module, switch_module, monkeypatch
+):
+    """Ensure switch restore still registers coordinator listeners."""
+    base_calls = []
+
+    async def fake_added_to_hass(entity):
+        """Record the base entity hook being invoked."""
+        base_calls.append(entity)
+
+    async def no_last_state():
+        """Return no restored switch state."""
+        return None
+
+    entry = make_entry()
+    coord = DummyCoordinator()
+    switch = switch_module.SimpleAutoCoverSwitch(
+        entry, "uid", "Manual", True, "manual_toggle", coord
+    )
+
+    monkeypatch.setattr(
+        entity_module.SimpleAutoCoverEntity,
+        "async_added_to_hass",
+        fake_added_to_hass,
+    )
+    monkeypatch.setattr(switch, "async_get_last_state", no_last_state)
+    monkeypatch.setattr(
+        switch,
+        "schedule_update_ha_state",
+        lambda: None,
+    )
+
+    await switch.async_added_to_hass()
+
+    assert base_calls == [switch]
+    assert coord.manual_toggle is True

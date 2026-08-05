@@ -1,81 +1,62 @@
-[tool.poetry]
-authors = ["Bas Brussee"]
-classifiers = [
-  "Development Status :: 3 - Alpha",
-  "Framework :: AsyncIO",
-  "Intended Audience :: Developers",
-  "Natural Language :: English",
-  "Programming Language :: Python :: 3.12",
-  "Programming Language :: Python :: 3",
-]
-description = "Adaptive Cover"
-documentation = "https://github.com/basbruss/adaptive-cover"
-homepage = "https://github.com/basbruss/adaptive-cover"
-license = "Passive Aggressive License"
-maintainers = ["Bas Brussee"]
-name = "adaptive_cover"
-packages = []
+[project]
+name = "simple_auto_cover"
+version = "2.0.0"
+description = "Simple Auto Cover"
+authors = [{ name = "Travis Pew" }]
+requires-python = ">=3.13.2,<3.14"
 readme = "README.md"
-repository = "https://github.com/basbruss/adaptive-cover"
-version = "0.0.0"
+license = "MIT"
+maintainers = [{ name = "Travis Pew" }]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: AsyncIO",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "homeassistant==2026.2.3",
+    "numpy",
+    "python-dateutil",
+]
 
-[tool.poetry.dependencies]
-homeassistant = "2023.11.1"
-python = "^3.11"
+[project.urls]
+Homepage = "https://github.com/travisp/adaptive-cover"
+Repository = "https://github.com/travisp/adaptive-cover"
+Documentation = "https://github.com/travisp/adaptive-cover"
+"Bug Tracker" = "https://github.com/travisp/adaptive-cover/issues"
+Changelog = "https://github.com/travisp/adaptive-cover/releases"
 
-[tool.poetry.group.dev.dependencies]
-hass-nabucasa = "0.75.1"
-pre-commit = "4.0.1"
-pre-commit-hooks = "5.0.0"
-pylint = "3.3.1"
-ruff = "0.6.9"
+[dependency-groups]
+dev = [
+    "colorlog~=6.12",
+    "ipykernel~=7.3",
+    "matplotlib~=3.11",
+    "pre-commit==4.6.1",
+    "pvlib~=0.15.2",
+    "pylint==4.0.6",
+    "pytest==9.0.0",
+    "pytest-homeassistant-custom-component==0.13.316",
+    "ruff==0.16.0",
+]
 
-[tool.poetry.urls]
-"Bug Tracker" = "https://github.com/basbruss/adaptive-cover/issues"
-Changelog = "https://github.com/basbruss/adaptive-cover/releases"
+[tool.hatch.build.targets.sdist]
+include = ["custom_components/simple_auto_cover"]
+
+[tool.hatch.build.targets.wheel]
+include = ["custom_components/simple_auto_cover"]
+
+[tool.hatch.build.targets.wheel.sources]
+"custom_components/simple_auto_cover" = "simple_auto_cover"
 
 [build-system]
-build-backend = "poetry.core.masonry.api"
-requires = ["poetry-core"]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.ruff]
-ignore = [
-  "ANN101", # Self... explanatory
-  "ANN401", # Opiniated warning on disallowing dynamically typed expressions
-  "D203", # Conflicts with other rules
-  "D213", # Conflicts with other rules
-  "TID252", # Relative imports
-  "RUF012", # Just broken
-
-  # Formatter conflicts
-  "COM812",
-  "COM819",
-  "D206",
-  "E501",
-  "ISC001",
-  "Q000",
-  "Q001",
-  "Q002",
-  "Q003",
-  "W191",
-]
-select = ["ALL"]
-src = ["custom_components/adaptive_cover"]
-
-[tool.ruff.flake8-import-conventions.extend-aliases]
-"homeassistant.helpers.area_registry" = "ar"
-"homeassistant.helpers.config_validation" = "cv"
-"homeassistant.helpers.device_registry" = "dr"
-"homeassistant.helpers.entity_registry" = "er"
-"homeassistant.helpers.issue_registry" = "ir"
-voluptuous = "vol"
-
-[tool.ruff.isort]
-force-sort-within-sections = true
-known-first-party = [
-    "homeassistant",
-]
-combine-as-imports = true
+[tool.pytest.ini_options]
+asyncio_default_fixture_loop_scope = "function"
+asyncio_mode = "auto"
 
 [tool.pylint."MESSAGES CONTROL"]
 # Reasons disabled:

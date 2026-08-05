@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
-
 set -e
-
 cd "$(dirname "$0")/.."
 
-# Install development requirements
-python3 -m pip install --requirement requirements-dev.txt
+echo "Installing project dependencies with UV..."
+uv sync --no-progress --all-groups
+
 
 # Setup git commit hooks
-pre-commit install
+echo "Installing pre-commit hooks..."
+uv run pre-commit install --install-hooks
+
+echo "Setup complete. You can now run commands with 'uv run' or activate the '.venv' virtual environment."
